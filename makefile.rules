@@ -20,7 +20,7 @@
 TEST_TOOL_ROOTS := mcs
 
 # This defines the tests to be run that were not already defined in TEST_TOOL_ROOTS.
-TEST_ROOTS :=
+TEST_ROOTS := MSI_SMPCache
 
 # This defines a list of tests that should run in the "short" sanity. Tests in this list must also
 # appear either in the TEST_TOOL_ROOTS or the TEST_ROOTS list.

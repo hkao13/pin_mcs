@@ -43,10 +43,10 @@ KNOB<unsigned int> KnobNumCaches(KNOB_MODE_WRITEONCE, "pintool",
 			   "numcaches", "1", "Number of Caches to Simulate");
 
 KNOB<string> KnobProtocol(KNOB_MODE_WRITEONCE, "pintool",
-			   "protos", "obj-intel64/MSI_SMPCache.so", "Cache Coherence Protocol Modules To Simulate");
+			   "protos", "obj-ia32/MSI_SMPCache.so", "Cache Coherence Protocol Modules To Simulate");
 
 KNOB<string> KnobReference(KNOB_MODE_WRITEONCE, "pintool",
-			   "reference", "obj-intel64/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
+			   "reference", "obj-ia32/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
 
 
 #define MAX_NTHREADS 64
