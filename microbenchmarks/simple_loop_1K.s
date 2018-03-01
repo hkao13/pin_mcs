@@ -1,4 +1,4 @@
-	.file	"simple_loop.c"
+	.file	"simple_loop_1K.c"
 	.text
 	.globl	main
 	.type	main, @function
@@ -7,7 +7,7 @@ main:
 	.cfi_startproc
 	movl	$0, %eax
 .L2:
-	movl	%eax, a(,%rax,4)
+	addl	%eax, a(,%rax,4)
 	addq	$1, %rax
 	cmpq	$1024, %rax
 	jne	.L2

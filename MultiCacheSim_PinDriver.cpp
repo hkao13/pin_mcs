@@ -28,7 +28,7 @@ KNOB<bool> KnobUseReference(KNOB_MODE_WRITEONCE, "pintool",
 			   "useref", "false", "Use a reference protocol to compare running protocol states with (default = false)");//default cache is verbose 
 
 KNOB<bool> KnobConcise(KNOB_MODE_WRITEONCE, "pintool",
-			   "concise", "true", "Print output concisely");//default cache is verbose 
+			   "concise", "false", "Print output concisely");//default cache is verbose 
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
 			   "csize", "65536", "Cache Size");//default cache is 64KB
@@ -43,10 +43,10 @@ KNOB<unsigned int> KnobNumCaches(KNOB_MODE_WRITEONCE, "pintool",
 			   "numcaches", "1", "Number of Caches to Simulate");
 
 KNOB<string> KnobProtocol(KNOB_MODE_WRITEONCE, "pintool",
-			   "protos", "obj-ia32/MSI_SMPCache.so", "Cache Coherence Protocol Modules To Simulate");
+			   "protos", "obj-intel64/MSI_SMPCache.so", "Cache Coherence Protocol Modules To Simulate");
 
 KNOB<string> KnobReference(KNOB_MODE_WRITEONCE, "pintool",
-			   "reference", "obj-ia32/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
+			   "reference", "obj-intel64/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
 
 
 #define MAX_NTHREADS 64
