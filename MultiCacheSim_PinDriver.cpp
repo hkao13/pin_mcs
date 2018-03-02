@@ -18,6 +18,8 @@ bool stopOnError = false;
 bool printOnError = false;
 bool useRef = false;
 
+bool do_instrumentation = false;
+
 KNOB<bool> KnobStopOnError(KNOB_MODE_WRITEONCE, "pintool",
 			   "stopOnProtoBug", "false", "Stop the Simulation when a deviation is detected between the test protocol and the reference");//default cache is verbose 
 
@@ -71,6 +73,11 @@ VOID TurnInstrumentationOff(ADDRINT tid){
   instrumentationStatus[PIN_ThreadId()] = false; 
 }
 
+VOID ToggleInstrumentation()
+{
+  do_instrumentation = !do_instrumentation;
+}
+
 
 VOID instrumentRoutine(RTN rtn, VOID *v){
     
@@ -100,9 +107,29 @@ VOID instrumentRoutine(RTN rtn, VOID *v){
 VOID instrumentImage(IMG img, VOID *v)
 {
 
+  RTN rtn = RTN_FindByName(img, "start_instrumentation");
+
+  if(RTN_Valid(rtn)) {
+    RTN_Open(rtn);
+
+    RTN_InsertCall(
+        rtn,
+        IPOINT_BEFORE,
+        AFUNPTR(ToggleInstrumentation),
+        IARG_END
+        );
+
+    RTN_Close(rtn);
+  }
+
 }
 
 void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
+
+  if (!do_instrumentation) { // Only do instrumentation if do_instrumentation is true.
+    return;
+  }
+
   PIN_GetLock(&globalLock, 1);
   if(useRef){
     ReferenceProtocol->readLine(tid,inst,addr);
@@ -132,6 +159,11 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 }
 
 void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
+
+  if (!do_instrumentation) { // Only do instrumentation if do_instrumentation is true.
+    return;
+  }
+
   PIN_GetLock(&globalLock, 1);
   if(useRef){
     ReferenceProtocol->writeLine(tid,inst,addr);
