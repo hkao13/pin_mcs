@@ -1,5 +1,7 @@
 #include "MSI_SMPCache.h"
 
+bool enable_prints=0;
+
 MSI_SMPCache::MSI_SMPCache(int cpuid, 
                            std::vector<SMPCache * > * cacheVector,
                            int csize, 
@@ -27,7 +29,10 @@ void MSI_SMPCache::fillLine(uint32_t addr, uint32_t msi_state){
   //this gets the state of whatever line this address maps to 
   MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine2Replace(addr); 
 
+  if(enable_prints) printf("PULKIT entering fillline:: addr=%x\n",addr);
+
   if(st==0){
+    if(enable_prints) printf("PULKIT entering state0:: addr=%x\n",addr);
     /*No state*/
     return;
   }
@@ -39,6 +44,8 @@ void MSI_SMPCache::fillLine(uint32_t addr, uint32_t msi_state){
   st->changeStateTo((MSIState_t)msi_state);
   return;
     
+  if(enable_prints) printf("PULKIT exiting fillline:: addr=%x\n",addr);
+
 }
   
 
@@ -116,6 +123,7 @@ void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
    *at instruction rdPC
   */
 
+  if(enable_prints) printf("PULKIT entered readline:: READING LINE addr=%x\n",addr);
   /*Get the state of the line to which this address maps*/
   MSI_SMPCacheState *st = 
     (MSI_SMPCacheState *)cache->findLine(addr);    
@@ -166,6 +174,7 @@ void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
     return; 
 
   }
+  if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%x\n\n",addr);
 
 }
 
