@@ -257,7 +257,7 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
      * state accordingly.  This action is effectively putting the write
      * on the bus.
      */ 
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
     numInvalidatesSent++;
 
     /*Fill the line with the new written block*/
@@ -276,7 +276,7 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
     numWriteOnSharedMisses++;
 
     /*Let the other sharers snoop this write, and invalidate themselves*/
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
     numInvalidatesSent++;
 
     /*Change the state of the line to Modified to reflect the write*/

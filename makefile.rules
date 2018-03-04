@@ -100,12 +100,10 @@ $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) : MultiCacheSim_PinDriver.cpp
 	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
 
 $(OBJDIR)MESI_SMPCache$(OBJ_SUFFIX) : MESI_SMPCache.cpp
-	$(CXX) -fPIC -shared $(CXXFLAGS) $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
+	$(CXX) -Wno-deprecated -fPIC -shared $(CXXFLAGS) -o $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
 
 $(OBJDIR)MSI_SMPCache$(PINTOOL_SUFFIX) : MSI_SMPCache.cpp
-	$(CXX) -fPIC -shared $(CXXFLAGS) -o $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
+	$(CXX) -Wno-deprecated -fPIC -shared $(CXXFLAGS) -o $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
 
-$(OBJDIR)mcs$(PINTOOL_SUFFIX) : $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX)
-	$(LINKER) $(TOOL_LDFLAGS) -shared $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) -o $(OBJDIR)mcs$(PINTOOL_SUFFIX) $(TOOL_LPATHS) $(TOOL_LIBS)
-
-
+$(OBJDIR)mcs$(PINTOOL_SUFFIX) : $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) $(OBJDIR)MSI_SMPCache$(OBJ_SUFFIX) $(OBJDIR)MESI_SMPCache$(OBJ_SUFFIX) 
+	$(LINKER) $(TOOL_LDFLAGS) -shared $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) -o $(OBJDIR)mcs$(PINTOOL_SUFFIX) $(TOOL_LPATHS) $(TOOL_LIBS) 
