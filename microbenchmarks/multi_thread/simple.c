@@ -3,13 +3,21 @@
 #include <pthread.h>
 #include <assert.h>
 
-#define MAXVAL 1024
+#define MAXVAL 100
 
 struct wonk{
   int a;
 } *shrdPtr;
 
 pthread_mutex_t lock;
+
+int temp;
+
+int start_instrumentation() {
+  // Need to set some var to keep from optimzing the function call away from -O1
+  temp = 0;
+  return 0;   
+}
 
 struct wonk *getNewVal(struct wonk**old){
   free(*old);
@@ -21,6 +29,8 @@ struct wonk *getNewVal(struct wonk**old){
 
 void *updaterThread(void *arg){
 
+  start_instrumentation();
+
   int i;
   for(i = 0; i < 10; i++){    
     pthread_mutex_lock(&lock);
@@ -28,6 +38,8 @@ void *updaterThread(void *arg){
     shrdPtr = newval;
     pthread_mutex_unlock(&lock);
   }
+
+  start_instrumentation();
 
 }
 
@@ -49,10 +61,14 @@ void *accessorThread(void *arg){
   int *result = (int*)malloc(sizeof(int));; 
   *result = 0;
 
+  start_instrumentation(); // TOGGLE ON
+
   while(*result < MAXVAL){ 
     swizzle(result);
     usleep(10 + (rand() % 100) );
   }
+
+  start_instrumentation(); // TOGGLE OFF
   
   pthread_exit(result); 
 }

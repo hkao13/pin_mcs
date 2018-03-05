@@ -78,7 +78,6 @@ VOID ToggleInstrumentation()
   do_instrumentation = !do_instrumentation;
 }
 
-
 VOID instrumentRoutine(RTN rtn, VOID *v){
     
   if(strstr(RTN_Name(rtn).c_str(),"INSTRUMENT_OFF")){
@@ -126,11 +125,12 @@ VOID instrumentImage(IMG img, VOID *v)
 
 void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  if (!do_instrumentation) { // Only do instrumentation if do_instrumentation is true.
+  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
     return;
   }
 
   PIN_GetLock(&globalLock, 1);
+
   if(useRef){
     ReferenceProtocol->readLine(tid,inst,addr);
   }
@@ -160,11 +160,12 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
 void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  if (!do_instrumentation) { // Only do instrumentation if do_instrumentation is true.
+  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
     return;
   }
 
   PIN_GetLock(&globalLock, 1);
+
   if(useRef){
     ReferenceProtocol->writeLine(tid,inst,addr);
   }
@@ -266,7 +267,7 @@ int main(int argc, char *argv[])
   PIN_InitLock(&globalLock);
   
   for(int i = 0; i < MAX_NTHREADS; i++){
-    instrumentationStatus[i] = true;
+    instrumentationStatus[i] = false;
   }
 
   unsigned long csize = KnobCacheSize.Value();
