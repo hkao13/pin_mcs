@@ -64,6 +64,8 @@ public:
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to msi_state 
   virtual void fillLine(uint32_t addr, uint32_t msi_state);//SMPCache Interface Function
+  // Overload the fillLine to handle values
+  virtual void fillLine(uint32_t addr, uint32_t msi_state, uint32_t val);//SMPCache Interface Function
 
   virtual char *Identify();
  

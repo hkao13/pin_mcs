@@ -194,7 +194,7 @@ template<class State, class Addr_t = uint32_t, bool Energy=true>
   CacheLine *fillLine(Addr_t addr) {
 
 
-    
+
     CacheLine *l = findLine2Replace(addr);
     if (l==0)
       return 0;
@@ -232,6 +232,7 @@ template<class State, class Addr_t = uint32_t, bool Energy=true>
   uint32_t  getNumSets() const    { return sets;        }
 
   Addr_t calcTag(Addr_t addr)       const { return (addr >> log2AddrLs);              }
+  Addr_t calcOffset (Addr_t addr)   const { return (addr & (lineSize - 1) );          }
 
   uint32_t calcSet4Tag(Addr_t tag)     const { return (tag & maskSets);                  }
   uint32_t calcSet4Addr(Addr_t addr)   const { return calcSet4Tag(calcTag(addr));        }
@@ -369,8 +370,9 @@ private:
 
   Addr_t tag;
 
+  // MAX block size fixed to 2^8 right now... - HENRY
   // HENRY: I think here is where we need to implement the cache line words
-  uint32_t* lineData[100]; // Hackish way to set this right now. Need to find
+  uint32_t lineData[256]; // Hackish way to set this right now. Need to find
                             // a beeter way to set it to correct block size.
 
 protected:
@@ -396,12 +398,12 @@ public:
    clearTag(); 
  }
 
- // Set cache line data at the given offset, still untested.
+ // Set cache line data at the given offset, still untested. - HENRY
  void setData(uint32_t data, Addr_t offset) {
     lineData[offset] = data;
  }
 
- // Get the cache line data at the given offset, still untested.
+ // Get the cache line data at the given offset, still untested. - HENRY
  uint32_t getData (Addr_t offset) {
     return lineData[offset];
  }

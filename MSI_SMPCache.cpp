@@ -47,6 +47,36 @@ void MSI_SMPCache::fillLine(uint32_t addr, uint32_t msi_state){
   if(enable_prints) printf("PULKIT exiting fillline:: addr=%x\n",addr);
 
 }
+
+// Overloaded fillLine to handle values - HENRY
+void MSI_SMPCache::fillLine(uint32_t addr, uint32_t msi_state, uint32_t val){
+
+  //this gets the state of whatever line this address maps to 
+  MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine2Replace(addr); 
+
+  if(enable_prints) printf("PULKIT entering fillline:: addr=%x, val=%x\n",addr, val);
+
+  if(st==0){
+    if(enable_prints) printf("PULKIT entering state0:: addr=%x, val=%x\n",addr, val);
+    /*No state*/
+    return;
+  }
+
+  /*Set the tags to the tags for the newly cached block*/
+  st->setTag(cache->calcTag(addr));
+
+  /*Set data in the cache line at the offset*/
+  st->setData(val, cache->calcOffset(addr));
+  if(enable_prints) printf("HENRY value set in fillline:: addr=%x, val=%x\n",addr, st->getData(cache->calcOffset(addr)));
+
+
+  /*Set the state of the block to the msi_state passed in*/
+  st->changeStateTo((MSIState_t)msi_state);
+  return;
+    
+  if(enable_prints) printf("PULKIT exiting fillline:: addr=%x, val=%x\n",addr, val);
+
+}
   
 
 MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint32_t addr){
@@ -228,7 +258,7 @@ void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr, uint32_t val){
     } 
 
     /*Fill the line*/
-    fillLine(addr,MSI_SHARED); 
+    fillLine(addr,MSI_SHARED,val); 
       
   }else{
 
