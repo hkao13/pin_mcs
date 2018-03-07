@@ -61,6 +61,9 @@ public:
   //to check for data in other caches
   virtual void writeLine(uint32_t wrPC, uint32_t addr);//SMPCache Interface Function
   virtual MSI_SMPCache::InvalidateReply writeRemoteAction(uint32_t addr);
+
+  // Overloaded write function with value
+  virtual void writeLine(uint32_t wrPC, uint32_t addr, uint32_t val);//SMPCache Interface Function
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to msi_state 
   virtual void fillLine(uint32_t addr, uint32_t msi_state);//SMPCache Interface Function

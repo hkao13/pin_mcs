@@ -398,12 +398,12 @@ public:
    clearTag(); 
  }
 
- // Set cache line data at the given offset, still untested. - HENRY
+ // Set cache line data at the given offset - HENRY
  void setData(uint32_t data, Addr_t offset) {
     lineData[offset] = data;
  }
 
- // Get the cache line data at the given offset, still untested. - HENRY
+ // Get the cache line data at the given offset - HENRY
  uint32_t getData (Addr_t offset) {
     return lineData[offset];
  }

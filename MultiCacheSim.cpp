@@ -135,6 +135,30 @@ void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned lo
     return;
 }
 
+// Overloaded writeLine with write value.
+void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr, unsigned long val){
+    #ifndef PIN
+    pthread_mutex_lock(&allCachesLock);
+    #else
+    PIN_GetLock(&allCachesLock,1); 
+    #endif
+
+
+    SMPCache * cacheToWrite = findCacheByCPUId(tidToCPUId(tid));
+    if(!cacheToWrite){
+      return;
+    }
+    cacheToWrite->writeLine(wrPC,addr, val);
+
+
+    #ifndef PIN
+    pthread_mutex_unlock(&allCachesLock);
+    #else
+    PIN_ReleaseLock(&allCachesLock); 
+    #endif
+    return;
+}
+
 int MultiCacheSim::getStateAsInt(unsigned long tid, unsigned long addr){
 
   SMPCache * cacheToWrite = findCacheByCPUId(tidToCPUId(tid));

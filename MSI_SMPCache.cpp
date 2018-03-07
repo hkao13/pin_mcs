@@ -387,6 +387,78 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
 
 }
 
+
+
+// Overloaded writeLine to handle write values - HENRY
+void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr, uint32_t val){
+  /*This method implements actions taken when instruction wrPC
+   *writes to memory location addr*/
+
+  /*Find the line to which this address maps*/ 
+  MSI_SMPCacheState * st = (MSI_SMPCacheState *)cache->findLine(addr);    
+   
+  /*
+   *If the tags didn't match, or the line was invalid, it is a 
+   *write miss
+   */ 
+  if(!st || (st && !(st->isValid())) ){ 
+
+    numWriteMisses++;
+    
+    if(st){
+
+      /*We're writing to an invalid line*/
+      numWriteOnInvalidMisses++;
+
+    }
+ 
+    /*
+     * Let the other caches snoop this write access and update their
+     * state accordingly.  This action is effectively putting the write
+     * on the bus.
+     */ 
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
+    numInvalidatesSent++;
+
+    /*Fill the line with the new written block*/
+    fillLine(addr,MSI_MODIFIED, val);
+
+    return;
+
+  }else if(st->getState() == MSI_SHARED){
+    /*If the block is shared and we're writing, we've incurred a coherence
+     *miss.  We need to upgrade to Modified to write, and all other
+     *copies must be invalidated
+    */
+    numWriteMisses++;
+
+    /*Write-on-shared Coherence Misses*/
+    numWriteOnSharedMisses++;
+
+    /*Let the other sharers snoop this write, and invalidate themselves*/
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
+    numInvalidatesSent++;
+
+    /*Change the state of the line to Modified to reflect the write*/
+    st->changeStateTo(MSI_MODIFIED);
+    return;
+
+  }else{ //Write Hit
+
+    /*Already have it writable: No coherence action required!*/
+    numWriteHits++;
+
+    /*Fill the line with the new written block*/
+    fillLine(addr,MSI_MODIFIED, val);
+
+    return;
+
+  }
+
+}
+
+
+
 char *MSI_SMPCache::Identify(){
   return (char *)"MSI Cache Coherence";
 }

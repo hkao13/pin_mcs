@@ -47,6 +47,9 @@ public:
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
   virtual void writeLine(uint32_t wrPC, uint32_t addr) = 0;
+
+  // Overloaded writeLine with write value
+  virtual void writeLine(uint32_t wrPC, uint32_t addr, uint32_t val) = 0;
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 
   virtual void fillLine(uint32_t addr, uint32_t mesi_state) = 0;
