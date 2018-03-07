@@ -29,6 +29,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //#include "GEnergy.h" //NEED TO GET RID OF THIS SOMEHOW
 #include "nanassert.h"
 #include "Snippets.h"
+
+#include <cstring>
+
 //#include "GStats.h" //NEED TO GET RID OF THIS SOMEHOW
 #define CBLKSZ 32
 #define CASSOC 8
@@ -66,22 +69,24 @@ template<class State, class Addr_t = uint32_t, bool Energy=true>
   bool goodInterface;
 
   public:
-  class CacheLine : public State {
-  public:
-    // Pure virtual class defines interface
-    //
-    // Tag included in state. Accessed through:
-    //
-    // Addr_t getTag() const;
-    // void setTag(Addr_t a);
-    // void clearTag();
-    // 
-    //
-    // bool isValid() const;
-    // void invalidate();
-    //
-    // bool isLocked() const;
-  };
+    class CacheLine : public State {
+    public:
+      // Pure virtual class defines interface
+      //
+      // Tag included in state. Accessed through:
+      //
+      // Addr_t getTag() const;
+      // void setTag(Addr_t a);
+      // void clearTag();
+      // 
+      //
+      // bool isValid() const;
+      // void invalidate();
+      //
+      // bool isLocked() const;
+
+
+    };
 
   // findLine returns a cache line that has tag == addr, NULL otherwise
   virtual CacheLine *findLinePrivate(Addr_t addr)=0;
@@ -187,6 +192,9 @@ template<class State, class Addr_t = uint32_t, bool Energy=true>
   }
 
   CacheLine *fillLine(Addr_t addr) {
+
+
+    
     CacheLine *l = findLine2Replace(addr);
     if (l==0)
       return 0;
@@ -361,11 +369,15 @@ private:
 
   Addr_t tag;
 
+  // HENRY: I think here is where we need to implement the cache line words
+  uint32_t* lineData[100]; // Hackish way to set this right now. Need to find
+                            // a beeter way to set it to correct block size.
+
 protected:
   unsigned state;
 
 public:
-  
+
   virtual unsigned getState() const {
     return state;
   }
@@ -382,6 +394,16 @@ public:
  void clearTag() { tag = 0; }
  void initialize(void *c) { 
    clearTag(); 
+ }
+
+ // Set cache line data at the given offset, still untested.
+ void setData(uint32_t data, Addr_t offset) {
+    lineData[offset] = data;
+ }
+
+ // Get the cache line data at the given offset, still untested.
+ uint32_t getData (Addr_t offset) {
+    return lineData[offset];
  }
 
  virtual bool isValid() const { return tag; }

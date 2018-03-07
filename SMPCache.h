@@ -41,6 +41,9 @@ public:
   //check for data in other caches
   virtual void readLine(uint32_t rdPC, uint32_t addr) = 0;
 
+  // Overloaded readLine with read value.
+  virtual void readLine(uint32_t rdPC, uint32_t addr, uint32_t val) = 0;
+
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
   virtual void writeLine(uint32_t wrPC, uint32_t addr) = 0;

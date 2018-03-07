@@ -47,6 +47,9 @@ public:
   void writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr);
   void dumpStatsForAllCaches(bool concise);
 
+  // Overloaded readLine
+  void readLine(unsigned long tid, unsigned long rdPC, unsigned long addr, unsigned long val);
+
   //Utility Function to get the cache object that has the specified CPUid
   SMPCache *findCacheByCPUId(unsigned int CPUid);
 

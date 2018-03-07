@@ -54,6 +54,9 @@ public:
   virtual void readLine(uint32_t rdPC, uint32_t addr);//SMPCache Interface Function
   virtual MSI_SMPCache::RemoteReadService readRemoteAction(uint32_t addr);
 
+  // Overloaded read function with value
+  virtual void readLine(uint32_t rdPC, uint32_t addr, uint32_t val);//SMPCache Interface Function
+
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
   virtual void writeLine(uint32_t wrPC, uint32_t addr);//SMPCache Interface Function

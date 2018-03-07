@@ -79,7 +79,7 @@ LIB_ROOTS :=
 # This section contains the build rules for all binaries that have special build rules.
 # See makefile.default.rules for the default build rules.
 
-TOOL_CXXFLAGS += -DPIN 
+TOOL_CXXFLAGS += -DPIN
 
 $(OBJDIR)SMPCache$(OBJ_SUFFIX) : SMPCache.cpp
 	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
@@ -99,11 +99,17 @@ $(OBJDIR)nanassert$(OBJ_SUFFIX) : nanassert.cpp
 $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) : MultiCacheSim_PinDriver.cpp
 	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
 
-$(OBJDIR)MESI_SMPCache$(OBJ_SUFFIX) : MESI_SMPCache.cpp
-	$(CXX) -Wno-deprecated -fPIC -shared $(CXXFLAGS) -o $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
+# Remove MESI temoporarily to save needing to apply the modifications to it
+#$(OBJDIR)MESI_SMPCache$(OBJ_SUFFIX) : MESI_SMPCache.cpp
+#	$(CXX) -Wno-deprecated -fPIC -shared $(CXXFLAGS) -o $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
 
 $(OBJDIR)MSI_SMPCache$(PINTOOL_SUFFIX) : MSI_SMPCache.cpp
 	$(CXX) -Wno-deprecated -fPIC -shared $(CXXFLAGS) -o $@ $< SMPCache.cpp Snippets.cpp nanassert.cpp
 
-$(OBJDIR)mcs$(PINTOOL_SUFFIX) : $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) $(OBJDIR)MSI_SMPCache$(OBJ_SUFFIX) $(OBJDIR)MESI_SMPCache$(OBJ_SUFFIX) 
+# Original with MESI
+#$(OBJDIR)mcs$(PINTOOL_SUFFIX) : $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) $(OBJDIR)MSI_SMPCache$(OBJ_SUFFIX) $(OBJDIR)MESI_SMPCache$(OBJ_SUFFIX) 
+#	$(LINKER) $(TOOL_LDFLAGS) -shared $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) -o $(OBJDIR)mcs$(PINTOOL_SUFFIX) $(TOOL_LPATHS) $(TOOL_LIBS) 
+
+# Modified to remove needing MESI 
+$(OBJDIR)mcs$(PINTOOL_SUFFIX) : $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) $(OBJDIR)MSI_SMPCache$(OBJ_SUFFIX) 
 	$(LINKER) $(TOOL_LDFLAGS) -shared $(OBJDIR)SMPCache$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim$(OBJ_SUFFIX) $(OBJDIR)CacheCore$(OBJ_SUFFIX) $(OBJDIR)Snippets$(OBJ_SUFFIX) $(OBJDIR)nanassert$(OBJ_SUFFIX) $(OBJDIR)MultiCacheSim_PinDriver$(OBJ_SUFFIX) -o $(OBJDIR)mcs$(PINTOOL_SUFFIX) $(TOOL_LPATHS) $(TOOL_LIBS) 

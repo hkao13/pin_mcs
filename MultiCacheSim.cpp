@@ -86,6 +86,31 @@ void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned lon
     #endif
     return;
 }
+
+// Overloaded readLine
+void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned long addr, unsigned long val){
+    #ifndef PIN
+    pthread_mutex_lock(&allCachesLock);
+    #else
+    PIN_GetLock(&allCachesLock,1); 
+    #endif
+
+
+    SMPCache * cacheToRead = findCacheByCPUId(tidToCPUId(tid));
+    if(!cacheToRead){
+      return;
+    }
+    cacheToRead->readLine(rdPC,addr, val);
+    //printf ("addr = %lx, val = %lx\n", addr, val);
+
+
+    #ifndef PIN
+    pthread_mutex_unlock(&allCachesLock);
+    #else
+    PIN_ReleaseLock(&allCachesLock); 
+    #endif
+    return;
+}
   
 void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr){
     #ifndef PIN

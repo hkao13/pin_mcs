@@ -47,21 +47,27 @@ accessorThread:
 	movl	$0, %eax
 	call	INSTRUMENT_ON
 .LVL2:
-	movl	$0, %eax
+	.loc 1 46 0
+	movl	$100, (%rbx)
 .LVL3:
-.L4:
-	.loc 1 45 0 discriminator 2
-	movl	(%rbx,%rax), %edx
-	imull	%edx, %edx
-	movl	%edx, (%rbx,%rax)
-	addq	$4, %rax
-	.loc 1 43 0 discriminator 2
-	cmpq	$32, %rax
-	jne	.L4
-	.loc 1 48 0
+	movl	$100, 4(%rbx)
+.LVL4:
+	movl	$100, 8(%rbx)
+.LVL5:
+	movl	$100, 12(%rbx)
+.LVL6:
+	movl	$100, 16(%rbx)
+.LVL7:
+	movl	$100, 20(%rbx)
+.LVL8:
+	movl	$100, 24(%rbx)
+.LVL9:
+	movl	$100, 28(%rbx)
+.LVL10:
+	.loc 1 49 0
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 50 0
+	.loc 1 51 0
 	movl	$0, %edi
 	call	pthread_exit
 	.cfi_endproc
@@ -71,40 +77,40 @@ accessorThread:
 	.type	main, @function
 main:
 .LFB38:
-	.loc 1 53 0
+	.loc 1 54 0
 	.cfi_startproc
-.LVL4:
+.LVL11:
 	subq	$24, %rsp
 .LCFI1:
 	.cfi_def_cfa_offset 32
-	.loc 1 55 0
+	.loc 1 56 0
 	movl	$0, %eax
 	call	INSTRUMENT_ON
-.LVL5:
-	.loc 1 59 0
+.LVL12:
+	.loc 1 60 0
 	movl	$wonk_array, %ecx
 	movl	$accessorThread, %edx
 	movl	$0, %esi
 	movq	%rsp, %rdi
 	call	pthread_create
-	.loc 1 60 0
+	.loc 1 61 0
 	leaq	8(%rsp), %rdi
 	movl	$wonk_array+32, %ecx
 	movl	$accessorThread, %edx
 	movl	$0, %esi
 	call	pthread_create
-	.loc 1 62 0
+	.loc 1 63 0
 	movl	$0, %esi
 	movq	(%rsp), %rdi
 	call	pthread_join
-	.loc 1 63 0
+	.loc 1 64 0
 	movl	$0, %esi
 	movq	8(%rsp), %rdi
 	call	pthread_join
-	.loc 1 65 0
+	.loc 1 66 0
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 71 0
+	.loc 1 72 0
 	movl	$0, %eax
 	addq	$24, %rsp
 .LCFI2:
@@ -591,7 +597,7 @@ main:
 	.byte	0x1
 	.long	.LASF54
 	.byte	0x1
-	.byte	0x35
+	.byte	0x36
 	.byte	0x1
 	.long	0x62
 	.quad	.LFB38
@@ -601,19 +607,19 @@ main:
 	.uleb128 0x14
 	.long	.LASF55
 	.byte	0x1
-	.byte	0x35
+	.byte	0x36
 	.long	0x62
 	.long	.LLST6
 	.uleb128 0x14
 	.long	.LASF56
 	.byte	0x1
-	.byte	0x35
+	.byte	0x36
 	.long	0x410
 	.long	.LLST7
 	.uleb128 0x15
 	.string	"acc"
 	.byte	0x1
-	.byte	0x39
+	.byte	0x3a
 	.long	0x416
 	.byte	0x2
 	.byte	0x91
@@ -1049,10 +1055,6 @@ main:
 	.quad	.LVL2-1-.Ltext0
 	.value	0x1
 	.byte	0x55
-	.quad	.LVL3-.Ltext0
-	.quad	.LFE37-.Ltext0
-	.value	0x1
-	.byte	0x53
 	.quad	0
 	.quad	0
 .LLST2:
@@ -1071,6 +1073,46 @@ main:
 	.quad	.LVL3-.Ltext0
 	.value	0x2
 	.byte	0x30
+	.byte	0x9f
+	.quad	.LVL3-.Ltext0
+	.quad	.LVL4-.Ltext0
+	.value	0x2
+	.byte	0x31
+	.byte	0x9f
+	.quad	.LVL4-.Ltext0
+	.quad	.LVL5-.Ltext0
+	.value	0x2
+	.byte	0x32
+	.byte	0x9f
+	.quad	.LVL5-.Ltext0
+	.quad	.LVL6-.Ltext0
+	.value	0x2
+	.byte	0x33
+	.byte	0x9f
+	.quad	.LVL6-.Ltext0
+	.quad	.LVL7-.Ltext0
+	.value	0x2
+	.byte	0x34
+	.byte	0x9f
+	.quad	.LVL7-.Ltext0
+	.quad	.LVL8-.Ltext0
+	.value	0x2
+	.byte	0x35
+	.byte	0x9f
+	.quad	.LVL8-.Ltext0
+	.quad	.LVL9-.Ltext0
+	.value	0x2
+	.byte	0x36
+	.byte	0x9f
+	.quad	.LVL9-.Ltext0
+	.quad	.LVL10-.Ltext0
+	.value	0x2
+	.byte	0x37
+	.byte	0x9f
+	.quad	.LVL10-.Ltext0
+	.quad	.LFE37-.Ltext0
+	.value	0x2
+	.byte	0x38
 	.byte	0x9f
 	.quad	0
 	.quad	0
@@ -1093,15 +1135,15 @@ main:
 	.quad	0
 	.quad	0
 .LLST6:
-	.quad	.LVL4-.Ltext0
-	.quad	.LVL5-1-.Ltext0
+	.quad	.LVL11-.Ltext0
+	.quad	.LVL12-1-.Ltext0
 	.value	0x1
 	.byte	0x55
 	.quad	0
 	.quad	0
 .LLST7:
-	.quad	.LVL4-.Ltext0
-	.quad	.LVL5-1-.Ltext0
+	.quad	.LVL11-.Ltext0
+	.quad	.LVL12-1-.Ltext0
 	.value	0x1
 	.byte	0x54
 	.quad	0

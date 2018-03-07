@@ -1,6 +1,6 @@
 #include "MSI_SMPCache.h"
 
-bool enable_prints=0;
+bool enable_prints=1;
 
 MSI_SMPCache::MSI_SMPCache(int cpuid, 
                            std::vector<SMPCache * > * cacheVector,
@@ -175,6 +175,69 @@ void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
 
   }
   if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%x\n\n",addr);
+
+}
+
+
+// Overloaded readLine to account for value stores - HENRY
+void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr, uint32_t val){
+  /*
+   *This method implements actions taken on a read access to address addr
+   *at instruction rdPC
+  */
+
+  if(enable_prints) printf("PULKIT entered readline:: READING LINE addr=%x, val=%x\n",addr, val);
+  /*Get the state of the line to which this address maps*/
+  MSI_SMPCacheState *st = 
+    (MSI_SMPCacheState *)cache->findLine(addr);    
+  
+  /*Read Miss - tags didn't match, or line is invalid*/
+  if(!st || (st && !(st->isValid())) ){
+
+    /*Update event counter for read misses*/
+    numReadMisses++;
+
+    if(st){
+
+      /*Tag matched, but state was invalid*/
+      numReadOnInvalidMisses++;
+
+    }
+
+    /*Make the other caches snoop this access 
+     *and get a remote read service object describing what happened.
+     *This is effectively putting the access on the bus.
+    */
+    MSI_SMPCache::RemoteReadService rrs = readRemoteAction(addr);
+    numReadRequestsSent++;
+    
+    if(rrs.providedData){
+
+      /*If it was shared or modified elsewhere,
+       *the line was provided by another cache.
+       *Update these counters to reflect that
+      */
+      numReadMissesServicedByOthers++;
+
+      if(rrs.isShared){
+        numReadMissesServicedByShared++;
+      }else{
+        numReadMissesServicedByModified++;
+      }
+
+    } 
+
+    /*Fill the line*/
+    fillLine(addr,MSI_SHARED); 
+      
+  }else{
+
+    /*Read Hit - any state but Invalid*/
+    numReadHits++; 
+    return; 
+
+  }
+  if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%x, val=%x\n\n",addr, val);
 
 }
 

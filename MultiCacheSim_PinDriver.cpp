@@ -20,6 +20,8 @@ bool useRef = false;
 
 bool do_instrumentation = false;
 
+bool useSCL = false;
+
 KNOB<bool> KnobStopOnError(KNOB_MODE_WRITEONCE, "pintool",
 			   "stopOnProtoBug", "false", "Stop the Simulation when a deviation is detected between the test protocol and the reference");//default cache is verbose 
 
@@ -30,7 +32,10 @@ KNOB<bool> KnobUseReference(KNOB_MODE_WRITEONCE, "pintool",
 			   "useref", "false", "Use a reference protocol to compare running protocol states with (default = false)");//default cache is verbose 
 
 KNOB<bool> KnobConcise(KNOB_MODE_WRITEONCE, "pintool",
-			   "concise", "false", "Print output concisely");//default cache is verbose 
+			   "concise", "false", "Print output concisely");//default cache is verbose
+
+KNOB<bool> KnobUseSCL(KNOB_MODE_WRITEONCE, "pintool",
+         "useSCL", "false", "Use the SCL"); // SCL Knob
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
 			   "csize", "65536", "Cache Size");//default cache is 64KB
@@ -131,12 +136,25 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   PIN_GetLock(&globalLock, 1);
 
+
+  // Get the value of the memory address, uncomment below to see.
+  ADDRINT * addr_ptr = (ADDRINT*)addr;
+  ADDRINT value;
+  PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
+  //fprintf(stderr,"ADDR, VAL: %lx, %lx\n", addr, value);
+
+  if (useSCL) {
+    // TODO
+  }
+
   if(useRef){
     ReferenceProtocol->readLine(tid,inst,addr);
   }
+
   std::vector<MultiCacheSim *>::iterator i,e;
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
-    (*i)->readLine(tid,inst,addr);
+    //(*i)->readLine(tid,inst,addr);
+    (*i)->readLine(tid,inst,addr,value);
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -165,6 +183,10 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
   }
 
   PIN_GetLock(&globalLock, 1);
+
+  if (useSCL) {
+    // TODO for write update
+  }
 
   if(useRef){
     ReferenceProtocol->writeLine(tid,inst,addr);
@@ -336,6 +358,11 @@ int main(int argc, char *argv[])
 
     fprintf(stderr,"Using Reference Implementation %s\n",KnobReference.Value().c_str());
 
+  }
+
+  useSCL = KnobUseSCL.Value();
+  if (useSCL) {
+    fprintf(stderr,"Using Speculative Cache Lookup.\n");
   }
 
   stopOnError = KnobStopOnError.Value();
