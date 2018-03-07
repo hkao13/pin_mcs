@@ -3,6 +3,7 @@
 
 #include "MESI_SMPCache.h"
 #include "MSI_SMPCache.h"
+#include "SCL_Read_SMPCache.h"
 
 #ifndef PIN
 #include <pthread.h>

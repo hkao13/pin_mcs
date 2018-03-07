@@ -21,6 +21,7 @@ bool useRef = false;
 bool do_instrumentation = false;
 
 bool useSCL = false;
+std::vector<MultiCacheSim *> SCL_Caches;
 
 KNOB<bool> KnobStopOnError(KNOB_MODE_WRITEONCE, "pintool",
 			   "stopOnProtoBug", "false", "Stop the Simulation when a deviation is detected between the test protocol and the reference");//default cache is verbose 
@@ -35,7 +36,7 @@ KNOB<bool> KnobConcise(KNOB_MODE_WRITEONCE, "pintool",
 			   "concise", "false", "Print output concisely");//default cache is verbose
 
 KNOB<bool> KnobUseSCL(KNOB_MODE_WRITEONCE, "pintool",
-         "useSCL", "false", "Use the SCL"); // SCL Knob
+         "usescl", "false", "Use the SCL"); // SCL Knob
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
 			   "csize", "65536", "Cache Size");//default cache is 64KB
@@ -55,6 +56,8 @@ KNOB<string> KnobProtocol(KNOB_MODE_WRITEONCE, "pintool",
 KNOB<string> KnobReference(KNOB_MODE_WRITEONCE, "pintool",
 			   "reference", "obj-intel64/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
 
+KNOB<string> KnobSCL(KNOB_MODE_WRITEONCE, "pintool",
+         "scl", "obj-intel64/SCL_Read_SMPCache.so", "Speculative Cache Lookup file");
 
 #define MAX_NTHREADS 64
 unsigned long instrumentationStatus[MAX_NTHREADS];
@@ -136,16 +139,16 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   PIN_GetLock(&globalLock, 1);
 
+  /* Speculative load */
+  if (useSCL) {
+    // TODO
+  }
 
   // Get the value of the memory address, uncomment below to see.
   ADDRINT * addr_ptr = (ADDRINT*)addr;
   ADDRINT value;
   PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
   //fprintf(stderr,"ADDR, VAL: %lx, %lx\n", addr, value);
-
-  if (useSCL) {
-    // TODO
-  }
 
   if(useRef){
     ReferenceProtocol->readLine(tid,inst,addr);
@@ -362,7 +365,32 @@ int main(int argc, char *argv[])
 
   useSCL = KnobUseSCL.Value();
   if (useSCL) {
-    fprintf(stderr,"Using Speculative Cache Lookup.\n");
+    //fprintf(stderr,"Using Speculative Cache Lookup.\n");
+
+    void *chand = dlopen( KnobSCL.Value().c_str(), RTLD_LAZY | RTLD_LOCAL );
+    if( chand == NULL ){
+      fprintf(stderr,"Couldn't Load SCL: %s\n", argv[1]);
+      fprintf(stderr,"dlerror: %s\n", dlerror());
+      exit(1);
+    }
+  
+    CacheFactory cfac = (CacheFactory)dlsym(chand, "Create");
+    if( chand == NULL ){
+      fprintf(stderr,"Couldn't get the Create function\n");
+      fprintf(stderr,"dlerror: %s\n", dlerror());
+      exit(1);
+    }
+  
+    MultiCacheSim *sc = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
+
+    for(unsigned int i = 0; i < num; i++){
+      sc->createNewCache();
+    } 
+
+    SCL_Caches.push_back(sc);
+
+    fprintf(stderr,"Using SCL Implementation %s\n",KnobSCL.Value().c_str());
+
   }
 
   stopOnError = KnobStopOnError.Value();
@@ -379,7 +407,7 @@ int main(int argc, char *argv[])
   PIN_AddThreadFiniFunction(threadEnd, 0);
   PIN_AddFiniFunction(Fini, 0);
     
-  fprintf(stderr,"Using Protocol %s\n",KnobReference.Value().c_str());
+  //fprintf(stderr,"Using Protocol %s\n",KnobReference.Value().c_str());
  
   PIN_StartProgram();
   
