@@ -42,6 +42,8 @@ public:
 
   //Adds a cache to the multicachesim
   void createNewCache();
+  //attach cache to new cache (For SCL) - HENRY
+  void createNewSCL(SMPCache *attachCache);
  
   //These three functions implement the CacheInterface interface 
   void readLine(unsigned long tid, unsigned long rdPC, unsigned long addr);
@@ -52,6 +54,10 @@ public:
   void readLine(unsigned long tid, unsigned long rdPC, unsigned long addr, unsigned long val);
   // Overloaded writeLine - HENRY
   void writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr, unsigned long val);
+
+
+  // Speculative readLine for SCL - HENRY
+  void readLineSpeculative(unsigned long tid, unsigned long rdPC, unsigned long addr);
 
   //Utility Function to get the cache object that has the specified CPUid
   SMPCache *findCacheByCPUId(unsigned int CPUid);

@@ -64,6 +64,30 @@ void MultiCacheSim::createNewCache(){
     #endif
 }
 
+// this is for SCL Caches (MSHRs) to link actual Caches with SCL.
+void MultiCacheSim::createNewSCL(SMPCache *attachCache){
+
+    #ifndef PIN
+    pthread_mutex_lock(&allCachesLock);
+    #else
+    PIN_GetLock(&allCachesLock,1); 
+    #endif
+
+    SMPCache * newcache;
+    newcache = this->cacheFactory(num_caches++, &allCaches, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
+    newcache->linkedCache = attachCache -> cache;
+    printf("SCL MSHR %d linked to Cache %d\n", newcache->getCPUId(), attachCache->getCPUId());
+
+    allCaches.push_back(newcache);
+
+
+    #ifndef PIN
+    pthread_mutex_unlock(&allCachesLock);
+    #else
+    PIN_ReleaseLock(&allCachesLock); 
+    #endif
+}
+
 void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned long addr){
     #ifndef PIN
     pthread_mutex_lock(&allCachesLock);
@@ -149,6 +173,31 @@ void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned lo
       return;
     }
     cacheToWrite->writeLine(wrPC,addr, val);
+
+
+    #ifndef PIN
+    pthread_mutex_unlock(&allCachesLock);
+    #else
+    PIN_ReleaseLock(&allCachesLock); 
+    #endif
+    return;
+}
+
+
+// Speculative readLine for SCL - HENRY
+void MultiCacheSim::readLineSpeculative(unsigned long tid, unsigned long rdPC, unsigned long addr){
+    #ifndef PIN
+    pthread_mutex_lock(&allCachesLock);
+    #else
+    PIN_GetLock(&allCachesLock,1); 
+    #endif
+
+
+    SMPCache * cacheToRead = findCacheByCPUId(tidToCPUId(tid));
+    if(!cacheToRead){
+      return;
+    }
+    cacheToRead->readLine(rdPC,addr);
 
 
     #ifndef PIN

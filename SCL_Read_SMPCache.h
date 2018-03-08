@@ -1,6 +1,7 @@
 #include "CacheCore.h"
 #include "SMPCache.h"
 #include "SCL_Read_SMPCacheState.h"
+#include "MSI_SMPCacheState.h"
 #include <vector>
 
 class SCL_Read_SMPCache : public SMPCache{
@@ -10,7 +11,6 @@ public:
   //FIELDS
   //This cache's ID
   int CPUId;
-
 
   //METHODS
   //Constructor
@@ -48,5 +48,3 @@ public:
   //Destructor
   ~SCL_Read_SMPCache();
 };
-
-

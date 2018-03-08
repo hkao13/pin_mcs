@@ -139,9 +139,15 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   PIN_GetLock(&globalLock, 1);
 
+  std::vector<MultiCacheSim *>::iterator i,e;
+
   /* Speculative load */
   if (useSCL) {
-    // TODO
+
+    for(i = SCL_Caches.begin(), e = SCL_Caches.end(); i != e; i++){
+      (*i) -> readLineSpeculative(tid, inst, addr);
+    }
+    
   }
 
   // Get the value of the memory address, uncomment below to see.
@@ -154,10 +160,10 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
     ReferenceProtocol->readLine(tid,inst,addr);
   }
 
-  std::vector<MultiCacheSim *>::iterator i,e;
+  
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
-    //(*i)->readLine(tid,inst,addr);
-    (*i)->readLine(tid,inst,addr,value);
+    (*i)->readLine(tid,inst,addr);
+    //(*i)->readLine(tid,inst,addr,value);
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -300,6 +306,8 @@ int main(int argc, char *argv[])
   unsigned long assoc = KnobAssoc.Value();
   unsigned long num = KnobNumCaches.Value();
 
+  MultiCacheSim *c;
+
   const char *pstr = KnobProtocol.Value().c_str();
   char *ct = strtok((char *)pstr,",");
   while(ct != NULL){
@@ -322,7 +330,7 @@ int main(int argc, char *argv[])
 
     }
 
-    MultiCacheSim *c = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
+    c = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
     for(unsigned int i = 0; i < num; i++){
       c->createNewCache();
@@ -364,7 +372,7 @@ int main(int argc, char *argv[])
   }
 
   useSCL = KnobUseSCL.Value();
-  if (useSCL) {
+  if (useSCL && c) {
     //fprintf(stderr,"Using Speculative Cache Lookup.\n");
 
     void *chand = dlopen( KnobSCL.Value().c_str(), RTLD_LAZY | RTLD_LOCAL );
@@ -384,7 +392,7 @@ int main(int argc, char *argv[])
     MultiCacheSim *sc = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
     for(unsigned int i = 0; i < num; i++){
-      sc->createNewCache();
+      sc->createNewSCL(c->allCaches[i]);
     } 
 
     SCL_Caches.push_back(sc);

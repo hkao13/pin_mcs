@@ -12,6 +12,9 @@ public:
   //The actual SESC cache object
   CacheGeneric<StateGeneric<> > *cache;
 
+  //Link another cache to it, (for SCL) -HENRY
+  CacheGeneric<StateGeneric<> > *linkedCache;
+
   //A vector of all the caches in the multicachesim
   std::vector<SMPCache * > *allCaches;
   

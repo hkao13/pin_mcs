@@ -1,6 +1,6 @@
 #include "SCL_Read_SMPCache.h"
 
-bool enable_prints=1;
+bool enable_prints=0;
 
 SCL_Read_SMPCache::SCL_Read_SMPCache(int cpuid, 
                            std::vector<SMPCache * > * cacheVector,
@@ -12,7 +12,7 @@ SCL_Read_SMPCache::SCL_Read_SMPCache(int cpuid,
                            bool cskew) : 
                              SMPCache(cpuid,cacheVector){
   
-  fprintf(stderr,"Making a SCL_Read cache with cpuid %d\n",cpuid);
+  fprintf(stderr,"Making a SCL_Read MSHR with cpuid %d\n",cpuid);
   CacheGeneric<SCL_Read_SMPCacheState> *c = 
     CacheGeneric<SCL_Read_SMPCacheState>::create(csize, 
                                             cassoc, 
@@ -35,7 +35,29 @@ void SCL_Read_SMPCache::fillLine(uint32_t addr, uint32_t msi_state, uint32_t val
   return;
 }
 
+// Speculative readLine
 void SCL_Read_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
+
+    if (linkedCache) {
+
+      MSI_SMPCacheState * st = (MSI_SMPCacheState *)linkedCache -> findLine(addr);
+ 
+      if(!st){ 
+        // Line not present in cache so do nothing
+        return;
+      }
+
+      else if( st && !(st->isValid()) ) { 
+        // Here the line is in an invalid state, do something.
+        if (enable_prints) printf("HENRY peek at addr=%x, state=%d\n", addr, (int)st -> getState());
+      }
+
+      else {
+        // Here the line is in a valid state so do nothing.
+        //if (enable_prints) printf("HENRY peek at addr=%x, state=%d\n", addr, (int)st -> getState());
+      }
+
+    }
 
   return;
 }

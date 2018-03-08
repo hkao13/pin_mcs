@@ -47,23 +47,19 @@ accessorThread:
 	movl	$0, %eax
 	call	INSTRUMENT_ON
 .LVL2:
-	.loc 1 46 0
-	movl	$100, (%rbx)
+	movl	$0, %eax
 .LVL3:
-	movl	$100, 4(%rbx)
-.LVL4:
-	movl	$100, 8(%rbx)
-.LVL5:
-	movl	$100, 12(%rbx)
-.LVL6:
-	movl	$100, 16(%rbx)
-.LVL7:
-	movl	$100, 20(%rbx)
-.LVL8:
-	movl	$100, 24(%rbx)
-.LVL9:
-	movl	$100, 28(%rbx)
-.LVL10:
+.L4:
+	.loc 1 45 0 discriminator 2
+	movl	(%rbx,%rax), %edx
+	imull	%edx, %edx
+	movl	%edx, (%rbx,%rax)
+	.loc 1 46 0 discriminator 2
+	addl	$1, temp(%rip)
+	addq	$4, %rax
+	.loc 1 43 0 discriminator 2
+	cmpq	$32, %rax
+	jne	.L4
 	.loc 1 49 0
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
@@ -79,14 +75,14 @@ main:
 .LFB38:
 	.loc 1 54 0
 	.cfi_startproc
-.LVL11:
+.LVL4:
 	subq	$24, %rsp
 .LCFI1:
 	.cfi_def_cfa_offset 32
 	.loc 1 56 0
 	movl	$0, %eax
 	call	INSTRUMENT_ON
-.LVL12:
+.LVL5:
 	.loc 1 60 0
 	movl	$wonk_array, %ecx
 	movl	$accessorThread, %edx
@@ -1055,6 +1051,10 @@ main:
 	.quad	.LVL2-1-.Ltext0
 	.value	0x1
 	.byte	0x55
+	.quad	.LVL3-.Ltext0
+	.quad	.LFE37-.Ltext0
+	.value	0x1
+	.byte	0x53
 	.quad	0
 	.quad	0
 .LLST2:
@@ -1073,46 +1073,6 @@ main:
 	.quad	.LVL3-.Ltext0
 	.value	0x2
 	.byte	0x30
-	.byte	0x9f
-	.quad	.LVL3-.Ltext0
-	.quad	.LVL4-.Ltext0
-	.value	0x2
-	.byte	0x31
-	.byte	0x9f
-	.quad	.LVL4-.Ltext0
-	.quad	.LVL5-.Ltext0
-	.value	0x2
-	.byte	0x32
-	.byte	0x9f
-	.quad	.LVL5-.Ltext0
-	.quad	.LVL6-.Ltext0
-	.value	0x2
-	.byte	0x33
-	.byte	0x9f
-	.quad	.LVL6-.Ltext0
-	.quad	.LVL7-.Ltext0
-	.value	0x2
-	.byte	0x34
-	.byte	0x9f
-	.quad	.LVL7-.Ltext0
-	.quad	.LVL8-.Ltext0
-	.value	0x2
-	.byte	0x35
-	.byte	0x9f
-	.quad	.LVL8-.Ltext0
-	.quad	.LVL9-.Ltext0
-	.value	0x2
-	.byte	0x36
-	.byte	0x9f
-	.quad	.LVL9-.Ltext0
-	.quad	.LVL10-.Ltext0
-	.value	0x2
-	.byte	0x37
-	.byte	0x9f
-	.quad	.LVL10-.Ltext0
-	.quad	.LFE37-.Ltext0
-	.value	0x2
-	.byte	0x38
 	.byte	0x9f
 	.quad	0
 	.quad	0
@@ -1135,15 +1095,15 @@ main:
 	.quad	0
 	.quad	0
 .LLST6:
-	.quad	.LVL11-.Ltext0
-	.quad	.LVL12-1-.Ltext0
+	.quad	.LVL4-.Ltext0
+	.quad	.LVL5-1-.Ltext0
 	.value	0x1
 	.byte	0x55
 	.quad	0
 	.quad	0
 .LLST7:
-	.quad	.LVL11-.Ltext0
-	.quad	.LVL12-1-.Ltext0
+	.quad	.LVL4-.Ltext0
+	.quad	.LVL5-1-.Ltext0
 	.value	0x1
 	.byte	0x54
 	.quad	0

@@ -42,8 +42,8 @@ void *accessorThread(void *arg){
   INSTRUMENT_ON();
   for (i=0; i < MAXVAL; i++) {
 
-    //array[i] = array[i] * array[i];
-    array[i] = 100;
+    array[i] = array[i] * array[i];
+    temp = temp++;
   }
 
   INSTRUMENT_OFF();

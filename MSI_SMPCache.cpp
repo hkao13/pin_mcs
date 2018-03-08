@@ -1,6 +1,6 @@
 #include "MSI_SMPCache.h"
 
-bool enable_prints=1;
+bool enable_prints=0;
 
 MSI_SMPCache::MSI_SMPCache(int cpuid, 
                            std::vector<SMPCache * > * cacheVector,
@@ -457,11 +457,10 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr, uint32_t val){
 
 }
 
-
-
 char *MSI_SMPCache::Identify(){
   return (char *)"MSI Cache Coherence";
 }
+
 
 MSI_SMPCache::~MSI_SMPCache(){
 
