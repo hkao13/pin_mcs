@@ -162,8 +162,8 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
-    (*i)->readLine(tid,inst,addr);
-    //(*i)->readLine(tid,inst,addr,value);
+    //(*i)->readLine(tid,inst,addr);
+    (*i)->readLine(tid,inst,addr,value);
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
