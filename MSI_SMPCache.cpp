@@ -179,9 +179,9 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
     if(enable_prints) printf("PULKIT HIT readline:: READING LINE addr=%lx\n\n",addr);
 
   }
-  if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%lx %d\n\n",addr, st->getData(cache->calcOffset(addr)));
-  return st->getData(cache->calcOffset(addr));
-
+   MSI_SMPCacheState *st2 = (MSI_SMPCacheState *)cache->findLine(addr);    
+   if(enable_prints)fprintf(stderr,"PULKIT exiting readline:: READING LINE addr=%lx %d\n\n",addr, st2->getData(cache->calcOffset(addr)));
+  return st2->getData(cache->calcOffset(addr));
 }
 
 

@@ -11,12 +11,14 @@
 #include "MultiCacheSim.h"
 
 std::vector<MultiCacheSim *> Caches;
+#define isStack(addr) (addr<=0x7FFFFFFFFFFF && addr>=0x700000000000)
 MultiCacheSim *ReferenceProtocol;
 PIN_LOCK globalLock;
 
 bool stopOnError = false;
 bool printOnError = false;
 bool useRef = false;
+bool enable_prints = false;
 
 bool do_instrumentation = false;
 
@@ -135,7 +137,7 @@ VOID instrumentImage(IMG img, VOID *v)
 
 void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  if (!instrumentationStatus[PIN_ThreadId()] || addr>0x7ff000000000) { // Only do instrumentation if do_instrumentation is true.
+  if (!instrumentationStatus[PIN_ThreadId()] || isStack(addr)) { // Only do instrumentation if do_instrumentation is true.
     return;
   }
 
@@ -159,11 +161,11 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
   ADDRINT * addr_ptr = (ADDRINT*)addr;
   uint32_t value1, value2;
   PIN_SafeCopy(&value1, addr_ptr, sizeof(ADDRINT));
-  //fprintf(stderr,"Read: ADDR, VAL: %lx, %lx\n", addr, value1);
+  if (enable_prints) fprintf(stderr,"Read: ADDR, VAL: %lx, %x\n", addr, value1);
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     value2 = (*i)->readLine(tid,inst,addr);
-    if(value1 != value2) printf("ERROR -> mismatch required (%d==%d)\n", value1, value2);
-    else printf("value matched!! yayyeee!!\n");
+    if(value1 != value2) {printf("ERROR -> mismatch required (%d==%d)\n", value1, value2); exit(0);}
+    else if (enable_prints) printf("value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -197,7 +199,7 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
   writetid  = tid;
   writeinst = inst;
   writecount++;
-  // fprintf(stderr,"Write: ADDR, REG1, REG2: %lx, %lu, %lu...... writecount=%d\n", addr, reg1, reg2, writecount);
+  if (enable_prints) fprintf(stderr,"Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
 
   PIN_ReleaseLock(&globalLock);
 }
@@ -208,7 +210,7 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
     return;
   }
 
-  if (writeaddr>0x7ff000000000) {printf ("addr_out_of_bounds %lx\n",writeaddr);return;}
+  if (isStack(writeaddr)) {if (enable_prints) printf ("access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
 
   PIN_GetLock(&globalLock, 1);
 
@@ -219,7 +221,7 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
     ADDRINT value;
     PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
 
-    fprintf(stderr,"Write: ADDR, Value: %lx, %lx\n", writeaddr, value);  
+    if (enable_prints) fprintf(stderr,"Write: ADDR, writecount, Value: %lx, %lx, %lx\n", writeaddr, writecount, value);  
 
     writecount--;
     if (useSCL) {
