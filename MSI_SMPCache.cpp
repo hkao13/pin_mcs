@@ -24,62 +24,35 @@ MSI_SMPCache::MSI_SMPCache(int cpuid,
 
 }
 
-void MSI_SMPCache::fillLine(uint32_t addr, uint32_t msi_state){
+void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t()){
 
   //this gets the state of whatever line this address maps to 
   MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine2Replace(addr); 
 
-  if(enable_prints) printf("PULKIT entering fillline:: addr=%x\n",addr);
+  if(enable_prints) printf("PULKIT entering fillline:: addr=%lx\n",addr);
 
   if(st==0){
-    if(enable_prints) printf("PULKIT entering state0:: addr=%x\n",addr);
+    if(enable_prints) printf("PULKIT entering state0:: addr=%lx\n",addr);
     /*No state*/
     return;
   }
 
   /*Set the tags to the tags for the newly cached block*/
   st->setTag(cache->calcTag(addr));
+  st->setData(val);
+
+  if(enable_prints) printf("HENRY value set in fillline:: addr=%lx, val=%x\n",addr, st->getData(cache->calcOffset(addr)));
 
   /*Set the state of the block to the msi_state passed in*/
   st->changeStateTo((MSIState_t)msi_state);
   return;
-    
-  if(enable_prints) printf("PULKIT exiting fillline:: addr=%x\n",addr);
 
-}
-
-// Overloaded fillLine to handle values - HENRY
-void MSI_SMPCache::fillLine(uint32_t addr, uint32_t msi_state, uint32_t val){
-
-  //this gets the state of whatever line this address maps to 
-  MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine2Replace(addr); 
-
-  if(enable_prints) printf("PULKIT entering fillline:: addr=%x, val=%x\n",addr, val);
-
-  if(st==0){
-    if(enable_prints) printf("PULKIT entering state0:: addr=%x, val=%x\n",addr, val);
-    /*No state*/
-    return;
-  }
-
-  /*Set the tags to the tags for the newly cached block*/
-  st->setTag(cache->calcTag(addr));
-
-  /*Set data in the cache line at the offset*/
-  st->setData(val, cache->calcOffset(addr));
-  if(enable_prints) printf("HENRY value set in fillline:: addr=%x, val=%x\n",addr, st->getData(cache->calcOffset(addr)));
-
-
-  /*Set the state of the block to the msi_state passed in*/
-  st->changeStateTo((MSIState_t)msi_state);
-  return;
-    
-  if(enable_prints) printf("PULKIT exiting fillline:: addr=%x, val=%x\n",addr, val);
+  if(enable_prints) printf("PULKIT exiting fillline:: addr=%lx\n",addr);
 
 }
   
 
-MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint32_t addr){
+MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
 
   /*This method implements snoop behavior on all the other 
    *caches that this cache might be interacting with*/
@@ -120,7 +93,7 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint32_t addr){
          *1)The line was not shared (the false param)
          *2)The line was provided by otherCache, as only it had it cached
         */
-        return MSI_SMPCache::RemoteReadService(false,true);
+        return MSI_SMPCache::RemoteReadService(false,true,otherState->getData()); // no need to check for MSB, as it is in modified state
 
       /*Other cache has recently read the line*/
       }else if(otherState->getState() == MSI_SHARED){  
@@ -129,7 +102,8 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint32_t addr){
          *1)The line was shared (the true param)
          *2)The line was provided by otherCache 
         */
-        return MSI_SMPCache::RemoteReadService(true,true);
+	if (otherState->islineInvalid) { /*Do Nothing*/ } 
+	else 	return MSI_SMPCache::RemoteReadService(true,true,otherState->getData());
 
       /*Line was cached, but invalid*/
       }else if(otherState->getState() == MSI_INVALID){ 
@@ -147,13 +121,13 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint32_t addr){
 }
 
 
-void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
+uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
   /*
    *This method implements actions taken on a read access to address addr
    *at instruction rdPC
   */
 
-  if(enable_prints) printf("PULKIT entered readline:: READING LINE addr=%x\n",addr);
+  if(enable_prints) printf("PULKIT entered readline:: READING LINE addr=%lx\n",addr);
   /*Get the state of the line to which this address maps*/
   MSI_SMPCacheState *st = 
     (MSI_SMPCacheState *)cache->findLine(addr);    
@@ -195,89 +169,27 @@ void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
     } 
 
     /*Fill the line*/
-    fillLine(addr,MSI_SHARED); 
-      
+    fillLine(addr,MSI_SHARED,rrs.linedata); // FIXME-PA - get actual data from somewhere?? required? can we assume that the benchmark will init all data after malloc
+    if(enable_prints) printf("PULKIT MISS readline:: READING LINE addr=%lx\n\n",addr);
+
   }else{
 
     /*Read Hit - any state but Invalid*/
     numReadHits++; 
-    return; 
+    if(enable_prints) printf("PULKIT HIT readline:: READING LINE addr=%lx\n\n",addr);
 
   }
-  if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%x\n\n",addr);
+  if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%lx %d\n\n",addr, st->getData(cache->calcOffset(addr)));
+  return st->getData(cache->calcOffset(addr));
 
 }
 
 
-// Overloaded readLine to account for value stores - HENRY
-void MSI_SMPCache::readLine(uint32_t rdPC, uint32_t addr, uint32_t val){
-  /*
-   *This method implements actions taken on a read access to address addr
-   *at instruction rdPC
-  */
-
-  if(enable_prints) printf("PULKIT entered readline:: READING LINE addr=%x, val=%x\n",addr, val);
-  /*Get the state of the line to which this address maps*/
-  MSI_SMPCacheState *st = 
-    (MSI_SMPCacheState *)cache->findLine(addr);    
-  
-  /*Read Miss - tags didn't match, or line is invalid*/
-  if(!st || (st && !(st->isValid())) ){
-
-    /*Update event counter for read misses*/
-    numReadMisses++;
-
-    if(st){
-
-      /*Tag matched, but state was invalid*/
-      numReadOnInvalidMisses++;
-
-    }
-
-    /*Make the other caches snoop this access 
-     *and get a remote read service object describing what happened.
-     *This is effectively putting the access on the bus.
-    */
-    MSI_SMPCache::RemoteReadService rrs = readRemoteAction(addr);
-    numReadRequestsSent++;
-    
-    if(rrs.providedData){
-
-      /*If it was shared or modified elsewhere,
-       *the line was provided by another cache.
-       *Update these counters to reflect that
-      */
-      numReadMissesServicedByOthers++;
-
-      if(rrs.isShared){
-        numReadMissesServicedByShared++;
-      }else{
-        numReadMissesServicedByModified++;
-      }
-
-    } 
-
-    /*Fill the line*/
-    fillLine(addr,MSI_SHARED,val); 
-      
-  }else{
-
-    /*Read Hit - any state but Invalid*/
-    numReadHits++; 
-    return; 
-
-  }
-  if(enable_prints) printf("PULKIT exiting readline:: READING LINE addr=%x, val=%x\n\n",addr, val);
-
-}
-
-
-MSI_SMPCache::InvalidateReply MSI_SMPCache::writeRemoteAction(uint32_t addr){
+MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr, uint32_t val=0){ // val is passed for rmw
     
     /*This method implements snoop behavior on all the other 
      *caches that this cache might be interacting with*/
-    
-    bool empty = true;
+    MSI_SMPCache::InvalidateReply reply = MSI_SMPCache::InvalidateReply(true);
 
     /*Loop over all other caches*/
     std::vector<SMPCache * >::iterator cacheIter;
@@ -291,6 +203,7 @@ MSI_SMPCache::InvalidateReply MSI_SMPCache::writeRemoteAction(uint32_t addr){
       
       MSI_SMPCache *otherCache = (MSI_SMPCache*)*cacheIter; 
       if(otherCache->getCPUId() == this->getCPUId()){
+	reply.linedata.data[otherCache->cache->calcOffset(addr)] = val;
         /*We don't snoop ourselves*/
         continue;
       }
@@ -302,12 +215,13 @@ MSI_SMPCache::InvalidateReply MSI_SMPCache::writeRemoteAction(uint32_t addr){
       /*if it is cached by otherCache*/
       if(otherState && otherState->isValid()){
 
-          /*Invalidate the line, because we're writing*/
-          otherState->invalidate();
- 
           /*The reply contains data, so "empty" is false*/
-          empty = false;
+          reply.empty = false;
+          otherState->setData(val,otherCache->cache->calcOffset(addr));
+          reply.linedata = otherState->getData();
 
+          /*Invalidate the line, because we're writing*/
+          otherState->invalidate(); // FIXME-PA - instead of invalidating make inlineinvalid true
       }
 
     }/*done with other caches*/
@@ -319,17 +233,17 @@ MSI_SMPCache::InvalidateReply MSI_SMPCache::writeRemoteAction(uint32_t addr){
     *but it might be useful if you plan to extend 
     *this simulator, so i left it in.
     */
-    return MSI_SMPCache::InvalidateReply(empty);
+    return reply;
 }
 
 
-void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
+void MSI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
   /*This method implements actions taken when instruction wrPC
    *writes to memory location addr*/
 
   /*Find the line to which this address maps*/ 
   MSI_SMPCacheState * st = (MSI_SMPCacheState *)cache->findLine(addr);    
-   
+
   /*
    *If the tags didn't match, or the line was invalid, it is a 
    *write miss
@@ -350,12 +264,12 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
      * state accordingly.  This action is effectively putting the write
      * on the bus.
      */ 
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr,val);
     numInvalidatesSent++;
 
     /*Fill the line with the new written block*/
-    fillLine(addr,MSI_MODIFIED);
-
+    if(enable_prints) printf("PULKIT entering writeline (miss):: WRITING word addr=%lx & val=%d\n\n",addr,val);
+    fillLine(addr,MSI_MODIFIED,inv_ack.linedata);
     return;
 
   }else if(st->getState() == MSI_SHARED){
@@ -369,88 +283,21 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
     numWriteOnSharedMisses++;
 
     /*Let the other sharers snoop this write, and invalidate themselves*/
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr,val); inv_ack=inv_ack;
     numInvalidatesSent++;
 
     /*Change the state of the line to Modified to reflect the write*/
     st->changeStateTo(MSI_MODIFIED);
+    st->setData(val,cache->calcOffset(addr));
+    if(enable_prints) printf("PULKIT entering writeline (shared miss):: WRITING word addr=%lx & val=%d\n\n",addr,val);
     return;
 
   }else{ //Write Hit
 
     /*Already have it writable: No coherence action required!*/
     numWriteHits++;
-
-    return;
-
-  }
-
-}
-
-
-
-// Overloaded writeLine to handle write values - HENRY
-void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr, uint32_t val){
-  /*This method implements actions taken when instruction wrPC
-   *writes to memory location addr*/
-
-  /*Find the line to which this address maps*/ 
-  MSI_SMPCacheState * st = (MSI_SMPCacheState *)cache->findLine(addr);    
-   
-  /*
-   *If the tags didn't match, or the line was invalid, it is a 
-   *write miss
-   */ 
-  if(!st || (st && !(st->isValid())) ){ 
-
-    numWriteMisses++;
-    
-    if(st){
-
-      /*We're writing to an invalid line*/
-      numWriteOnInvalidMisses++;
-
-    }
- 
-    /*
-     * Let the other caches snoop this write access and update their
-     * state accordingly.  This action is effectively putting the write
-     * on the bus.
-     */ 
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
-    numInvalidatesSent++;
-
-    /*Fill the line with the new written block*/
-    fillLine(addr,MSI_MODIFIED, val);
-
-    return;
-
-  }else if(st->getState() == MSI_SHARED){
-    /*If the block is shared and we're writing, we've incurred a coherence
-     *miss.  We need to upgrade to Modified to write, and all other
-     *copies must be invalidated
-    */
-    numWriteMisses++;
-
-    /*Write-on-shared Coherence Misses*/
-    numWriteOnSharedMisses++;
-
-    /*Let the other sharers snoop this write, and invalidate themselves*/
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);inv_ack=inv_ack;
-    numInvalidatesSent++;
-
-    /*Change the state of the line to Modified to reflect the write*/
-    st->changeStateTo(MSI_MODIFIED);
-    return;
-
-  }else{ //Write Hit
-
-    /*Already have it writable: No coherence action required!*/
-    numWriteHits++;
-
-    /*Fill the line with the new written block*/
-    fillLine(addr,MSI_MODIFIED, val);
-
+    if(enable_prints) printf("PULKIT entering writeline (mod hit):: WRITING word addr=%lx & val=%d\n\n",addr,val);
+    st->setData(val,cache->calcOffset(addr));
     return;
 
   }
@@ -460,7 +307,6 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr, uint32_t val){
 char *MSI_SMPCache::Identify(){
   return (char *)"MSI Cache Coherence";
 }
-
 
 MSI_SMPCache::~MSI_SMPCache(){
 

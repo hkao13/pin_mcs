@@ -10,10 +10,7 @@ public:
   unsigned long CPUId;
   
   //The actual SESC cache object
-  CacheGeneric<StateGeneric<> > *cache;
-
-  //Link another cache to it, (for SCL) -HENRY
-  CacheGeneric<StateGeneric<> > *linkedCache;
+  CacheGeneric<StateGeneric<> > *cache, *linkedCache; // one for SCL -HENRY
 
   //A vector of all the caches in the multicachesim
   std::vector<SMPCache * > *allCaches;
@@ -42,20 +39,14 @@ public:
   std::vector<SMPCache * > *getCacheVector();
   //Readline performs a read, and uses readRemoteAction to 
   //check for data in other caches
-  virtual void readLine(uint32_t rdPC, uint32_t addr) = 0;
-
-  // Overloaded readLine with read value.
-  virtual void readLine(uint32_t rdPC, uint32_t addr, uint32_t val) = 0;
+  virtual  uint32_t readLine(uint32_t rdPC, uint64_t addr)=0;
 
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
-  virtual void writeLine(uint32_t wrPC, uint32_t addr) = 0;
-
-  // Overloaded writeLine with write value
-  virtual void writeLine(uint32_t wrPC, uint32_t addr, uint32_t val) = 0;
+  virtual void writeLine(uint32_t wrPC, uint64_t addr, uint32_t val)=0;
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 
-  virtual void fillLine(uint32_t addr, uint32_t mesi_state) = 0;
+  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val) = 0;
 
   virtual char *Identify() = 0;
 
@@ -63,7 +54,7 @@ public:
   virtual void dumpStatsToFile(FILE* outFile);
   virtual void conciseDumpStatsToFile(FILE* outFile);
   
-  int getStateAsInt(unsigned long addr);
+  int getStateAsInt(uint64_t addr);
 
 };
 

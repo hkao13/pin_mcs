@@ -9,7 +9,7 @@ MESI_SMPCache::MESI_SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector,
 
 }
 
-void MESI_SMPCache::fillLine(uint32_t addr, uint32_t mesi_state){
+void MESI_SMPCache::fillLine(uint64_t addr, uint32_t mesi_state){
   MESI_SMPCacheState *st = (MESI_SMPCacheState *)cache->findLine2Replace(addr); //this gets the contents of whateverline this would go into
   if(st==0){
     return;
@@ -21,7 +21,7 @@ void MESI_SMPCache::fillLine(uint32_t addr, uint32_t mesi_state){
 }
   
 
-MESI_SMPCache::RemoteReadService MESI_SMPCache::readRemoteAction(uint32_t addr){
+MESI_SMPCache::RemoteReadService MESI_SMPCache::readRemoteAction(uint64_t addr){
 
   std::vector<SMPCache * >::iterator cacheIter;
   std::vector<SMPCache * >::iterator lastCacheIter;
@@ -60,7 +60,7 @@ MESI_SMPCache::RemoteReadService MESI_SMPCache::readRemoteAction(uint32_t addr){
   return MESI_SMPCache::RemoteReadService(false,false);
 }
 
-void MESI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
+void MESI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
 
   MESI_SMPCacheState *st = (MESI_SMPCacheState *)cache->findLine(addr);    
   //fprintf(stderr,"In MESI ReadLine\n");
@@ -114,7 +114,7 @@ void MESI_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
 }
 
 
-MESI_SMPCache::InvalidateReply MESI_SMPCache::writeRemoteAction(uint32_t addr){
+MESI_SMPCache::InvalidateReply MESI_SMPCache::writeRemoteAction(uint64_t addr){
     
     bool empty = true;
     std::vector<SMPCache * >::iterator cacheIter;
@@ -147,7 +147,7 @@ MESI_SMPCache::InvalidateReply MESI_SMPCache::writeRemoteAction(uint32_t addr){
 }
 
 
-void MESI_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
+void MESI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr){
 
   MESI_SMPCacheState * st = (MESI_SMPCacheState *)cache->findLine(addr);    
     

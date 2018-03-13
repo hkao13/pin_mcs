@@ -46,18 +46,11 @@ public:
   void createNewSCL(SMPCache *attachCache);
  
   //These three functions implement the CacheInterface interface 
-  void readLine(unsigned long tid, unsigned long rdPC, unsigned long addr);
-  void writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr);
+  uint32_t readLine(unsigned long tid, unsigned long rdPC, uint64_t addr);
+  void writeLine(unsigned long tid, unsigned long wrPC, uint64_t addr, uint32_t val);
   void dumpStatsForAllCaches(bool concise);
-
-  // Overloaded readLine - HENRY
-  void readLine(unsigned long tid, unsigned long rdPC, unsigned long addr, unsigned long val);
-  // Overloaded writeLine - HENRY
-  void writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr, unsigned long val);
-
-
   // Speculative readLine for SCL - HENRY
-  void readLineSpeculative(unsigned long tid, unsigned long rdPC, unsigned long addr);
+  void readLineSpeculative(unsigned long tid, unsigned long rdPC, uint64_t addr);
 
   //Utility Function to get the cache object that has the specified CPUid
   SMPCache *findCacheByCPUId(unsigned int CPUid);
@@ -66,7 +59,7 @@ public:
   int tidToCPUId(int tid);
 
   char *Identify();
-  int getStateAsInt(unsigned long tid, unsigned long addr);
+  int getStateAsInt(unsigned long tid, uint64_t addr);
 
   //Destructor
   ~MultiCacheSim();

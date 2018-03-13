@@ -29,9 +29,6 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //#include "GEnergy.h" //NEED TO GET RID OF THIS SOMEHOW
 #include "nanassert.h"
 #include "Snippets.h"
-
-#include <cstring>
-
 //#include "GStats.h" //NEED TO GET RID OF THIS SOMEHOW
 #define CBLKSZ 32
 #define CASSOC 8
@@ -39,6 +36,17 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define CREPLPOLICY "RANDOM" 
 
 enum    ReplacementPolicy  {LRU, RANDOM};
+
+// FIXME-HENRY: MAX block size fixed to 2^8 * 32B right now... 
+// FIXME-HENRY: I think here is where we need to implement the cache line words
+// FIXME-HENRY: Hackish way to set this right now. Need to find a beeter way to set it to correct block size.
+struct linedata_t {
+  uint32_t data[256];
+  linedata_t() {
+    for (int ii=0; ii<256; ii++)
+      data[ii] = 0;
+  }
+};
 
 #ifdef SESC_ENERGY
 template<class State, class Addr_t = uint32_t, bool Energy=true>
@@ -69,24 +77,22 @@ template<class State, class Addr_t = uint32_t, bool Energy=true>
   bool goodInterface;
 
   public:
-    class CacheLine : public State {
-    public:
-      // Pure virtual class defines interface
-      //
-      // Tag included in state. Accessed through:
-      //
-      // Addr_t getTag() const;
-      // void setTag(Addr_t a);
-      // void clearTag();
-      // 
-      //
-      // bool isValid() const;
-      // void invalidate();
-      //
-      // bool isLocked() const;
-
-
-    };
+  class CacheLine : public State {
+  public:
+    // Pure virtual class defines interface
+    //
+    // Tag included in state. Accessed through:
+    //
+    // Addr_t getTag() const;
+    // void setTag(Addr_t a);
+    // void clearTag();
+    // 
+    //
+    // bool isValid() const;
+    // void invalidate();
+    //
+    // bool isLocked() const;
+  };
 
   // findLine returns a cache line that has tag == addr, NULL otherwise
   virtual CacheLine *findLinePrivate(Addr_t addr)=0;
@@ -192,9 +198,6 @@ template<class State, class Addr_t = uint32_t, bool Energy=true>
   }
 
   CacheLine *fillLine(Addr_t addr) {
-
-
-
     CacheLine *l = findLine2Replace(addr);
     if (l==0)
       return 0;
@@ -369,17 +372,14 @@ class StateGeneric {
 private:
 
   Addr_t tag;
-
-  // MAX block size fixed to 2^8 right now... - HENRY
-  // HENRY: I think here is where we need to implement the cache line words
-  uint32_t lineData[256]; // Hackish way to set this right now. Need to find
-                            // a beeter way to set it to correct block size.
+  linedata_t linedata;
 
 protected:
   unsigned state;
 
 public:
-
+  bool islineInvalid;
+  
   virtual unsigned getState() const {
     return state;
   }
@@ -399,14 +399,12 @@ public:
  }
 
  // Set cache line data at the given offset - HENRY
- void setData(uint32_t data, Addr_t offset) {
-    lineData[offset] = data;
- }
+ void setData(uint32_t   data, Addr_t offset) {linedata.data[offset] = data;}
+ void setData(linedata_t data               ) {linedata              = data;}
 
  // Get the cache line data at the given offset - HENRY
- uint32_t getData (Addr_t offset) {
-    return lineData[offset];
- }
+ uint32_t   getData (Addr_t offset)  {return linedata.data[offset];}
+ linedata_t getData (             )  {return linedata        ;}
 
  virtual bool isValid() const { return tag; }
 

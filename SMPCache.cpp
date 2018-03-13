@@ -65,7 +65,7 @@ int SMPCache::getCPUId(){
   return CPUId;
 }
 
-int SMPCache::getStateAsInt(unsigned long addr){
+int SMPCache::getStateAsInt(uint64_t addr){
   return (int)this->cache->findLine(addr)->getState();
 }
 

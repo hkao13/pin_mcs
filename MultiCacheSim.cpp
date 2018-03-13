@@ -88,7 +88,8 @@ void MultiCacheSim::createNewSCL(SMPCache *attachCache){
     #endif
 }
 
-void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned long addr){
+uint32_t MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, uint64_t addr){
+  uint32_t val;
     #ifndef PIN
     pthread_mutex_lock(&allCachesLock);
     #else
@@ -98,33 +99,9 @@ void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned lon
 
     SMPCache * cacheToRead = findCacheByCPUId(tidToCPUId(tid));
     if(!cacheToRead){
-      return;
+      return 0;
     }
-    cacheToRead->readLine(rdPC,addr);
-
-
-    #ifndef PIN
-    pthread_mutex_unlock(&allCachesLock);
-    #else
-    PIN_ReleaseLock(&allCachesLock); 
-    #endif
-    return;
-}
-
-// Overloaded readLine
-void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned long addr, unsigned long val){
-    #ifndef PIN
-    pthread_mutex_lock(&allCachesLock);
-    #else
-    PIN_GetLock(&allCachesLock,1); 
-    #endif
-
-
-    SMPCache * cacheToRead = findCacheByCPUId(tidToCPUId(tid));
-    if(!cacheToRead){
-      return;
-    }
-    cacheToRead->readLine(rdPC,addr, val);
+    val = cacheToRead->readLine(rdPC,addr);
     //printf ("addr = %lx, val = %lx\n", addr, val);
 
 
@@ -133,34 +110,10 @@ void MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, unsigned lon
     #else
     PIN_ReleaseLock(&allCachesLock); 
     #endif
-    return;
+    return val;
 }
   
-void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr){
-    #ifndef PIN
-    pthread_mutex_lock(&allCachesLock);
-    #else
-    PIN_GetLock(&allCachesLock,1); 
-    #endif
-
-
-    SMPCache * cacheToWrite = findCacheByCPUId(tidToCPUId(tid));
-    if(!cacheToWrite){
-      return;
-    }
-    cacheToWrite->writeLine(wrPC,addr);
-
-
-    #ifndef PIN
-    pthread_mutex_unlock(&allCachesLock);
-    #else
-    PIN_ReleaseLock(&allCachesLock); 
-    #endif
-    return;
-}
-
-// Overloaded writeLine with write value.
-void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned long addr, unsigned long val){
+void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, uint64_t addr, uint32_t val = 0){
     #ifndef PIN
     pthread_mutex_lock(&allCachesLock);
     #else
@@ -185,7 +138,7 @@ void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, unsigned lo
 
 
 // Speculative readLine for SCL - HENRY
-void MultiCacheSim::readLineSpeculative(unsigned long tid, unsigned long rdPC, unsigned long addr){
+void MultiCacheSim::readLineSpeculative(unsigned long tid, unsigned long rdPC, uint64_t addr){
     #ifndef PIN
     pthread_mutex_lock(&allCachesLock);
     #else
@@ -208,7 +161,7 @@ void MultiCacheSim::readLineSpeculative(unsigned long tid, unsigned long rdPC, u
     return;
 }
 
-int MultiCacheSim::getStateAsInt(unsigned long tid, unsigned long addr){
+int MultiCacheSim::getStateAsInt(unsigned long tid, uint64_t addr){
 
   SMPCache * cacheToWrite = findCacheByCPUId(tidToCPUId(tid));
   if(!cacheToWrite){

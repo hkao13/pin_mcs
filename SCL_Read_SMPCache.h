@@ -25,20 +25,14 @@ public:
 
   //Readline performs a read, and uses readRemoteAction to 
   //check for data in other caches
-  virtual void readLine(uint32_t rdPC, uint32_t addr);//SMPCache Interface Function
-  // Overloaded read function with value
-  virtual void readLine(uint32_t rdPC, uint32_t addr, uint32_t val);//SMPCache Interface Function
+  virtual uint32_t readLine(uint32_t rdPC, uint64_t addr);//SMPCache Interface Function
 
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
-  virtual void writeLine(uint32_t wrPC, uint32_t addr);//SMPCache Interface Function
-  // Overloaded write function with value
-  virtual void writeLine(uint32_t wrPC, uint32_t addr, uint32_t val);//SMPCache Interface Function
+  virtual void writeLine(uint32_t wrPC, uint64_t addr, uint32_t val);//SMPCache Interface Function
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to msi_state 
-  virtual void fillLine(uint32_t addr, uint32_t msi_state);//SMPCache Interface Function
-  // Overload the fillLine to handle values
-  virtual void fillLine(uint32_t addr, uint32_t msi_state, uint32_t val);//SMPCache Interface Function
+  virtual void fillLine(uint64_t addr, uint32_t msi_state, linedata_t val);//SMPCache Interface Function
 
   virtual char *Identify();
  

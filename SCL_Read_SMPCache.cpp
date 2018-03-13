@@ -24,19 +24,13 @@ SCL_Read_SMPCache::SCL_Read_SMPCache(int cpuid,
 
 }
 
-void SCL_Read_SMPCache::fillLine(uint32_t addr, uint32_t msi_state){
-
-  return;
-}
-
-// Overloaded fillLine to handle values - HENRY
-void SCL_Read_SMPCache::fillLine(uint32_t addr, uint32_t msi_state, uint32_t val){
+void SCL_Read_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t()){
 
   return;
 }
 
 // Speculative readLine
-void SCL_Read_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
+uint32_t SCL_Read_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
 
     if (linkedCache) {
 
@@ -44,42 +38,26 @@ void SCL_Read_SMPCache::readLine(uint32_t rdPC, uint32_t addr){
  
       if(!st){ 
         // Line not present in cache so do nothing
-        return;
+        return 0;
       }
 
       else if( st && !(st->isValid()) ) { 
         // Here the line is in an invalid state, do something.
-        if (enable_prints) printf("HENRY peek at addr=%x, state=%d\n", addr, (int)st -> getState());
+        if (enable_prints) printf("HENRY peek at addr=%lx, state=%d\n", addr, (int)st -> getState());
       }
 
       else {
         // Here the line is in a valid state so do nothing.
-        //if (enable_prints) printf("HENRY peek at addr=%x, state=%d\n", addr, (int)st -> getState());
+        //if (enable_prints) printf("HENRY peek at addr=%lx, state=%d\n", addr, (int)st -> getState());
       }
 
     }
 
-  return;
+  return 0;
 }
 
 
-// Overloaded readLine to account for value stores - HENRY
-void SCL_Read_SMPCache::readLine(uint32_t rdPC, uint32_t addr, uint32_t val){
-  
-  return;
-}
-
-
-void SCL_Read_SMPCache::writeLine(uint32_t wrPC, uint32_t addr){
-  /*This method implements actions taken when instruction wrPC
-   *writes to memory location addr*/
-
-  /*SCL Read Component, DO nothing - HENRY*/
-  return;
-}
-
-// Overloaded writeLine to handle write values - HENRY
-void SCL_Read_SMPCache::writeLine(uint32_t wrPC, uint32_t addr, uint32_t val){
+void SCL_Read_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
   /*This method implements actions taken when instruction wrPC
    *writes to memory location addr*/
 

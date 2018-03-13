@@ -20,6 +20,8 @@ bool useRef = false;
 
 bool do_instrumentation = false;
 
+long int writecount;
+ADDRINT writeaddr; THREADID writetid; ADDRINT writeinst;
 bool useSCL = false;
 std::vector<MultiCacheSim *> SCL_Caches;
 
@@ -133,12 +135,15 @@ VOID instrumentImage(IMG img, VOID *v)
 
 void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+  if (!instrumentationStatus[PIN_ThreadId()] || addr>0x7ff000000000) { // Only do instrumentation if do_instrumentation is true.
     return;
   }
 
   PIN_GetLock(&globalLock, 1);
 
+  if(useRef){
+    ReferenceProtocol->readLine(tid,inst,addr);
+  }
   std::vector<MultiCacheSim *>::iterator i,e;
 
   /* Speculative load */
@@ -152,18 +157,13 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   // Get the value of the memory address, uncomment below to see.
   ADDRINT * addr_ptr = (ADDRINT*)addr;
-  ADDRINT value;
-  PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
-  //fprintf(stderr,"ADDR, VAL: %lx, %lx\n", addr, value);
-
-  if(useRef){
-    ReferenceProtocol->readLine(tid,inst,addr);
-  }
-
-  
+  uint32_t value1, value2;
+  PIN_SafeCopy(&value1, addr_ptr, sizeof(ADDRINT));
+  //fprintf(stderr,"Read: ADDR, VAL: %lx, %lx\n", addr, value1);
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
-    //(*i)->readLine(tid,inst,addr);
-    (*i)->readLine(tid,inst,addr,value);
+    value2 = (*i)->readLine(tid,inst,addr);
+    if(value1 != value2) printf("ERROR -> mismatch required (%d==%d)\n", value1, value2);
+    else printf("value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -193,33 +193,63 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   PIN_GetLock(&globalLock, 1);
 
-  if (useSCL) {
-    // TODO for write update
+  writeaddr = addr;
+  writetid  = tid;
+  writeinst = inst;
+  writecount++;
+  // fprintf(stderr,"Write: ADDR, REG1, REG2: %lx, %lu, %lu...... writecount=%d\n", addr, reg1, reg2, writecount);
+
+  PIN_ReleaseLock(&globalLock);
+}
+
+void WriteData(){ //Should add all the necessary arguments for updating the virtual cache
+  
+  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+    return;
   }
 
-  if(useRef){
-    ReferenceProtocol->writeLine(tid,inst,addr);
-  }
-  std::vector<MultiCacheSim *>::iterator i,e;
+  if (writeaddr>0x7ff000000000) {printf ("addr_out_of_bounds %lx\n",writeaddr);return;}
 
-  for(i = Caches.begin(), e = Caches.end(); i != e; i++){
+  PIN_GetLock(&globalLock, 1);
 
-    (*i)->writeLine(tid,inst,addr);
+  //Reading from memory
+  if (writecount > 0){
 
-    if(useRef && (stopOnError || printOnError)){
+    ADDRINT * addr_ptr = (ADDRINT*)writeaddr;
+    ADDRINT value;
+    PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
 
-      if( ReferenceProtocol->getStateAsInt(tid,addr) !=
-          (*i)->getStateAsInt(tid,addr)
-        ){
-        if(printOnError){
-          fprintf(stderr,"[MCS-Write] State of Protocol %s did not match the reference\nShould have been %d but it was %d\n",
-                  (*i)->Identify(),
-                  ReferenceProtocol->getStateAsInt(tid,addr),
-                  (*i)->getStateAsInt(tid,addr));
-        }
-        if(stopOnError){
-          exit(1);
-        }
+    fprintf(stderr,"Write: ADDR, Value: %lx, %lx\n", writeaddr, value);  
+
+    writecount--;
+    if (useSCL) {
+      // TODO for write update
+    }
+
+    if(useRef){
+      ReferenceProtocol->writeLine(writetid,writeinst,writeaddr,value);
+    }
+    std::vector<MultiCacheSim *>::iterator i,e;
+
+    for(i = Caches.begin(), e = Caches.end(); i != e; i++){
+
+      (*i)->writeLine(writetid,writeinst,writeaddr,value);
+
+      if(useRef && (stopOnError || printOnError)){
+
+	if( ReferenceProtocol->getStateAsInt(writetid,writeaddr) !=
+	    (*i)->getStateAsInt(writetid,writeaddr)
+	    ){
+	  if(printOnError){
+	    fprintf(stderr,"[MCS-Write] State of Protocol %s did not match the reference\nShould have been %d but it was %d\n",
+		    (*i)->Identify(),
+		    ReferenceProtocol->getStateAsInt(writetid,writeaddr),
+		    (*i)->getStateAsInt(writetid,writeaddr));
+	  }
+	  if(stopOnError){
+	    exit(1);
+	  }
+	}
       }
     }
   }
@@ -231,6 +261,10 @@ VOID instrumentTrace(TRACE trace, VOID *v)
 
   for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl)) {
     for (INS ins = BBL_InsHead(bbl); INS_Valid(ins); ins = INS_Next(ins)) {  
+        INS_InsertCall(ins, 
+			 IPOINT_BEFORE, 
+			 (AFUNPTR)WriteData, 
+			 IARG_END);
       if(INS_IsMemoryRead(ins)) {
 	  INS_InsertCall(ins, 
 			 IPOINT_BEFORE, 
