@@ -161,18 +161,18 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
   ADDRINT * addr_ptr = (ADDRINT*)addr;
   uint32_t value1, value2;
   PIN_SafeCopy(&value1, addr_ptr, sizeof(ADDRINT));
-  if (enable_prints) fprintf(stderr,"Read: ADDR, VAL: %lx, %x\n", addr, value1);
+  if (enable_prints) printf("---------------------------------------------------------------Read: ADDR, VAL: %lx, %x\n", addr, value1);
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     value2 = (*i)->readLine(tid,inst,addr);
-    if(value1 != value2) {printf("ERROR -> mismatch required (%d==%d)\n", value1, value2); exit(0);}
-    else if (enable_prints) printf("value matched!! yayyeee!!\n");
+    if(value1 != value2) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
+    else if (enable_prints) printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
           (*i)->getStateAsInt(tid,addr)
         ){
         if(printOnError){
-          fprintf(stderr,"[MCS-Read] State of Protocol %s did not match the reference\nShould have been %d but it was %d\n",
+          printf("---------------------------------------------------------------[MCS-Read] State of Protocol %s did not match the reference\nShould have been %d but it was %d\n",
                   (*i)->Identify(),
                   ReferenceProtocol->getStateAsInt(tid,addr),
                   (*i)->getStateAsInt(tid,addr));
@@ -199,7 +199,7 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
   writetid  = tid;
   writeinst = inst;
   writecount++;
-  if (enable_prints) fprintf(stderr,"Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
+  if (enable_prints) printf("---------------------------------------------------------------Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
 
   PIN_ReleaseLock(&globalLock);
 }
@@ -210,7 +210,7 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
     return;
   }
 
-  if (isStack(writeaddr)) {if (enable_prints) printf ("access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
+  if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
 
   PIN_GetLock(&globalLock, 1);
 
@@ -221,7 +221,7 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
     ADDRINT value;
     PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
 
-    if (enable_prints) fprintf(stderr,"Write: ADDR, writecount, Value: %lx, %lx, %lx\n", writeaddr, writecount, value);  
+    if (enable_prints) printf("---------------------------------------------------------------Write: ADDR, writecount, Value: %lx, %lx, %lx\n", writeaddr, writecount, value);  
 
     writecount--;
     if (useSCL) {
@@ -243,7 +243,7 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
 	    (*i)->getStateAsInt(writetid,writeaddr)
 	    ){
 	  if(printOnError){
-	    fprintf(stderr,"[MCS-Write] State of Protocol %s did not match the reference\nShould have been %d but it was %d\n",
+	    printf("---------------------------------------------------------------[MCS-Write] State of Protocol %s did not match the reference\nShould have been %d but it was %d\n",
 		    (*i)->Identify(),
 		    ReferenceProtocol->getStateAsInt(writetid,writeaddr),
 		    (*i)->getStateAsInt(writetid,writeaddr));
@@ -348,11 +348,11 @@ int main(int argc, char *argv[])
   char *ct = strtok((char *)pstr,",");
   while(ct != NULL){
 
-    fprintf(stderr,"Opening protocol \"%s\"\n",ct);
+    printf("---------------------------------------------------------------Opening protocol \"%s\"\n",ct);
     void *chand = dlopen( ct, RTLD_LAZY | RTLD_LOCAL );
     if( chand == NULL ){
-      fprintf(stderr,"Couldn't Load %s\n", argv[1]);
-      fprintf(stderr,"dlerror: %s\n", dlerror());
+      printf("---------------------------------------------------------------Couldn't Load %s\n", argv[1]);
+      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
       exit(1);
     }
   
@@ -360,8 +360,8 @@ int main(int argc, char *argv[])
 
     if( chand == NULL ){
 
-      fprintf(stderr,"Couldn't get the Create function\n");
-      fprintf(stderr,"dlerror: %s\n", dlerror());
+      printf("---------------------------------------------------------------Couldn't get the Create function\n");
+      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
       exit(1);
 
     }
@@ -382,15 +382,15 @@ int main(int argc, char *argv[])
   if(useRef){
     void *chand = dlopen( KnobReference.Value().c_str(), RTLD_LAZY | RTLD_LOCAL );
     if( chand == NULL ){
-      fprintf(stderr,"Couldn't Load Reference: %s\n", argv[1]);
-      fprintf(stderr,"dlerror: %s\n", dlerror());
+      printf("---------------------------------------------------------------Couldn't Load Reference: %s\n", argv[1]);
+      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
       exit(1);
     }
   
     CacheFactory cfac = (CacheFactory)dlsym(chand, "Create");
     if( chand == NULL ){
-      fprintf(stderr,"Couldn't get the Create function\n");
-      fprintf(stderr,"dlerror: %s\n", dlerror());
+      printf("---------------------------------------------------------------Couldn't get the Create function\n");
+      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
       exit(1);
     }
   
@@ -403,25 +403,25 @@ int main(int argc, char *argv[])
 
     } 
 
-    fprintf(stderr,"Using Reference Implementation %s\n",KnobReference.Value().c_str());
+    printf("---------------------------------------------------------------Using Reference Implementation %s\n",KnobReference.Value().c_str());
 
   }
 
   useSCL = KnobUseSCL.Value();
   if (useSCL && c) {
-    //fprintf(stderr,"Using Speculative Cache Lookup.\n");
+    //printf("---------------------------------------------------------------Using Speculative Cache Lookup.\n");
 
     void *chand = dlopen( KnobSCL.Value().c_str(), RTLD_LAZY | RTLD_LOCAL );
     if( chand == NULL ){
-      fprintf(stderr,"Couldn't Load SCL: %s\n", argv[1]);
-      fprintf(stderr,"dlerror: %s\n", dlerror());
+      printf("---------------------------------------------------------------Couldn't Load SCL: %s\n", argv[1]);
+      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
       exit(1);
     }
   
     CacheFactory cfac = (CacheFactory)dlsym(chand, "Create");
     if( chand == NULL ){
-      fprintf(stderr,"Couldn't get the Create function\n");
-      fprintf(stderr,"dlerror: %s\n", dlerror());
+      printf("---------------------------------------------------------------Couldn't get the Create function\n");
+      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
       exit(1);
     }
   
@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
 
     SCL_Caches.push_back(sc);
 
-    fprintf(stderr,"Using SCL Implementation %s\n",KnobSCL.Value().c_str());
+    printf("---------------------------------------------------------------Using SCL Implementation %s\n",KnobSCL.Value().c_str());
 
   }
 
@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
   PIN_AddThreadFiniFunction(threadEnd, 0);
   PIN_AddFiniFunction(Fini, 0);
     
-  //fprintf(stderr,"Using Protocol %s\n",KnobReference.Value().c_str());
+  //printf("---------------------------------------------------------------Using Protocol %s\n",KnobReference.Value().c_str());
  
   PIN_StartProgram();
   

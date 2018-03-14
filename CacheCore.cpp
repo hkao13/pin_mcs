@@ -155,23 +155,33 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
 
   Line **theSet = &content[this->calcIndex4Tag(tag)];
 
-  // Check most typical case
-  if ((*theSet)->getTag() == tag) {
-    //this assertion is not true for SMP; it is valid to return invalid line
-#if !defined(SESC_SMP) && !defined(SESC_CRIT)
-    I((*theSet)->isValid());  
-#endif
-    return *theSet;
-  }
+//   // Check most typical case
+//   if ((*theSet)->getTag() == tag && !(*theSet)->islineInvalid) {
+//     //this assertion is not true for SMP; it is valid to return invalid line
+// #if !defined(SESC_SMP) && !defined(SESC_CRIT)
+//     I((*theSet)->isValid());  
+// #endif
+//     return *theSet;
+//   }
 
   Line **lineHit=0;
   Line **setEnd = theSet + assoc;
 
   // For sure that position 0 is not (short-cut)
   {
-    Line **l = theSet + 1;
+    int ii=0;
+    Line **l = theSet + 0;
     while(l < setEnd) {
-      if ((*l)->getTag() == tag) {
+      printf("searching tag=%x findline %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
+      l++;
+    }
+  }
+
+  // For sure that position 0 is not (short-cut)
+  {
+    Line **l = theSet + 0;
+    while(l < setEnd) {
+      if ((*l)->getTag() == tag && !(*l)->islineInvalid) {
         lineHit = l;
         break;
       }
@@ -298,7 +308,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
   Line **theSet = &content[this->calcIndex4Tag(tag)];
 
   // Check most typical case
-  if ((*theSet)->getTag() == tag) {
+  if ((*theSet)->getTag() == tag && !(*theSet)->islineInvalid) {
     GI(tag,(*theSet)->isValid());
     return *theSet;
   }
@@ -310,13 +320,15 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
   // Start in reverse order so that get the youngest invalid possible,
   // and the oldest isLocked possible (lineFree)
   {
+    int ii=0;
     Line **l = setEnd -1;
     while(l >= theSet) {
-      if ((*l)->getTag() == tag) {
+      printf("searching tag=%x replace %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
+      if ((*l)->getTag() == tag && !(*l)->islineInvalid) {
         lineHit = l;
         break;
       }
-      if (!(*l)->isValid())
+      if (!(*l)->isValid() && (*l)->islineInvalid)
         lineFree = l;
       else if (lineFree == 0 && !(*l)->isLocked())
         lineFree = l;

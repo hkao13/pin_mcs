@@ -393,22 +393,23 @@ public:
    I(a);
    tag = a; 
  }
- void clearTag() { tag = 0; }
+ void clearTag() { islineInvalid = true; }
  void initialize(void *c) { 
-   clearTag(); 
+   tag = 0;
+   islineInvalid = true;
  }
 
  // Set cache line data at the given offset - HENRY
- void setData(uint32_t   data, Addr_t offset) {linedata.data[offset] = data;}
- void setData(linedata_t data               ) {linedata              = data;}
+ void setData(uint32_t   data, Addr_t offset) {linedata.data[offset] = data;islineInvalid=false;}
+ void setData(linedata_t data               ) {linedata              = data;islineInvalid=false;}
 
  // Get the cache line data at the given offset - HENRY
  uint32_t   getData (Addr_t offset)  {return linedata.data[offset];}
  linedata_t getData (             )  {return linedata        ;}
 
- virtual bool isValid() const { return tag; }
+ virtual bool isValid() const { return (islineInvalid==false); }
 
- virtual void invalidate() { clearTag(); }
+ virtual void invalidate() {islineInvalid=true; }
 
  virtual bool isLocked() const {
    return false;
