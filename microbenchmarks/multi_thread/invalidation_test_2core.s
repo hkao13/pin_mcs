@@ -57,9 +57,9 @@ INSTRUMENT_OFF:
 	.cfi_endproc
 .LFE3:
 	.size	INSTRUMENT_OFF, .-INSTRUMENT_OFF
-	.globl	accessorThreadRead
-	.type	accessorThreadRead, @function
-accessorThreadRead:
+	.globl	accessorThreadRead1
+	.type	accessorThreadRead1, @function
+accessorThreadRead1:
 .LFB4:
 	.loc 1 32 0
 	.cfi_startproc
@@ -107,7 +107,7 @@ accessorThreadRead:
 	call	INSTRUMENT_ON
 	.loc 1 55 0
 	movq	-8(%rbp), %rax
-	movl	(%rax), %eax
+	movl	4(%rax), %eax
 	movl	%eax, -20(%rbp)
 	.loc 1 56 0
 	movl	$0, %eax
@@ -136,12 +136,12 @@ accessorThreadRead:
 	call	pthread_exit
 	.cfi_endproc
 .LFE4:
-	.size	accessorThreadRead, .-accessorThreadRead
-	.globl	accessorThreadWrite
-	.type	accessorThreadWrite, @function
-accessorThreadWrite:
+	.size	accessorThreadRead1, .-accessorThreadRead1
+	.globl	accessorThreadRead2
+	.type	accessorThreadRead2, @function
+accessorThreadRead2:
 .LFB5:
-	.loc 1 69 0
+	.loc 1 70 0
 	.cfi_startproc
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
@@ -150,63 +150,51 @@ accessorThreadWrite:
 	.cfi_def_cfa_register 6
 	subq	$48, %rsp
 	movq	%rdi, -40(%rbp)
-	.loc 1 74 0
+	.loc 1 75 0
 	movq	-40(%rbp), %rax
 	movq	%rax, -16(%rbp)
-	.loc 1 76 0
+	.loc 1 77 0
 	movq	-16(%rbp), %rax
 	movq	%rax, -8(%rbp)
-	.loc 1 80 0
+	.loc 1 81 0
 	movl	$lock, %edi
 	call	pthread_mutex_lock
-	.loc 1 81 0
+	.loc 1 82 0
 	movl	$0, %eax
 	call	INSTRUMENT_ON
-	.loc 1 82 0
+	.loc 1 83 0
 	movq	-8(%rbp), %rax
 	movl	(%rax), %eax
 	movl	%eax, -20(%rbp)
-	.loc 1 83 0
+	.loc 1 84 0
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 84 0
+	.loc 1 85 0
 	movl	$lock, %edi
 	call	pthread_mutex_unlock
-	.loc 1 86 0
-	call	rand
-	movl	%eax, %ecx
-	movl	$1374389535, %edx
-	movl	%ecx, %eax
-	imull	%edx
-	sarl	$5, %edx
-	movl	%ecx, %eax
-	sarl	$31, %eax
-	subl	%eax, %edx
-	movl	%edx, %eax
-	imull	$100, %eax, %eax
-	subl	%eax, %ecx
-	movl	%ecx, %eax
-	addl	$100, %eax
-	movl	%eax, %edi
-	movl	$0, %eax
-	call	usleep
-	.loc 1 89 0
+	.loc 1 87 0
+	nop
+.L8:
+	.loc 1 87 0 is_stmt 0 discriminator 1
+	movl	semaphore(%rip), %eax
+	testl	%eax, %eax
+	jne	.L8
+	.loc 1 91 0 is_stmt 1
 	movl	$lock, %edi
 	call	pthread_mutex_lock
-	.loc 1 90 0
-	movl	$0, %eax
-	call	INSTRUMENT_ON
-	.loc 1 91 0
-	movq	-8(%rbp), %rax
-	movl	$65535, (%rax)
 	.loc 1 92 0
 	movl	$0, %eax
-	call	INSTRUMENT_OFF
+	call	INSTRUMENT_ON
 	.loc 1 93 0
+	movq	-8(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -20(%rbp)
+	.loc 1 94 0
+	movl	$0, %eax
+	call	INSTRUMENT_OFF
+	.loc 1 95 0
 	movl	$lock, %edi
 	call	pthread_mutex_unlock
-	.loc 1 95 0
-	movl	$0, semaphore(%rip)
 	.loc 1 98 0
 	movl	$lock, %edi
 	call	pthread_mutex_lock
@@ -228,10 +216,10 @@ accessorThreadWrite:
 	call	pthread_exit
 	.cfi_endproc
 .LFE5:
-	.size	accessorThreadWrite, .-accessorThreadWrite
-	.globl	main
-	.type	main, @function
-main:
+	.size	accessorThreadRead2, .-accessorThreadRead2
+	.globl	accessorThreadWrite
+	.type	accessorThreadWrite, @function
+accessorThreadWrite:
 .LFB6:
 	.loc 1 107 0
 	.cfi_startproc
@@ -241,79 +229,184 @@ main:
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
 	subq	$48, %rsp
+	movq	%rdi, -40(%rbp)
+	.loc 1 112 0
+	movq	-40(%rbp), %rax
+	movq	%rax, -16(%rbp)
+	.loc 1 114 0
+	movq	-16(%rbp), %rax
+	movq	%rax, -8(%rbp)
+	.loc 1 118 0
+	movl	$lock, %edi
+	call	pthread_mutex_lock
+	.loc 1 119 0
+	movl	$0, %eax
+	call	INSTRUMENT_ON
+	.loc 1 120 0
+	movq	-8(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -20(%rbp)
+	.loc 1 121 0
+	movl	$0, %eax
+	call	INSTRUMENT_OFF
+	.loc 1 122 0
+	movl	$lock, %edi
+	call	pthread_mutex_unlock
+	.loc 1 124 0
+	call	rand
+	movl	%eax, %ecx
+	movl	$1374389535, %edx
+	movl	%ecx, %eax
+	imull	%edx
+	sarl	$5, %edx
+	movl	%ecx, %eax
+	sarl	$31, %eax
+	subl	%eax, %edx
+	movl	%edx, %eax
+	imull	$100, %eax, %eax
+	subl	%eax, %ecx
+	movl	%ecx, %eax
+	addl	$100, %eax
+	movl	%eax, %edi
+	movl	$0, %eax
+	call	usleep
+	.loc 1 127 0
+	movl	$lock, %edi
+	call	pthread_mutex_lock
+	.loc 1 128 0
+	movl	$0, %eax
+	call	INSTRUMENT_ON
+	.loc 1 129 0
+	movq	-8(%rbp), %rax
+	movl	$65535, (%rax)
+	.loc 1 130 0
+	movl	$0, %eax
+	call	INSTRUMENT_OFF
+	.loc 1 131 0
+	movl	$lock, %edi
+	call	pthread_mutex_unlock
+	.loc 1 133 0
+	movl	$0, semaphore(%rip)
+	.loc 1 136 0
+	movl	$lock, %edi
+	call	pthread_mutex_lock
+	.loc 1 137 0
+	movl	$0, %eax
+	call	INSTRUMENT_ON
+	.loc 1 138 0
+	movq	-8(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -20(%rbp)
+	.loc 1 139 0
+	movl	$0, %eax
+	call	INSTRUMENT_OFF
+	.loc 1 140 0
+	movl	$lock, %edi
+	call	pthread_mutex_unlock
+	.loc 1 142 0
+	movl	$0, %edi
+	call	pthread_exit
+	.cfi_endproc
+.LFE6:
+	.size	accessorThreadWrite, .-accessorThreadWrite
+	.globl	main
+	.type	main, @function
+main:
+.LFB7:
+	.loc 1 145 0
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$48, %rsp
 	movl	%edi, -36(%rbp)
 	movq	%rsi, -48(%rbp)
-	.loc 1 107 0
+	.loc 1 145 0
 	movq	%fs:40, %rax
 	movq	%rax, -8(%rbp)
 	xorl	%eax, %eax
-	.loc 1 109 0
+	.loc 1 147 0
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 113 0
+	.loc 1 151 0
 	movl	$0, %esi
 	movl	$lock, %edi
 	call	pthread_mutex_init
-	.loc 1 115 0
+	.loc 1 153 0
 	movl	$43947, wonk_array(%rip)
-	.loc 1 117 0
+	.loc 1 155 0
 	leaq	-32(%rbp), %rax
 	movl	$wonk_array, %ecx
 	movl	$accessorThreadWrite, %edx
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_create
-	.loc 1 118 0
+	.loc 1 156 0
 	leaq	-32(%rbp), %rax
 	addq	$8, %rax
 	movl	$wonk_array, %ecx
-	movl	$accessorThreadRead, %edx
+	movl	$accessorThreadRead1, %edx
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_create
-	.loc 1 119 0
+	.loc 1 157 0
+	leaq	-32(%rbp), %rax
+	addq	$16, %rax
+	movl	$wonk_array, %ecx
+	movl	$accessorThreadRead2, %edx
+	movl	$0, %esi
+	movq	%rax, %rdi
+	call	pthread_create
+	.loc 1 158 0
 	movq	-32(%rbp), %rax
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_join
-	.loc 1 120 0
+	.loc 1 159 0
 	movq	-24(%rbp), %rax
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_join
-	.loc 1 122 0
+	.loc 1 160 0
+	movq	-16(%rbp), %rax
+	movl	$0, %esi
+	movq	%rax, %rdi
+	call	pthread_join
+	.loc 1 162 0
 	movl	$lock, %edi
 	call	pthread_mutex_destroy
-	.loc 1 124 0
+	.loc 1 164 0
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 128 0
+	.loc 1 168 0
 	movl	$0, %eax
-	.loc 1 130 0
+	.loc 1 170 0
 	movq	-8(%rbp), %rdx
 	xorq	%fs:40, %rdx
-	je	.L10
+	je	.L12
 	call	__stack_chk_fail
-.L10:
+.L12:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE7:
 	.size	main, .-main
 .Letext0:
 	.file 2 "/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h"
 	.section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0x369
+	.long	0x3c1
 	.value	0x4
 	.long	.Ldebug_abbrev0
 	.byte	0x8
 	.uleb128 0x1
-	.long	.LASF43
-	.byte	0x1
 	.long	.LASF44
+	.byte	0x1
 	.long	.LASF45
+	.long	.LASF46
 	.quad	.Ltext0
 	.quad	.Letext0-.Ltext0
 	.long	.Ldebug_line0
@@ -580,17 +673,17 @@ main:
 	.uleb128 0xf
 	.long	.LASF35
 	.byte	0x1
-	.byte	0x45
+	.byte	0x46
 	.long	0x6c
 	.quad	.LFB5
 	.quad	.LFE5-.LFB5
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x2a6
+	.long	0x299
 	.uleb128 0x10
 	.string	"arg"
 	.byte	0x1
-	.byte	0x45
+	.byte	0x46
 	.long	0x6c
 	.uleb128 0x2
 	.byte	0x91
@@ -598,7 +691,7 @@ main:
 	.uleb128 0x11
 	.long	.LASF32
 	.byte	0x1
-	.byte	0x49
+	.byte	0x4a
 	.long	0x23b
 	.uleb128 0x2
 	.byte	0x91
@@ -606,7 +699,7 @@ main:
 	.uleb128 0x11
 	.long	.LASF33
 	.byte	0x1
-	.byte	0x4b
+	.byte	0x4c
 	.long	0x7b
 	.uleb128 0x2
 	.byte	0x91
@@ -614,50 +707,93 @@ main:
 	.uleb128 0x12
 	.string	"i"
 	.byte	0x1
-	.byte	0x4d
+	.byte	0x4e
 	.long	0x57
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -36
-	.uleb128 0x13
-	.long	.LASF46
-	.byte	0x1
-	.byte	0x56
-	.long	0x57
-	.uleb128 0x14
-	.byte	0
 	.byte	0
 	.uleb128 0xf
 	.long	.LASF36
 	.byte	0x1
 	.byte	0x6b
-	.long	0x57
+	.long	0x6c
 	.quad	.LFB6
 	.quad	.LFE6-.LFB6
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x2f2
-	.uleb128 0x15
-	.long	.LASF37
+	.long	0x2fe
+	.uleb128 0x10
+	.string	"arg"
 	.byte	0x1
 	.byte	0x6b
+	.long	0x6c
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -56
+	.uleb128 0x11
+	.long	.LASF32
+	.byte	0x1
+	.byte	0x6f
+	.long	0x23b
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -32
+	.uleb128 0x11
+	.long	.LASF33
+	.byte	0x1
+	.byte	0x71
+	.long	0x7b
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -24
+	.uleb128 0x12
+	.string	"i"
+	.byte	0x1
+	.byte	0x73
+	.long	0x57
+	.uleb128 0x2
+	.byte	0x91
+	.sleb128 -36
+	.uleb128 0x13
+	.long	.LASF47
+	.byte	0x1
+	.byte	0x7c
+	.long	0x57
+	.uleb128 0x14
+	.byte	0
+	.byte	0
+	.uleb128 0xf
+	.long	.LASF37
+	.byte	0x1
+	.byte	0x91
+	.long	0x57
+	.quad	.LFB7
+	.quad	.LFE7-.LFB7
+	.uleb128 0x1
+	.byte	0x9c
+	.long	0x34a
+	.uleb128 0x15
+	.long	.LASF38
+	.byte	0x1
+	.byte	0x91
 	.long	0x57
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -52
 	.uleb128 0x15
-	.long	.LASF38
+	.long	.LASF39
 	.byte	0x1
-	.byte	0x6b
-	.long	0x2f2
+	.byte	0x91
+	.long	0x34a
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -64
 	.uleb128 0x12
 	.string	"acc"
 	.byte	0x1
-	.byte	0x6f
-	.long	0x2f8
+	.byte	0x95
+	.long	0x350
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -48
@@ -667,13 +803,13 @@ main:
 	.long	0x6e
 	.uleb128 0xb
 	.long	0x88
-	.long	0x308
+	.long	0x360
 	.uleb128 0xc
 	.long	0x65
 	.byte	0x1
 	.byte	0
 	.uleb128 0x16
-	.long	.LASF39
+	.long	.LASF40
 	.byte	0x1
 	.byte	0x9
 	.long	0x57
@@ -681,7 +817,7 @@ main:
 	.byte	0x3
 	.quad	temp
 	.uleb128 0x16
-	.long	.LASF40
+	.long	.LASF41
 	.byte	0x1
 	.byte	0xa
 	.long	0x170
@@ -689,7 +825,7 @@ main:
 	.byte	0x3
 	.quad	lock
 	.uleb128 0x16
-	.long	.LASF41
+	.long	.LASF42
 	.byte	0x1
 	.byte	0xc
 	.long	0x57
@@ -698,16 +834,16 @@ main:
 	.quad	semaphore
 	.uleb128 0xb
 	.long	0x182
-	.long	0x357
+	.long	0x3af
 	.uleb128 0xc
 	.long	0x65
 	.byte	0x1
 	.byte	0
 	.uleb128 0x16
-	.long	.LASF42
+	.long	.LASF43
 	.byte	0x1
 	.byte	0x12
-	.long	0x347
+	.long	0x39f
 	.uleb128 0x9
 	.byte	0x3
 	.quad	wonk_array
@@ -1038,6 +1174,10 @@ main:
 	.section	.debug_line,"",@progbits
 .Ldebug_line0:
 	.section	.debug_str,"MS",@progbits,1
+.LASF34:
+	.string	"accessorThreadRead1"
+.LASF35:
+	.string	"accessorThreadRead2"
 .LASF27:
 	.string	"pthread_mutex_t"
 .LASF31:
@@ -1048,15 +1188,15 @@ main:
 	.string	"pthread_t"
 .LASF15:
 	.string	"__pthread_mutex_s"
-.LASF46:
+.LASF47:
 	.string	"usleep"
 .LASF18:
 	.string	"__owner"
-.LASF43:
+.LASF44:
 	.string	"GNU C 4.9.2 -mtune=generic -march=x86-64 -g -O0 -fstack-protector-strong"
 .LASF20:
 	.string	"__kind"
-.LASF41:
+.LASF42:
 	.string	"semaphore"
 .LASF32:
 	.string	"thread_data"
@@ -1064,13 +1204,13 @@ main:
 	.string	"__size"
 .LASF1:
 	.string	"unsigned char"
-.LASF45:
+.LASF46:
 	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
-.LASF42:
+.LASF43:
 	.string	"wonk_array"
 .LASF0:
 	.string	"long unsigned int"
-.LASF39:
+.LASF40:
 	.string	"temp"
 .LASF2:
 	.string	"short unsigned int"
@@ -1080,19 +1220,19 @@ main:
 	.string	"__pthread_internal_list"
 .LASF22:
 	.string	"__elision"
-.LASF36:
+.LASF37:
 	.string	"main"
 .LASF3:
 	.string	"unsigned int"
 .LASF28:
 	.string	"long long unsigned int"
-.LASF35:
+.LASF36:
 	.string	"accessorThreadWrite"
 .LASF21:
 	.string	"__spins"
-.LASF44:
+.LASF45:
 	.string	"invalidation_test_2core.c"
-.LASF37:
+.LASF38:
 	.string	"argc"
 .LASF7:
 	.string	"sizetype"
@@ -1100,23 +1240,21 @@ main:
 	.string	"long long int"
 .LASF8:
 	.string	"char"
-.LASF16:
-	.string	"__lock"
 .LASF26:
 	.string	"__align"
 .LASF19:
 	.string	"__nusers"
 .LASF17:
 	.string	"__count"
-.LASF34:
-	.string	"accessorThreadRead"
+.LASF16:
+	.string	"__lock"
 .LASF5:
 	.string	"short int"
 .LASF30:
 	.string	"INSTRUMENT_ON"
 .LASF10:
 	.string	"__prev"
-.LASF38:
+.LASF39:
 	.string	"argv"
 .LASF13:
 	.string	"__pthread_list_t"
@@ -1128,7 +1266,7 @@ main:
 	.string	"__next"
 .LASF4:
 	.string	"signed char"
-.LASF40:
+.LASF41:
 	.string	"lock"
 .LASF29:
 	.string	"wonk"

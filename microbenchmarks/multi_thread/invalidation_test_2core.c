@@ -29,7 +29,45 @@ int INSTRUMENT_OFF() {
   return 0;  
 }
 
-void *accessorThreadRead(void *arg){
+void *accessorThreadRead1(void *arg){
+
+  
+
+  struct wonk *thread_data;
+  thread_data = (struct wonk *) arg;
+  int* array;
+  array = thread_data -> a;
+  int i;
+  
+  // READ
+  pthread_mutex_lock(&lock);
+  INSTRUMENT_ON();
+  i = array[0];
+  INSTRUMENT_OFF();
+  pthread_mutex_unlock(&lock);
+
+  while (semaphore) {
+  }
+
+  // READ
+  pthread_mutex_lock(&lock);
+  INSTRUMENT_ON();
+  i = array[1];
+  INSTRUMENT_OFF();
+  pthread_mutex_unlock(&lock);
+
+  // READ
+  pthread_mutex_lock(&lock);
+  INSTRUMENT_ON();
+  i = array[1];
+  INSTRUMENT_OFF();
+  pthread_mutex_unlock(&lock);
+
+  pthread_exit(NULL); 
+}
+
+
+void *accessorThreadRead2(void *arg){
 
   
 
@@ -59,7 +97,7 @@ void *accessorThreadRead(void *arg){
   // READ
   pthread_mutex_lock(&lock);
   INSTRUMENT_ON();
-  i = array[1];
+  i = array[0];
   INSTRUMENT_OFF();
   pthread_mutex_unlock(&lock);
 
@@ -108,16 +146,18 @@ int main(int argc, char *argv[]){
 
   INSTRUMENT_OFF();
 
-  pthread_t acc[2];
+  pthread_t acc[NUMTHREADS];
 
   pthread_mutex_init(&lock,NULL);
 
   wonk_array[0].a[0] = 0xabab;
 
   pthread_create(&acc[0],NULL,accessorThreadWrite,(void *)&wonk_array[0]);
-  pthread_create(&acc[1],NULL,accessorThreadRead,(void *)&wonk_array[0]);
+  pthread_create(&acc[1],NULL,accessorThreadRead1,(void *)&wonk_array[0]);
+  pthread_create(&acc[2],NULL,accessorThreadRead2,(void *)&wonk_array[0]);
   pthread_join(acc[0],NULL);
   pthread_join(acc[1],NULL);
+  pthread_join(acc[2],NULL);
 
   pthread_mutex_destroy(&lock);
 

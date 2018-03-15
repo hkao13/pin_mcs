@@ -144,7 +144,8 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
       numReadOnInvalidMisses++;
       printf("READ MISS ON INVALID -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
 
-            //------------------------------------------------------CURRENT CHANGES!------------------------------------------------------
+      // VICTOR
+      //------------------------------------------------------CURRENT CHANGES!------------------------------------------------------
       /*Check if it's true or false sharing*/
       uint32_t lcd, rcd; //local cache data, remote cache data
       lcd = st->getData(cache->calcOffset(addr));         //NEEDS CHECK
@@ -191,10 +192,14 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
             if ( (lcd == rcd) && (rcd != INT_NAN) ){
               numTrueSharing++;
             }
-            else numFalseSharing++;
+            else {
+              numFalseSharing++;
+            }
             
-            printf("Number of false sharings: %d, lcd: %x, rcd: %x\n", numFalseSharing, lcd, rcd);
-            printf("Number of true sharings: %d, lcd: %x, rcd: %x\n", numTrueSharing, lcd, rcd);
+            //printf("Number of false sharings: %d, lcd: %x, rcd: %x\n", numFalseSharing, lcd, rcd);
+            //printf("Number of true sharings: %d, lcd: %x, rcd: %x\n", numTrueSharing, lcd, rcd);
+
+            break;
             
           }
 

@@ -55,6 +55,8 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Rd Misses Serviced Remotely: %d\n",numReadMissesServicedByOthers);
   fprintf(outFile, "Rd Misses Serviced by Shared: %d\n",numReadMissesServicedByShared);
   fprintf(outFile, "Rd Misses Serviced by Modified: %d\n",numReadMissesServicedByModified);
+  fprintf(outFile, "Rd Misses from False Sharing: %d\n", numFalseSharing);
+  fprintf(outFile, "Rd Misses from True Sharing:  %d\n", numTrueSharing);
   fprintf(outFile, "\n");
   fprintf(outFile, "Write Hits:                  %d\n",numWriteHits);
   fprintf(outFile, "Write Misses:                %d\n",numWriteMisses);
