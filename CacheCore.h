@@ -33,7 +33,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define CBLKSZ 32
 #define CASSOC 8
 #define CSIZE 32767
-#define CREPLPOLICY "RANDOM" 
+#define CREPLPOLICY "RANDOM"
+
+#define INT_NAN INT32_MAX //FIXME-HENRY: use INT32_MAX as an interger NaN value since NaN is only for floats.
 
 enum    ReplacementPolicy  {LRU, RANDOM};
 
@@ -44,7 +46,7 @@ struct linedata_t {
   uint32_t data[256];
   linedata_t() {
     for (int ii=0; ii<256; ii++)
-      data[ii] = 0;
+      data[ii] = INT_NAN; //FIXME-HENRY: use INT32_MAX as an interger NaN value since NaN is only for floats.
   }
 };
 

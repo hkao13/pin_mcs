@@ -19,6 +19,10 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector){
   numWriteOnInvalidMisses = 0;
   numInvalidatesSent = 0;
 
+  /* New stats for true/false sharing for SCL */
+  numFalseSharing = 0;
+  numTrueSharing = 0;
+
 }
 
 void SMPCache::conciseDumpStatsToFile(FILE* outFile){

@@ -31,6 +31,10 @@ public:
   int numWriteOnSharedMisses;
   int numWriteOnInvalidMisses;
   int numInvalidatesSent;
+
+  /* New stats for true/false sharing for SCL */
+  int numFalseSharing;
+  int numTrueSharing;
   
   SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector);
   virtual ~SMPCache(){}

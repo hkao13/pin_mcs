@@ -53,19 +53,27 @@ void *accessorThread(void *arg){
 
 int main(int argc, char *argv[]){
 
-  INSTRUMENT_ON();
+  INSTRUMENT_OFF();
 
   pthread_t acc[2];
 
+  int i;
+
+  for (i = 0; i < MAXVAL; i++) {
+    wonk_array[0].a[i] = i;
+  }
+
   pthread_create(&acc[0],NULL,accessorThread,(void *)&wonk_array[0]);
-  pthread_create(&acc[1],NULL,accessorThread,(void *)&wonk_array[1]);
+  pthread_create(&acc[1],NULL,accessorThread,(void *)&wonk_array[0]);
 
   pthread_join(acc[0],NULL);
   pthread_join(acc[1],NULL);
 
   INSTRUMENT_OFF();
 
-  
+  for (i = 0; i < MAXVAL; i++) {
+    assert(wonk_array[0].a[i] == i * i);
+  }
 
   return 0;
 

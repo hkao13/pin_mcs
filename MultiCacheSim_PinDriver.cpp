@@ -19,6 +19,7 @@ bool stopOnError = false;
 bool printOnError = false;
 bool useRef = false;
 bool enable_prints = false;
+bool henry_debug = true;
 
 bool do_instrumentation = false;
 
@@ -162,10 +163,16 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
   uint32_t value1, value2;
   PIN_SafeCopy(&value1, addr_ptr, sizeof(ADDRINT));
   if (enable_prints) printf("---------------------------------------------------------------Read: ADDR, VAL: %lx, %x\n", addr, value1);
+
+  if (henry_debug) {
+    printf("CPU %d -- READ:\tAddress:%lx,\tValue:%x\n", tid, addr, value1);
+  }
+
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     value2 = (*i)->readLine(tid,inst,addr);
-    if(value1 != value2) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
-    else if (enable_prints) printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
+     if( (value1 != value2) && (value2 != INT_NAN) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
+    //if( (value1 != value2) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
+    else if (enable_prints) //printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -199,7 +206,7 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
   writetid  = tid;
   writeinst = inst;
   writecount++;
-  if (enable_prints) printf("---------------------------------------------------------------Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
+  //if (enable_prints) printf("---------------------------------------------------------------Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
 
   PIN_ReleaseLock(&globalLock);
 }
@@ -210,7 +217,9 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
     return;
   }
 
-  if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
+  //if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
+
+  if (isStack(writeaddr)) {if (0) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
 
   PIN_GetLock(&globalLock, 1);
 
@@ -223,7 +232,12 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
 
     if (enable_prints) printf("---------------------------------------------------------------Write: ADDR, writecount, Value: %lx, %lx, %lx\n", writeaddr, writecount, value);  
 
+    if (henry_debug) {
+      printf("CPU %d -- WRITE:\tAddress:%lx,\tValue:%lx\n", writetid, writeaddr, value);
+    }
+
     writecount--;
+    
     if (useSCL) {
       // TODO for write update
     }

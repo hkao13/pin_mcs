@@ -169,14 +169,28 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
 
   // For sure that position 0 is not (short-cut)
   {
-    int ii=0;
+    //int ii=0;
     Line **l = theSet + 0;
     while(l < setEnd) {
-      printf("searching tag=%x findline %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
+      //printf("searching tag=%x findline %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
       l++;
     }
   }
 
+
+  // First check for any tags that do match, doesn't matter if invalid
+  {
+    Line **l = theSet + 0;
+    while(l < setEnd) {
+      if ((*l)->getTag() == tag) {
+        lineHit = l;
+        break;
+      }
+      l++;
+    }
+  }
+
+  // Second, check if there is a valid hit.
   // For sure that position 0 is not (short-cut)
   {
     Line **l = theSet + 0;
@@ -188,6 +202,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
       l++;
     }
   }
+
 
   if (lineHit == 0)
     return 0;
@@ -320,10 +335,10 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
   // Start in reverse order so that get the youngest invalid possible,
   // and the oldest isLocked possible (lineFree)
   {
-    int ii=0;
+    //int ii=0;
     Line **l = setEnd -1;
     while(l >= theSet) {
-      printf("searching tag=%x replace %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
+      //printf("searching tag=%x replace %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
       if ((*l)->getTag() == tag && !(*l)->islineInvalid) {
         lineHit = l;
         break;

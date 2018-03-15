@@ -136,11 +136,75 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
 
     /*Update event counter for read misses*/
     numReadMisses++;
+    printf("READ MISS -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
 
     if(st){
 
       /*Tag matched, but state was invalid*/
       numReadOnInvalidMisses++;
+      printf("READ MISS ON INVALID -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
+
+            //------------------------------------------------------CURRENT CHANGES!------------------------------------------------------
+      /*Check if it's true or false sharing*/
+      uint32_t lcd, rcd; //local cache data, remote cache data
+      lcd = st->getData(cache->calcOffset(addr));         //NEEDS CHECK
+      
+      //Find where the data actually is
+      
+      /*This method implements snoop behavior on all the other 
+      *caches that this cache might be interacting with*/
+      
+      /*Loop over the other caches in the simulation*/
+      std::vector<SMPCache * >::iterator cacheIter;
+      std::vector<SMPCache * >::iterator lastCacheIter;
+      for(cacheIter = this->getCacheVector()->begin(), 
+          lastCacheIter = this->getCacheVector()->end(); 
+          cacheIter != lastCacheIter; 
+          cacheIter++){
+
+        /*Get a pointer to the other cache*/
+        MSI_SMPCache *otherCache = (MSI_SMPCache*)*cacheIter; 
+        if(otherCache->getCPUId() == this->getCPUId()){
+
+          /*We don't want to snoop our own access*/
+          continue;
+
+        }
+
+        /*Get the state of the block this addr maps to in the other cache*/      
+        MSI_SMPCacheState* otherState = 
+          (MSI_SMPCacheState *)otherCache->cache->findLine(addr);
+
+        /*If otherState == NULL here, the tags didn't match, so the
+         *other cache didn't have this line cached*/
+        if(otherState){
+          /*The tags matched -- need to do snoop actions*/
+
+          /*Other cache has recently written or read the line*/
+          if( otherState->isValid() ){        //NEEDS CHECK - Can it be shared and not be valid?
+          
+            //MSI_SMPCacheState* otherData = 
+            //  (MSI_SMPCacheState *)otherCache->cache->findLine(addr);
+          
+            rcd = otherState->getData(cache->calcOffset(addr));    //NEEDS CHECK
+            
+            if ( (lcd == rcd) && (rcd != INT_NAN) ){
+              numTrueSharing++;
+            }
+            else numFalseSharing++;
+            
+            printf("Number of false sharings: %d, lcd: %x, rcd: %x\n", numFalseSharing, lcd, rcd);
+            printf("Number of true sharings: %d, lcd: %x, rcd: %x\n", numTrueSharing, lcd, rcd);
+            
+          }
+
+        }/*Else: Tag didn't match. Nothing to do for this cache*/
+
+      }/*Done with other caches*/
+          
+    
+
+    //------------------------------------------------------CURRENT CHANGES!------------------------------------------------------
 
     }
 
