@@ -136,13 +136,13 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
 
     /*Update event counter for read misses*/
     numReadMisses++;
-    //printf("READ MISS -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
+    printf("READ MISS -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
 
     if(st){
 
       /*Tag matched, but state was invalid*/
       numReadOnInvalidMisses++;
-      //printf("READ MISS ON INVALID -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
+      printf("READ MISS ON INVALID -- CPU %d, Address:%lx\n", this->getCPUId(), addr);
 
       // VICTOR
       //------------------------------------------------------CURRENT CHANGES!------------------------------------------------------
@@ -196,8 +196,8 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
               numTrueSharing++;
             }
             
-            //printf("Number of false sharings: %d, lcd: %x, rcd: %x\n", numFalseSharing, lcd, rcd);
-            //printf("Number of true sharings: %d, lcd: %x, rcd: %x\n", numTrueSharing, lcd, rcd);
+            printf("Number of false sharings: %d, lcd: %x, rcd: %x\n", numFalseSharing, lcd, rcd);
+            printf("Number of true sharings: %d, lcd: %x, rcd: %x\n", numTrueSharing, lcd, rcd);
 
             break;
             

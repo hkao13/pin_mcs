@@ -20,7 +20,7 @@ bool stopOnError = false;
 bool printOnError = false;
 bool useRef = false;
 bool enable_prints = false;
-bool henry_debug = false;
+bool henry_debug = true;
 
 bool do_instrumentation = false;
 
@@ -159,9 +159,9 @@ VOID instrumentImage(IMG img, VOID *v)
 
 void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  //if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
-  //  return;
-  //}
+  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+    return;
+  }
 
   if (isStack(addr)) {
     return;
@@ -206,7 +206,7 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
       if(stopOnError) exit(1);
     }
     if( (tdata1->data != tdata2->data) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", tdata1->data, tdata2->data); if(stopOnError)exit(1);}
-    //else if (enable_prints) //printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
+    else if (enable_prints) //printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -230,9 +230,9 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
 void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  //if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
-  //  return;
-  //}
+  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+    return;
+  }
 
   PIN_GetLock(&globalLock, 1);
 
@@ -240,20 +240,18 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
   writetid  = tid;
   writeinst = inst;
   writecount++;
-  //if (enable_prints) printf("---------------------------------------------------------------Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
+  if (enable_prints) printf("---------------------------------------------------------------Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
 
   PIN_ReleaseLock(&globalLock);
 }
 
 void WriteData(){ //Should add all the necessary arguments for updating the virtual cache
   
-  //if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
-  //  return;
-  //}
+  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+    return;
+  }
 
-  //if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
-
-  if (isStack(writeaddr)) {if (0) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
+  if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
 
   PIN_GetLock(&globalLock, 1);
 
@@ -261,13 +259,14 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
   if (writecount > 0){
 
     ADDRINT * addr_ptr = (ADDRINT*)writeaddr;
-    ADDRINT value;
-    PIN_SafeCopy(&value, addr_ptr, sizeof(ADDRINT));
+    //ADDRINT value;
+    THREAD_DATA *tdata = get_tls(writetid);
+    PIN_SafeCopy(&tdata->data, addr_ptr, sizeof(ADDRINT));
 
-    if (enable_prints) printf("---------------------------------------------------------------Write: ADDR, writecount, Value: %lx, %lx, %lx\n", writeaddr, writecount, value);  
+    if (enable_prints) printf("---------------------------------------------------------------Write: ADDR, writecount, Value: %lx, %lx, %x\n", writeaddr, writecount, (tdata->data));  
 
     if (henry_debug) {
-      printf("CPU %d -- WRITE:\tAddress:%lx,\tValue:%lx\n", writetid, writeaddr, value);
+      printf("CPU %d -- WRITE:\tAddress:%lx,\tValue:%x\n", writetid, writeaddr, tdata->data);
     }
 
     writecount--;
@@ -277,13 +276,13 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
     }
 
     if(useRef){
-      ReferenceProtocol->writeLine(writetid,writeinst,writeaddr,value);
+      ReferenceProtocol->writeLine(writetid,writeinst,writeaddr,tdata->data);
     }
     std::vector<MultiCacheSim *>::iterator i,e;
 
     for(i = Caches.begin(), e = Caches.end(); i != e; i++){
 
-      (*i)->writeLine(writetid,writeinst,writeaddr,value);
+      (*i)->writeLine(writetid,writeinst,writeaddr,tdata->data);
 
       if(useRef && (stopOnError || printOnError)){
 
