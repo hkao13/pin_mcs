@@ -10,8 +10,9 @@
 
 #include "MultiCacheSim.h"
 
-std::vector<MultiCacheSim *> Caches;
 #define isStack(addr) (addr<=0x7FFFFFFFFFFF && addr>=0x700000000000)
+
+std::vector<MultiCacheSim *> Caches;
 MultiCacheSim *ReferenceProtocol;
 PIN_LOCK globalLock;
 
@@ -27,6 +28,8 @@ long int writecount;
 ADDRINT writeaddr; THREADID writetid; ADDRINT writeinst;
 bool useSCL = false;
 std::vector<MultiCacheSim *> SCL_Caches;
+
+
 
 KNOB<bool> KnobStopOnError(KNOB_MODE_WRITEONCE, "pintool",
 			   "stopOnProtoBug", "false", "Stop the Simulation when a deviation is detected between the test protocol and the reference");//default cache is verbose 
@@ -69,12 +72,30 @@ unsigned long instrumentationStatus[MAX_NTHREADS];
 
 enum MemOpType { MemRead = 0, MemWrite = 1 };
 
+struct THREAD_DATA {
+  uint32_t data;
+  THREAD_DATA(): data(INT_NAN)
+  {
+
+  }
+};
+
+INT32 numThreads = 0;
+// key to access THREAD LEVEL STORAGE in threads
+static TLS_KEY tls_key;
+
 INT32 usage()
 {
     cerr << "MultiCacheSim -- A Multiprocessor cache simulator with a pin frontend";
     cerr << KNOB_BASE::StringKnobSummary();
     cerr << endl;
     return -1;
+}
+
+// get thread data given thread id tid.
+THREAD_DATA *get_tls(THREADID threadid) {
+  THREAD_DATA *tdata = static_cast<THREAD_DATA *>(PIN_GetThreadData(tls_key, threadid));
+  return tdata;
 }
 
 
@@ -164,22 +185,27 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   // Get the value of the memory address, uncomment below to see.
   ADDRINT * addr_ptr = (ADDRINT*)addr;
-  uint32_t value1, value2;
-  PIN_SafeCopy(&value1, addr_ptr, sizeof(ADDRINT));
-  if (enable_prints) printf("---------------------------------------------------------------Read: ADDR, VAL: %lx, %x\n", addr, value1);
+  //uint32_t value1, value2;
+
+  THREAD_DATA *tdata1 = get_tls(tid);
+  THREAD_DATA *tdata2;
+
+  PIN_SafeCopy(&(tdata1 -> data), addr_ptr, sizeof(ADDRINT));
+  if (enable_prints) printf("---------------------------------------------------------------Read: ADDR, VAL: %lx, %x\n", addr, tdata1 -> data);
 
   if (henry_debug) {
-    printf("CPU %d -- READ:\tAddress:%lx,\tValue:%x\n", tid, addr, value1);
+    printf("CPU %d -- READ:\tAddress:%lx,\tValue:%x\n", tid, addr, tdata1->data);
   }
 
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
-    value2 = (*i)->readLine(tid,inst,addr);
-      if( (value1 != value2) && (value2 != INT_NAN) ) {
-      //printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2);
+    tdata2 = get_tls(tid);
+    tdata2->data = (*i)->readLine(tid,inst,addr);
+      if( (tdata1->data != tdata2->data) && (tdata2->data != INT_NAN) ) {
+      printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", tdata1->data, tdata2->data);
 
       if(stopOnError) exit(1);
     }
-    //if( (value1 != value2) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
+    if( (tdata1->data != tdata2->data) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", tdata1->data, tdata2->data); if(stopOnError)exit(1);}
     //else if (enable_prints) //printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
@@ -313,7 +339,10 @@ VOID instrumentTrace(TRACE trace, VOID *v)
 
 VOID threadBegin(THREADID threadid, CONTEXT *sp, INT32 flags, VOID *v)
 {
-  
+  numThreads++;
+  ASSERT(numThreads <= MAX_NTHREADS, "Maximum number of threads exceeded\n");
+  THREAD_DATA *tdata = new THREAD_DATA();
+  PIN_SetThreadData(tls_key, tdata, threadid); 
 }
     
 VOID threadEnd(THREADID threadid, const CONTEXT *sp, INT32 flags, VOID *v)
@@ -357,6 +386,13 @@ int main(int argc, char *argv[])
   
   for(int i = 0; i < MAX_NTHREADS; i++){
     instrumentationStatus[i] = false;
+  }
+
+  // Obtain  a key for TLS storage.
+  tls_key = PIN_CreateThreadDataKey(NULL);
+  if(-1 == tls_key) {
+    printf("number of already allocated keys reached the MAX_CLIENT_TLS_KEYS limit\n");
+    PIN_ExitProcess(1);
   }
 
   unsigned long csize = KnobCacheSize.Value();
