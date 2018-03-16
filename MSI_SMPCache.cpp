@@ -189,7 +189,7 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
           
             rcd = otherState->getData(cache->calcOffset(addr));    //NEEDS CHECK
             
-            if ( (lcd == rcd) && (rcd != INT_NAN) ){
+            if ( (lcd == rcd) ){
               numFalseSharing++;
             }
             else {
