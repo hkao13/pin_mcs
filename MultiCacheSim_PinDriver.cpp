@@ -19,7 +19,7 @@ bool stopOnError = false;
 bool printOnError = false;
 bool useRef = false;
 bool enable_prints = false;
-bool henry_debug = true;
+bool henry_debug = false;
 
 bool do_instrumentation = false;
 
@@ -138,7 +138,11 @@ VOID instrumentImage(IMG img, VOID *v)
 
 void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  if (!instrumentationStatus[PIN_ThreadId()] || isStack(addr)) { // Only do instrumentation if do_instrumentation is true.
+  //if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+  //  return;
+  //}
+
+  if (isStack(addr)) {
     return;
   }
 
@@ -170,9 +174,13 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     value2 = (*i)->readLine(tid,inst,addr);
-     if( (value1 != value2) && (value2 != INT_NAN) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
+      if( (value1 != value2) && (value2 != INT_NAN) ) {
+      //printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2);
+
+      if(stopOnError) exit(1);
+    }
     //if( (value1 != value2) ) {printf("---------------------------------------------------------------ERROR -> mismatch.... required (%d==%d)\n", value1, value2); if(stopOnError)exit(1);}
-    else if (enable_prints) //printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
+    //else if (enable_prints) //printf("---------------------------------------------------------------value matched!! yayyeee!!\n");
     
     if(useRef && (stopOnError || printOnError)){
       if( ReferenceProtocol->getStateAsInt(tid,addr) !=
@@ -196,9 +204,9 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
 
 void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
 
-  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
-    return;
-  }
+  //if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+  //  return;
+  //}
 
   PIN_GetLock(&globalLock, 1);
 
@@ -213,9 +221,9 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
 
 void WriteData(){ //Should add all the necessary arguments for updating the virtual cache
   
-  if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
-    return;
-  }
+  //if (!instrumentationStatus[PIN_ThreadId()]) { // Only do instrumentation if do_instrumentation is true.
+  //  return;
+  //}
 
   //if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
 
@@ -279,7 +287,7 @@ VOID instrumentTrace(TRACE trace, VOID *v)
     for (INS ins = BBL_InsHead(bbl); INS_Valid(ins); ins = INS_Next(ins)) {  
         INS_InsertCall(ins, 
 			 IPOINT_BEFORE, 
-			 (AFUNPTR)WriteData, 
+			 (AFUNPTR)WriteData,
 			 IARG_END);
       if(INS_IsMemoryRead(ins)) {
 	  INS_InsertCall(ins, 

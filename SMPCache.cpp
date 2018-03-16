@@ -27,7 +27,7 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector){
 
 void SMPCache::conciseDumpStatsToFile(FILE* outFile){
 
-  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
                   CPUId,
                   numReadHits,
                   numReadMisses,
@@ -36,6 +36,8 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
                   numReadMissesServicedByOthers,
                   numReadMissesServicedByShared,
                   numReadMissesServicedByModified,
+                  numFalseSharing,
+                  numTrueSharing,
                   numWriteHits,
                   numWriteMisses,
                   numWriteOnSharedMisses,
@@ -45,7 +47,7 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
 }
 
 void SMPCache::dumpStatsToFile(FILE* outFile){
-  fprintf(outFile, "-----Cache %lu-----\n",CPUId);
+  fprintf(outFile, " -----Cache %lu-----\n",CPUId);
 
   fprintf(outFile, "Read Hits:                   %d\n",numReadHits);
   fprintf(outFile, "Read Misses:                 %d\n",numReadMisses);

@@ -37,7 +37,7 @@ void MultiCacheSim::dumpStatsForAllCaches(bool concise){
         (*cacheIter)->dumpStatsToFile(CacheStats);
       }else{
 
-    fprintf(CacheStats,"CPUId, numReadHits, numReadMisses, numReadOnInvalidMisses, numReadRequestsSent, numReadMissesServicedByOthers, numReadMissesServicedByShared, numReadMissesServicedByModified, numWriteHits, numWriteMisses, numWriteOnSharedMisses, numWriteOnInvalidMisses, numInvalidatesSent\n");
+    fprintf(CacheStats,"CPUId, numReadHits, numReadMisses, numReadOnInvalidMisses, numReadRequestsSent, numReadMissesServicedByOthers, numReadMissesServicedByShared, numReadMissesServicedByModified, numFalseSharing, numTrueSharing, numWriteHits, numWriteMisses, numWriteOnSharedMisses, numWriteOnInvalidMisses, numInvalidatesSent\n");
 
         (*cacheIter)->conciseDumpStatsToFile(CacheStats);
       }
