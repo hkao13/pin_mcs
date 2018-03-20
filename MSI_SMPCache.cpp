@@ -1,16 +1,19 @@
 #include "MSI_SMPCache.h"
 
-bool enable_prints=0;
+//bool enable_prints=0;
+int main_memory_size_used=0;
+int main_memory_size_used_max=0;
 
 MSI_SMPCache::MSI_SMPCache(int cpuid, 
                            std::vector<SMPCache * > * cacheVector,
+			   SMPCache * main, 
                            int csize, 
                            int cassoc, 
                            int cbsize, 
                            int caddressable, 
                            const char * repPol, 
                            bool cskew) : 
-                             SMPCache(cpuid,cacheVector){
+                             SMPCache(cpuid,cacheVector,main){
   
   printf("Making a MSI cache with cpuid %d\n",cpuid);
   CacheGeneric<MSI_SMPCacheState> *c = 
@@ -33,10 +36,29 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
 
   if(st==0){
     if(enable_prints) printf("%d::::PULKIT entering state0:: addr=%lx\n",this->getCPUId(),addr);
-    /*No state*/
+    /*No state*/ exit(1);
     return;
   }
 
+  if (!st->islineInvalid) { // line valid, push it into main
+    MSI_SMPCacheState *st3 = (MSI_SMPCacheState *)main_memory->cache->findLine2Replace(addr);
+    if (!st3->islineInvalid) { // main_memory full. error out
+      printf("1 %x\n",st3->getData(0));
+      printf("2 %x\n",st3->getTag());
+      printf("3 %d\n",st3->islineInvalid);
+      printf("main memory full. please increase. not supported\n");
+      exit(1);
+    }
+    else {
+      st3->setTag(st->getTag());
+      st3->setData(st->getData());
+      st3->changeStateTo(MSI_SHARED);
+      if(enable_prints) printf("pushed into main mem with tag=%x\n",st3->getTag());
+      main_memory_size_used++;
+      if (main_memory_size_used_max < main_memory_size_used) {main_memory_size_used_max = main_memory_size_used; if(enable_prints) printf("%d\n",main_memory_size_used_max);}
+    }
+  }
+  
   /*Set the tags to the tags for the newly cached block*/
   st->setTag(cache->calcTag(addr));
   st->setData(val);
@@ -234,22 +256,34 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
         numReadMissesServicedByModified++;
       }
 
-    } 
+    }
+    else { // get from main memory
+      MSI_SMPCacheState* st3 = (MSI_SMPCacheState *)main_memory->cache->findLine(addr);
+      if(st3){
+	rrs.linedata     = st3->getData();
+	rrs.providedData = true;
+	if(enable_prints) printf("pulled from main mem with tag=%x\n",st3->getTag());
+	main_memory_size_used--;
+	st3->invalidate();
+      }
+      else printf("ERROR - address accessed before simulated system saw init val\n");
+    }
+      
 
     /*Fill the line*/
     fillLine(addr,MSI_SHARED,rrs.linedata); // FIXME-PA - get actual data from somewhere?? required? can we assume that the benchmark will init all data after malloc
-    if(enable_prints) printf("%d::::PULKIT MISS readline:: READING LINE addr=%lx\n\n",this->getCPUId(),addr);
+    if(enable_prints) printf("%d::::PULKIT MISS readline:: READING LINE addr=%lx\n",this->getCPUId(),addr);
 
   }else{
 
     /*Read Hit - any state but Invalid*/
     numReadHits++; 
-    if(enable_prints) printf("%d::::PULKIT HIT readline:: READING LINE addr=%lx\n\n",this->getCPUId(),addr);
+    if(enable_prints) printf("%d::::PULKIT HIT readline:: READING LINE addr=%lx\n",this->getCPUId(),addr);
 
   }
   if (st==NULL){
     MSI_SMPCacheState *st2 = (MSI_SMPCacheState *)cache->findLine(addr);    
-    if(enable_prints)printf("%d::::PULKIT exiting readline:: READING LINE addr=%lx %d\n\n",this->getCPUId(),addr, st2->getData(cache->calcOffset(addr)));
+    // if(enable_prints)printf("%d::::PULKIT exiting readline:: READING LINE addr=%lx %d\n",this->getCPUId(),addr, st2->getData(cache->calcOffset(addr)));
     return st2->getData(cache->calcOffset(addr));
   }
   else
@@ -298,6 +332,15 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr, ui
 
     }/*done with other caches*/
 
+    // checking in main memory
+    MSI_SMPCacheState* st3 = (MSI_SMPCacheState *)main_memory->cache->findLine(addr);
+    if(st3!=NULL){
+      reply.empty = false;
+      st3->setData(val,main_memory->cache->calcOffset(addr));
+      reply.linedata     = st3->getData();
+      st3->invalidate();
+    }
+
     /*Empty=true indicates that no other cache 
     *had the line or there were no other caches
     * 
@@ -340,7 +383,7 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     numInvalidatesSent++;
 
     /*Fill the line with the new written block*/
-    if(enable_prints) printf("%d::::PULKIT entering writeline (miss):: WRITING word addr=%lx & val=%d\n\n",this->getCPUId(),addr,val);
+    if(enable_prints) printf("%d::::PULKIT exiting writeline (miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
     fillLine(addr,MSI_MODIFIED,inv_ack.linedata);
     return;
 
@@ -361,14 +404,14 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     /*Change the state of the line to Modified to reflect the write*/
     st->changeStateTo(MSI_MODIFIED);
     st->setData(val,cache->calcOffset(addr));
-    if(enable_prints) printf("%d::::PULKIT entering writeline (shared miss):: WRITING word addr=%lx & val=%d\n\n",this->getCPUId(),addr,val);
+    if(enable_prints) printf("%d::::PULKIT exiting writeline (shared miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
     return;
 
   }else{ //Write Hit
 
     /*Already have it writable: No coherence action required!*/
     numWriteHits++;
-    if(enable_prints) printf("%d::::PULKIT entering writeline (mod hit):: WRITING word addr=%lx & val=%d\n\n",this->getCPUId(),addr,val);
+    if(enable_prints) printf("%d::::PULKIT exiting writeline (mod hit):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
     st->setData(val,cache->calcOffset(addr));
     return;
 
@@ -384,8 +427,8 @@ MSI_SMPCache::~MSI_SMPCache(){
 
 }
 
-extern "C" SMPCache *Create(int num, std::vector<SMPCache*> *cvec, int csize, int casso, int bs, int addrble, const char *repl, bool skw){
+extern "C" SMPCache *Create(int num, std::vector<SMPCache*> *cvec, SMPCache* main, int csize, int casso, int bs, int addrble, const char *repl, bool skw){
 
-  return new MSI_SMPCache(num,cvec,csize,casso,bs,addrble,repl,skw);
+  return new MSI_SMPCache(num,cvec,main,csize,casso,bs,addrble,repl,skw);
 
 }

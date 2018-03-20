@@ -15,6 +15,8 @@ public:
   //A vector of all the caches in the multicachesim
   std::vector<SMPCache * > *allCaches;
   
+  SMPCache *main_memory;
+  
   //Stats about the events the cache saw during execution
   int numReadHits;
   int numReadMisses;
@@ -36,7 +38,7 @@ public:
   int numFalseSharing;
   int numTrueSharing;
   
-  SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector);
+  SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *main);
   virtual ~SMPCache(){}
   
   int getCPUId();
@@ -62,5 +64,5 @@ public:
 
 };
 
-typedef SMPCache *(*CacheFactory)(int, std::vector<SMPCache*> *, int, int, int, int, const char *, bool);
+typedef SMPCache *(*CacheFactory)(int, std::vector<SMPCache*> *, SMPCache*, int, int, int, int, const char *, bool);
 #endif

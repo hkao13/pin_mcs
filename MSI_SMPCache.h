@@ -46,6 +46,7 @@ public:
   //Constructor
   MSI_SMPCache(int cpuid, 
                std::vector<SMPCache * > * cacheVector, 
+               SMPCache * main, 
                int csize, 
                int cassoc, 
                int cbsize, 

@@ -19,8 +19,8 @@ PIN_LOCK globalLock;
 bool stopOnError = false;
 bool printOnError = false;
 bool useRef = false;
-bool enable_prints = false;
-bool henry_debug = true;
+//bool enable_prints = false;
+bool henry_debug = false;
 
 bool do_instrumentation = false;
 
@@ -360,6 +360,7 @@ VOID Fini(INT32 code, VOID *v)
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     PIN_GetLock(&globalLock,1);
     (*i)->dumpStatsForAllCaches(KnobConcise.Value());
+    (*i)->dumpStatsForMain(KnobConcise.Value());
     PIN_ReleaseLock(&globalLock);
   }
   
@@ -425,6 +426,7 @@ int main(int argc, char *argv[])
 
     c = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
+    c->createMain();
     for(unsigned int i = 0; i < num; i++){
       c->createNewCache();
     } 

@@ -1,9 +1,10 @@
 #include "SMPCache.h"
 
-SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector){
+SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *main){
 
   CPUId = cpuid;
   allCaches = cacheVector;
+  main_memory = main;
 
   numReadHits = 0;
   numReadMisses = 0;
@@ -47,7 +48,7 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
 }
 
 void SMPCache::dumpStatsToFile(FILE* outFile){
-  fprintf(outFile, " -----Cache %lu-----\n",CPUId);
+  fprintf(outFile, "-----Cache %lu-----\n",CPUId);
 
   fprintf(outFile, "Read Hits:                   %d\n",numReadHits);
   fprintf(outFile, "Read Misses:                 %d\n",numReadMisses);

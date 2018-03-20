@@ -1,16 +1,17 @@
 #include "SCL_Read_SMPCache.h"
 
-bool enable_prints=0;
+//bool enable_prints=0;
 
 SCL_Read_SMPCache::SCL_Read_SMPCache(int cpuid, 
                            std::vector<SMPCache * > * cacheVector,
+			   SMPCache * main,
                            int csize, 
                            int cassoc, 
                            int cbsize, 
                            int caddressable, 
                            const char * repPol, 
                            bool cskew) : 
-                             SMPCache(cpuid,cacheVector){
+                             SMPCache(cpuid,cacheVector,main){
   
   fprintf(stderr,"Making a SCL_Read MSHR with cpuid %d\n",cpuid);
   CacheGeneric<SCL_Read_SMPCacheState> *c = 
@@ -75,8 +76,8 @@ SCL_Read_SMPCache::~SCL_Read_SMPCache(){
 
 }
 
-extern "C" SMPCache *Create(int num, std::vector<SMPCache*> *cvec, int csize, int casso, int bs, int addrble, const char *repl, bool skw){
+extern "C" SMPCache *Create(int num, std::vector<SMPCache*> *cvec, SMPCache *main, int csize, int casso, int bs, int addrble, const char *repl, bool skw){
 
-  return new SCL_Read_SMPCache(num,cvec,csize,casso,bs,addrble,repl,skw);
+  return new SCL_Read_SMPCache(num,cvec,main,csize,casso,bs,addrble,repl,skw);
 
 }
