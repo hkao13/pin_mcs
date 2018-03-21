@@ -4,6 +4,10 @@ LDFLAGS= -pthread
 
 all:
 
+	$(CC) -c $(CFLAGS) -o test2.o test2.c
+	$(CC) $(LDFLAGS) -o test2 ./test2.o
+	$(CC) -c $(CFLAGS) -S test2.c
+
 	$(CC) -c $(CFLAGS) -o invalidation_test_2core.o invalidation_test_2core.c
 	$(CC) $(LDFLAGS) -o invalidation_test_2core ./invalidation_test_2core.o
 	$(CC) -c $(CFLAGS) -S invalidation_test_2core.c
@@ -22,3 +26,4 @@ clean:
 	-rm mt_test
 	-rm simple
 	-rm invalidation_test_2core
+	-rm test2

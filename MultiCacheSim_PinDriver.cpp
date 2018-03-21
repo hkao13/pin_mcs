@@ -426,7 +426,8 @@ int main(int argc, char *argv[])
 
     c = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
-    c->createMain();
+    c->createMain(); // Creates the simulated main memory
+
     for(unsigned int i = 0; i < num; i++){
       c->createNewCache();
     } 

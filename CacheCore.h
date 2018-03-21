@@ -381,6 +381,7 @@ protected:
 
 public:
   bool islineInvalid;
+  bool dirtyBit;
   
   virtual unsigned getState() const {
     return state;
@@ -412,6 +413,10 @@ public:
  virtual bool isValid() const { return (islineInvalid==false); }
 
  virtual void invalidate() {islineInvalid=true; }
+
+ virtual bool isDirty() const { return (dirtyBit==true); }
+
+ virtual void setDirty() {dirtyBit = true;}
 
  virtual bool isLocked() const {
    return false;

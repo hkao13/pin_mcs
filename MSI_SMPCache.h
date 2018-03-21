@@ -13,11 +13,13 @@ public:
     bool isShared;
     bool providedData;
     linedata_t linedata;
+    bool dirtyBit;
   
-    RemoteReadService(bool shrd, bool prov, linedata_t data=linedata_t()){
+    RemoteReadService(bool shrd, bool prov, linedata_t data=linedata_t(), bool dirty=false){
       isShared = shrd;
       providedData = prov;
       linedata = data;
+      dirtyBit = dirty;
     }
     
   };

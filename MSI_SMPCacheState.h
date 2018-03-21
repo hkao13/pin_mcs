@@ -72,6 +72,11 @@ public:
     // not supposed to invalidate through this interface
     I(newstate != (unsigned)MSI_INVALID);
     state = (unsigned)newstate;
+
+    if (newstate == (unsigned)MSI_MODIFIED) {
+      setDirty();
+      printf("setting dirty bit \n");
+    }
   }
 
 };

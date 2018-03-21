@@ -37,6 +37,9 @@ public:
   /* New stats for true/false sharing for SCL */
   int numFalseSharing;
   int numTrueSharing;
+
+  /* Additional stats for number of write-backs */
+  int numWriteBacks;
   
   SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *main);
   virtual ~SMPCache(){}
