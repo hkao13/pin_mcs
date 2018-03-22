@@ -25,13 +25,13 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *
   numTrueSharing = 0;
 
   /* Additional stats for number of write-backs */
-  numWriteBacks = 0;
+  numReplacements = 0;
 
 }
 
 void SMPCache::conciseDumpStatsToFile(FILE* outFile){
 
-  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d, %d\n",
+  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
                   CPUId,
                   numReadHits,
                   numReadMisses,
@@ -47,7 +47,8 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
                   numWriteOnSharedMisses,
                   numWriteOnInvalidMisses,
                   numInvalidatesSent,
-                  numWriteBacks);
+                  numReplacements,
+                  numWritebacksRecieved);
 
 }
 
@@ -71,7 +72,9 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Write-On-Shared Misses:      %d\n",numWriteOnSharedMisses);
   fprintf(outFile, "Write-On-Invalid Misses:     %d\n",numWriteOnInvalidMisses);
   fprintf(outFile, "Invalidates Sent:            %d\n",numInvalidatesSent);
-  fprintf(outFile, "Writebacks:                  %d\n",numWriteBacks);
+  fprintf(outFile, "\n");
+  fprintf(outFile, "Replacements:                %d\n",numReplacements);
+  fprintf(outFile, "Writebacks Recieved:         %d\n",numWritebacksRecieved);
   fprintf(outFile, "\n");
 }
 

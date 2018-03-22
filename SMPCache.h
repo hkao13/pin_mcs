@@ -39,7 +39,8 @@ public:
   int numTrueSharing;
 
   /* Additional stats for number of write-backs */
-  int numWriteBacks;
+  int numReplacements;
+  int numWritebacksRecieved; // for lower level caches to keep track of writeback recieved from upstream.
   
   SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *main);
   virtual ~SMPCache(){}

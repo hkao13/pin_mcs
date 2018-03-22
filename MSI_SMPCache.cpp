@@ -55,7 +55,8 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
       st3->changeStateTo(MSI_SHARED);
       if(enable_prints) printf("pushed into main mem with tag=%x\n",st3->getTag());
       main_memory_size_used++;
-      numWriteBacks++;
+      numReplacements++;
+      main_memory -> numWritebacksRecieved++;
       if (main_memory_size_used_max < main_memory_size_used) {main_memory_size_used_max = main_memory_size_used; if(enable_prints) printf("%d\n",main_memory_size_used_max);}
     }
   }

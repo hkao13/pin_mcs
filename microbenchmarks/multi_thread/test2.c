@@ -3,12 +3,13 @@
 #include <pthread.h>
 #include <assert.h>
 
-#define MAXVAL 2000
+#define MAXVAL 2048
 #define NUMTHREADS 2
 
 int temp;
+pthread_mutex_t lock;
 
-struct wonk{
+struct wonk{ // should occupy a 64B cache line
   int a;
   char c[60];
 };
@@ -29,12 +30,17 @@ int INSTRUMENT_OFF() {
 
 void *accessorThread(void *arg){
   register int i;
+
+  pthread_mutex_lock(&lock);
   
   INSTRUMENT_ON();
   for (i=0; i < MAXVAL; i++) {
     array[i].a = array[i].a * array[i].a;
+    //array[i].a = array[i].a * 2;
   }
   INSTRUMENT_OFF();
+
+  pthread_mutex_unlock(&lock);
 
   pthread_exit(NULL); 
 }
@@ -42,9 +48,10 @@ void *accessorThread(void *arg){
 int main(int argc, char *argv[]){
 
 
-
   pthread_t acc[2];
+  pthread_mutex_init(&lock,NULL);
   register int i;
+
   INSTRUMENT_ON();
   for (i=0; i < MAXVAL; i++) {
     array[i].a = i;

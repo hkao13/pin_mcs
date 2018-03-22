@@ -75,7 +75,7 @@ public:
 
     if (newstate == (unsigned)MSI_MODIFIED) {
       setDirty();
-      printf("setting dirty bit \n");
+      //printf("setting dirty bit \n");
     }
   }
 
