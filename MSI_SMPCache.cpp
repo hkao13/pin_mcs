@@ -27,7 +27,7 @@ MSI_SMPCache::MSI_SMPCache(int cpuid,
 
 }
 
-void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t()){
+void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t(), bool dirty = false){
 
   //this gets the state of whatever line this address maps to 
   MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine2Replace(addr); 
@@ -53,6 +53,7 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
       st3->setTag(st->getTag());
       st3->setData(st->getData());
       st3->changeStateTo(MSI_SHARED);
+      st3->setClean();
       if(enable_prints) printf("pushed into main mem with tag=%x\n",st3->getTag());
       main_memory_size_used++;
       numReplacements++;
@@ -64,11 +65,16 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
   /*Set the tags to the tags for the newly cached block*/
   st->setTag(cache->calcTag(addr));
   st->setData(val);
+  if ((msi_state == MSI_MODIFIED) || dirty) {
+    st -> setDirty();
+  }
 
   if(enable_prints) printf("%d::::HENRY value set in fillline:: addr=%lx, val=%x\n",this->getCPUId(),addr, st->getData(cache->calcOffset(addr)));
 
   /*Set the state of the block to the msi_state passed in*/
   st->changeStateTo((MSIState_t)msi_state);
+
+
   return;
 
   if(enable_prints) printf("%d::::PULKIT exiting fillline:: addr=%lx\n",this->getCPUId(),addr);
@@ -112,6 +118,11 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
     
         /*Modified transitions to Shared on a remote Read*/ 
         otherState->changeStateTo(MSI_SHARED);
+
+        if(!otherState->isDirty()) {
+          printf("ERROR! Modified block is clean when it should be dirty 3\n");
+          exit(1);
+        }
 
         /*Return a Remote Read Service indicating that 
          *1)The line was not shared (the false param)
@@ -252,6 +263,11 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
         numReadMissesServicedByShared++;
       }else{
         numReadMissesServicedByModified++;
+        if(rrs.dirtyBit == false) {
+          printf("ERROR! Modified block is clean when it should be dirty 1 \n");
+          exit(1);
+        }
+
       }
 
     }
@@ -261,15 +277,20 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
         rrs.linedata     = st3->getData();
         rrs.providedData = true;
         if(enable_prints) printf("pulled from main mem with tag=%x\n",st3->getTag());
+
+        if(rrs.dirtyBit == true) {
+          printf("ERROR! Data pulled from main mem should be clean 2\n");
+          exit(1);
+        }
+
         main_memory_size_used--;
         st3->invalidate();
       }
-      else printf("ERROR - address accessed before simulated system saw init val\n");
+      //else printf("ERROR - address accessed before simulated system saw init val\n");
     }
       
-
     /*Fill the line*/
-    fillLine(addr,MSI_SHARED,rrs.linedata); // FIXME-PA - get actual data from somewhere?? required? can we assume that the benchmark will init all data after malloc
+    fillLine(addr,MSI_SHARED,rrs.linedata, rrs.dirtyBit); // FIXME-PA - get actual data from somewhere?? required? can we assume that the benchmark will init all data after malloc
     if(enable_prints) printf("%d::::PULKIT MISS readline:: READING LINE addr=%lx\n",this->getCPUId(),addr);
 
   }else{
@@ -322,6 +343,7 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr, ui
           /*The reply contains data, so "empty" is false*/
           reply.empty = false;
           otherState->setData(val,otherCache->cache->calcOffset(addr));
+          otherState->setDirty();
           reply.linedata = otherState->getData();
 
           /*Invalidate the line, because we're writing*/
@@ -387,7 +409,7 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
 
     /*Fill the line with the new written block*/
     if(enable_prints) printf("%d::::PULKIT exiting writeline (miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
-    fillLine(addr,MSI_MODIFIED,inv_ack.linedata);
+    fillLine(addr,MSI_MODIFIED,inv_ack.linedata,true);
     return;
 
   }else if(st->getState() == MSI_SHARED){
@@ -405,6 +427,7 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     numInvalidatesSent++;
 
     /*Change the state of the line to Modified to reflect the write*/
+    st->setDirty();
     st->changeStateTo(MSI_MODIFIED);
     st->setData(val,cache->calcOffset(addr));
     if(enable_prints) printf("%d::::PULKIT exiting writeline (shared miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
@@ -415,6 +438,7 @@ void MSI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     /*Already have it writable: No coherence action required!*/
     numWriteHits++;
     if(enable_prints) printf("%d::::PULKIT exiting writeline (mod hit):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
+    st->setDirty();
     st->setData(val,cache->calcOffset(addr));
     return;
 

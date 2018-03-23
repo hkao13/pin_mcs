@@ -403,8 +403,16 @@ public:
  }
 
  // Set cache line data at the given offset - HENRY
- void setData(uint32_t   data, Addr_t offset) {linedata.data[offset] = data;islineInvalid=false;}
- void setData(linedata_t data               ) {linedata              = data;islineInvalid=false;}
+ void setData(uint32_t   data, Addr_t offset) {
+  linedata.data[offset] = data;
+  islineInvalid=false;
+  setDirty();
+ }
+
+ void setData(linedata_t data               ) {
+  linedata              = data;
+  islineInvalid=false;
+}
 
  // Get the cache line data at the given offset - HENRY
  uint32_t   getData (Addr_t offset)  {return linedata.data[offset];}
@@ -417,6 +425,8 @@ public:
  virtual bool isDirty() const { return (dirtyBit==true); }
 
  virtual void setDirty() {dirtyBit = true;}
+
+ virtual void setClean() {dirtyBit = false;}
 
  virtual bool isLocked() const {
    return false;

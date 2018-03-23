@@ -73,10 +73,10 @@ public:
     I(newstate != (unsigned)MSI_INVALID);
     state = (unsigned)newstate;
 
-    if (newstate == (unsigned)MSI_MODIFIED) {
-      setDirty();
+    //if (newstate == (unsigned)MSI_MODIFIED) {
+      //setDirty();
       //printf("setting dirty bit \n");
-    }
+    //}
   }
 
 };

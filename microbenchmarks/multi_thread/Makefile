@@ -8,6 +8,10 @@ all:
 	$(CC) $(LDFLAGS) -o test2 ./test2.o
 	$(CC) -c $(CFLAGS) -S test2.c
 
+	$(CC) -c $(CFLAGS) -o test3.o test3.c
+	$(CC) $(LDFLAGS) -o test3 ./test3.o
+	$(CC) -c $(CFLAGS) -S test3.c
+
 	$(CC) -c $(CFLAGS) -o invalidation_test_2core.o invalidation_test_2core.c
 	$(CC) $(LDFLAGS) -o invalidation_test_2core ./invalidation_test_2core.o
 	$(CC) -c $(CFLAGS) -S invalidation_test_2core.c
@@ -27,3 +31,4 @@ clean:
 	-rm simple
 	-rm invalidation_test_2core
 	-rm test2
+	-rm test3

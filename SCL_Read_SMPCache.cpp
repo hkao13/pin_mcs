@@ -25,7 +25,7 @@ SCL_Read_SMPCache::SCL_Read_SMPCache(int cpuid,
 
 }
 
-void SCL_Read_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t()){
+void SCL_Read_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t(), bool dirty=false){
 
   return;
 }

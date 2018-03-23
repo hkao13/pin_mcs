@@ -56,7 +56,7 @@ public:
   virtual void writeLine(uint32_t wrPC, uint64_t addr, uint32_t val)=0;
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 
-  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val) = 0;
+  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val, bool dirty) = 0;
 
   virtual char *Identify() = 0;
 

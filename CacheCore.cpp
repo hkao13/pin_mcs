@@ -343,6 +343,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
     Line **l = setEnd -1;
     while(l >= theSet) {
       if (enable_prints) printf("searching tag=%x replace %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
+      //printf("searching tag=%x replace %d tag=%x invalid=%d dirty=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid, (*l)->dirtyBit);
       if ((*l)->getTag() == tag && !(*l)->islineInvalid) {
         lineHit = l;
         break;
