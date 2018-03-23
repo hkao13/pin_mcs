@@ -88,21 +88,6 @@ accessorThread1:
 	.loc 1 41 0 is_stmt 0 discriminator 1
 	cmpl	$1022, %ebx
 	jle	.L7
-	.loc 1 46 0 is_stmt 1
-	movl	$1023, %ebx
-	jmp	.L8
-.L9:
-	.loc 1 47 0 discriminator 3
-	movslq	%ebx, %rax
-	salq	$6, %rax
-	addq	$array, %rax
-	movl	(%rax), %r12d
-	.loc 1 46 0 discriminator 3
-	addl	$1, %ebx
-.L8:
-	.loc 1 46 0 is_stmt 0 discriminator 1
-	cmpl	$2045, %ebx
-	jle	.L9
 	.loc 1 51 0 is_stmt 1
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
@@ -142,8 +127,8 @@ accessorThread2:
 	call	INSTRUMENT_ON
 	.loc 1 69 0
 	movl	$0, %ebx
-	jmp	.L11
-.L12:
+	jmp	.L9
+.L10:
 	.loc 1 70 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
@@ -151,14 +136,14 @@ accessorThread2:
 	movl	(%rax), %r12d
 	.loc 1 69 0 discriminator 3
 	addl	$1, %ebx
-.L11:
+.L9:
 	.loc 1 69 0 is_stmt 0 discriminator 1
 	cmpl	$1022, %ebx
-	jle	.L12
+	jle	.L10
 	.loc 1 74 0 is_stmt 1
 	movl	$1023, %ebx
-	jmp	.L13
-.L14:
+	jmp	.L11
+.L12:
 	.loc 1 75 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
@@ -166,10 +151,10 @@ accessorThread2:
 	movl	(%rax), %r12d
 	.loc 1 74 0 discriminator 3
 	addl	$1, %ebx
-.L13:
+.L11:
 	.loc 1 74 0 is_stmt 0 discriminator 1
 	cmpl	$2045, %ebx
-	jle	.L14
+	jle	.L12
 	.loc 1 78 0 is_stmt 1
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
@@ -215,8 +200,8 @@ main:
 	call	INSTRUMENT_ON
 	.loc 1 96 0
 	movl	$0, %ebx
-	jmp	.L16
-.L17:
+	jmp	.L14
+.L15:
 	.loc 1 97 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
@@ -224,10 +209,10 @@ main:
 	movl	%ebx, (%rax)
 	.loc 1 96 0 discriminator 3
 	addl	$1, %ebx
-.L16:
+.L14:
 	.loc 1 96 0 is_stmt 0 discriminator 1
 	cmpl	$1022, %ebx
-	jle	.L17
+	jle	.L15
 	.loc 1 103 0 is_stmt 1
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
@@ -250,8 +235,8 @@ main:
 	call	INSTRUMENT_ON
 	.loc 1 112 0
 	movl	$1023, %ebx
-	jmp	.L18
-.L19:
+	jmp	.L16
+.L17:
 	.loc 1 113 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
@@ -259,10 +244,10 @@ main:
 	movl	(%rax), %r12d
 	.loc 1 112 0 discriminator 3
 	addl	$1, %ebx
-.L18:
+.L16:
 	.loc 1 112 0 is_stmt 0 discriminator 1
 	cmpl	$2045, %ebx
-	jle	.L19
+	jle	.L17
 	.loc 1 115 0 is_stmt 1
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
@@ -286,9 +271,9 @@ main:
 	.loc 1 126 0
 	movq	-24(%rbp), %rdx
 	xorq	%fs:40, %rdx
-	je	.L21
+	je	.L19
 	call	__stack_chk_fail
-.L21:
+.L19:
 	addq	$48, %rsp
 	popq	%rbx
 	popq	%r12

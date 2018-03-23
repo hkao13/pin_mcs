@@ -115,14 +115,16 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
 
       /*Other cache has recently written the line*/
       if(otherState->getState() == MSI_MODIFIED){
-    
-        /*Modified transitions to Shared on a remote Read*/ 
-        otherState->changeStateTo(MSI_SHARED);
 
         if(!otherState->isDirty()) {
           printf("ERROR! Modified block is clean when it should be dirty 3\n");
           exit(1);
         }
+    
+        /*Modified transitions to Shared on a remote Read*/ 
+        otherState->changeStateTo(MSI_SHARED);
+        otherState->setClean();
+        
 
         /*Return a Remote Read Service indicating that 
          *1)The line was not shared (the false param)
@@ -263,11 +265,6 @@ uint32_t MSI_SMPCache::readLine(uint32_t rdPC, uint64_t addr){
         numReadMissesServicedByShared++;
       }else{
         numReadMissesServicedByModified++;
-        if(rrs.dirtyBit == false) {
-          printf("ERROR! Modified block is clean when it should be dirty 1 \n");
-          exit(1);
-        }
-
       }
 
     }
