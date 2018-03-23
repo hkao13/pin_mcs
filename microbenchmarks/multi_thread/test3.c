@@ -43,9 +43,9 @@ void *accessorThread1(void *arg){
   }
   
 
-  for (i=MAXVAL; i < 2*MAXVAL; i++) {
-    b = array[i].a;
-  }
+  //for (i=MAXVAL; i < 2*MAXVAL; i++) {
+  //  b = array[i].a;
+  //}
 
   
   INSTRUMENT_OFF();
