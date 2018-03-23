@@ -376,6 +376,8 @@ private:
   Addr_t tag;
   linedata_t linedata;
 
+  Addr_t xorTag; // Henry - extra tag to store which other cache line it is XOR'd with
+
 protected:
   unsigned state;
 
@@ -392,11 +394,22 @@ public:
   }
  
  Addr_t getTag() const { return tag; }
+ 
  void setTag(Addr_t a) {
    I(a);
    tag = a; 
  }
  void clearTag() { islineInvalid = true; }
+
+ Addr_t getXorTag() const { return xorTag; }
+
+ void setXorTag(Addr_t a){
+  I(a);
+  xorTag = a;
+ }
+
+ void clearXorTag() { xorTag = 0; }
+
  void initialize(void *c) { 
    tag = 0;
    islineInvalid = true;
