@@ -360,6 +360,7 @@ VOID Fini(INT32 code, VOID *v)
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     PIN_GetLock(&globalLock,1);
     (*i)->dumpStatsForAllCaches(KnobConcise.Value());
+    (*i)->dumpStatsForLLC(KnobConcise.Value());
     (*i)->dumpStatsForMain(KnobConcise.Value());
     PIN_ReleaseLock(&globalLock);
   }
@@ -426,6 +427,7 @@ int main(int argc, char *argv[])
 
     c = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
+    c->createLLC();
     c->createMain(); // Creates the simulated main memory
 
     for(unsigned int i = 0; i < num; i++){

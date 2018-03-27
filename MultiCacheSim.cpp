@@ -21,6 +21,12 @@ MultiCacheSim::MultiCacheSim(FILE *cachestats, int size, int assoc, int bsize, C
   PIN_InitLock(&mainLock);
   #endif
 
+  #ifndef PIN
+  pthread_mutex_init(&LLCLock, NULL);
+  #else
+  PIN_InitLock(&LLCLock);
+  #endif
+
 }
 
 SMPCache *MultiCacheSim::findCacheByCPUId(unsigned int CPUid){
@@ -50,10 +56,28 @@ void MultiCacheSim::dumpStatsForAllCaches(bool concise){
     }
 }
 
+void MultiCacheSim::dumpStatsForLLC(bool concise){
+   
+    std::vector<SMPCache *>::iterator cacheIter = llc.begin();
+    std::vector<SMPCache *>::iterator cacheEndIter = llc.end();
+    printf("--- LLC ---\n");
+    for(; cacheIter != cacheEndIter; cacheIter++){
+      if(!concise){
+        (*cacheIter)->dumpStatsToFile(CacheStats);
+      }else{
+
+    fprintf(CacheStats,"CPUId, numReadHits, numReadMisses, numReadOnInvalidMisses, numReadRequestsSent, numReadMissesServicedByOthers, numReadMissesServicedByShared, numReadMissesServicedByModified, numWriteHits, numWriteMisses, numWriteOnSharedMisses, numWriteOnInvalidMisses, numInvalidatesSent\n");
+
+        (*cacheIter)->conciseDumpStatsToFile(CacheStats);
+      }
+    }
+}
+
 void MultiCacheSim::dumpStatsForMain(bool concise){
    
     std::vector<SMPCache *>::iterator cacheIter = main.begin();
     std::vector<SMPCache *>::iterator cacheEndIter = main.end();
+    printf("--- MAIN MEMORY ---\n");
     for(; cacheIter != cacheEndIter; cacheIter++){
       if(!concise){
         (*cacheIter)->dumpStatsToFile(CacheStats);
@@ -75,7 +99,7 @@ void MultiCacheSim::createNewCache(){
     #endif
 
     SMPCache * newcache;
-    newcache = this->cacheFactory(num_caches++, &allCaches, main_memory, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
+    newcache = this->cacheFactory(num_caches++, &allCaches, llc_memory, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
     allCaches.push_back(newcache);
 
 
@@ -86,24 +110,46 @@ void MultiCacheSim::createNewCache(){
     #endif
 }
 
+
+void MultiCacheSim::createLLC() {
+
+  #ifndef PIN
+  pthread_mutex_lock(&LLCLock);
+  #else
+  PIN_GetLock(&LLCLock,1); 
+  #endif
+
+  SMPCache * newcache;
+  newcache = this->cacheFactory(0, &llc, main_memory, cache_size*128, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  llc.push_back(newcache);
+  llc_memory = newcache;
+
+  #ifndef PIN
+  pthread_mutex_unlock(&LLCLock);
+  #else
+  PIN_ReleaseLock(&LLCLock); 
+  #endif
+
+}
+
 void MultiCacheSim::createMain(){
 
-    #ifndef PIN
-    pthread_mutex_lock(&mainLock);
-    #else
-    PIN_GetLock(&mainLock,1); 
-    #endif
+  #ifndef PIN
+  pthread_mutex_lock(&mainLock);
+  #else
+  PIN_GetLock(&mainLock,1); 
+  #endif
 
-    SMPCache * newcache;
-    newcache = this->cacheFactory(0, &main, NULL, cache_size*128, cache_assoc*64, cache_bsize, 1, "LRU", false);
-    main.push_back(newcache);
-    main_memory = newcache;
+  SMPCache * newcache;
+  newcache = this->cacheFactory(0, &main, NULL, cache_size*128, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  main.push_back(newcache);
+  main_memory = newcache;
 
-    #ifndef PIN
-    pthread_mutex_unlock(&mainLock);
-    #else
-    PIN_ReleaseLock(&mainLock); 
-    #endif
+  #ifndef PIN
+  pthread_mutex_unlock(&mainLock);
+  #else
+  PIN_ReleaseLock(&mainLock); 
+  #endif
 }
 
 // this is for SCL Caches (MSHRs) to link actual Caches with SCL.

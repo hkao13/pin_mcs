@@ -1003,6 +1003,8 @@ main:
 	.string	"__size"
 .LASF1:
 	.string	"unsigned char"
+.LASF43:
+	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF0:
 	.string	"long unsigned int"
 .LASF38:
@@ -1023,8 +1025,6 @@ main:
 	.string	"long long unsigned int"
 .LASF21:
 	.string	"__spins"
-.LASF43:
-	.string	"/home/henry/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF35:
 	.string	"argc"
 .LASF7:

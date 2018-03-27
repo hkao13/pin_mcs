@@ -40,7 +40,8 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
     return;
   }
 
-  if ((!st->islineInvalid) && (st->isDirty())) { // line valid, push it into main and dirty bit is set.
+  // if ((!st->islineInvalid) && (st->isDirty())) { // line valid, push it into main and dirty bit is set.
+  if ((!st->islineInvalid)) { // line valid, push it into main and dirty bit is set.
     MSI_SMPCacheState *st3 = (MSI_SMPCacheState *)main_memory->cache->findLine2Replace(addr);
     if (!st3->islineInvalid) { // main_memory full. error out
       printf("1 %x\n",st3->getData(0));

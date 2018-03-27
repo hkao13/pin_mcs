@@ -1488,6 +1488,8 @@ main:
 	.string	"__next"
 .LASF71:
 	.string	"newval"
+.LASF83:
+	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF46:
 	.string	"long long int"
 .LASF4:
@@ -1582,8 +1584,6 @@ main:
 	.string	"_chain"
 .LASF30:
 	.string	"_vtable_offset"
-.LASF83:
-	.string	"/home/henry/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF73:
 	.string	"accessorThread"
 .LASF54:
