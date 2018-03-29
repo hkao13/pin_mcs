@@ -50,7 +50,7 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
                   numWriteOnInvalidMisses,
                   numInvalidatesSent,
                   numReplacements,
-                  numWritebacksRecieved);
+                  numWritebacksReceived);
 
 }
 
@@ -76,7 +76,7 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Invalidates Sent:            %d\n",numInvalidatesSent);
   fprintf(outFile, "\n");
   fprintf(outFile, "Replacements:                %d\n",numReplacements);
-  fprintf(outFile, "Writebacks Recieved:         %d\n",numWritebacksRecieved);
+  fprintf(outFile, "Writebacks Received:         %d\n",numWritebacksReceived);
   fprintf(outFile, "\n");
 }
 

@@ -383,7 +383,7 @@ protected:
 
 public:
   bool islineInvalid;
-//  bool dirtyBit;	//DIRTY_BIT
+//  bool dirtyBit;
   
   virtual unsigned getState() const {
     return state;
@@ -419,7 +419,7 @@ public:
  void setData(uint32_t   data, Addr_t offset) {
   linedata.data[offset] = data;
   islineInvalid=false;
-//  setDirty();	//DIRTY_BIT
+//  setDirty();
  }
 
  void setData(linedata_t data               ) {
@@ -435,7 +435,7 @@ public:
 
  virtual void invalidate() {islineInvalid=true; }
 
-// virtual bool isDirty() const { return (dirtyBit==true); }	//DIRTY_BIT
+// virtual bool isDirty() const { return (dirtyBit==true); }
 
 // virtual void setDirty() {dirtyBit = true;}
 

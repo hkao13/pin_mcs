@@ -41,7 +41,7 @@ public:
 
   /* Additional stats for number of write-backs */
   int numReplacements;
-  int numWritebacksRecieved; // for lower level caches to keep track of writeback recieved from upstream.
+  int numWritebacksReceived; // for lower level caches to keep track of writeback received from upstream.
   
   SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev);
   virtual ~SMPCache(){}
@@ -57,7 +57,8 @@ public:
   virtual void writeLine(uint32_t wrPC, uint64_t addr, uint32_t val)=0;
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 
-  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val, bool dirty) = 0;
+//  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val, bool dirty) = 0;	//DIRTY_BIT
+  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val) = 0;
 
   virtual char *Identify() = 0;
 
