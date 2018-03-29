@@ -4,7 +4,9 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
 //(CPUID, Siblings, Parent, Children), 2nd attribute was cacheVector->same, 3rd was main->next
 
   CPUId = cpuid;
-  siblings = same;
+  siblings = same; 
+//	allCaches = same;
+//  main_memory = next;
   parent = next;
   children = prev;
 

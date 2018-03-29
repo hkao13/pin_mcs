@@ -853,8 +853,6 @@ main:
 	.string	"__size"
 .LASF1:
 	.string	"unsigned char"
-.LASF41:
-	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF0:
 	.string	"long unsigned int"
 .LASF36:
@@ -865,6 +863,8 @@ main:
 	.string	"test2.c"
 .LASF38:
 	.string	"array"
+.LASF41:
+	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF14:
 	.string	"__pthread_internal_list"
 .LASF22:

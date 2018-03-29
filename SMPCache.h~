@@ -13,9 +13,11 @@ public:
   CacheGeneric<StateGeneric<> > *cache, *linkedCache; // one for SCL -HENRY
 
   //A vector of all the caches in the multicachesim
+//  std::vector<SMPCache * > *allCaches;
   std::vector<SMPCache * > *siblings; //Instead of allCaches
   std::vector<SMPCache * > *children;
   
+//  SMPCache *main_memory;
   SMPCache *parent; //Instead of main_memory
   
   //Stats about the events the cache saw during execution

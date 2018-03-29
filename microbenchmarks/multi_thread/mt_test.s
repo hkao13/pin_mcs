@@ -777,8 +777,6 @@ __PRETTY_FUNCTION__.3251:
 	.string	"pthread_t"
 .LASF1:
 	.string	"unsigned char"
-.LASF23:
-	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF20:
 	.string	"wonk_array"
 .LASF0:
@@ -791,6 +789,8 @@ __PRETTY_FUNCTION__.3251:
 	.string	"mt_test.c"
 .LASF14:
 	.string	"array"
+.LASF23:
+	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF16:
 	.string	"main"
 .LASF3:

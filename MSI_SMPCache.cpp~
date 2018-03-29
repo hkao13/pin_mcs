@@ -5,9 +5,9 @@ int main_memory_size_used=0;
 int main_memory_size_used_max=0;
 
 MSI_SMPCache::MSI_SMPCache(int cpuid, 
-                           std::vector<SMPCache * > * same,	//siblings
-													 SMPCache * next, 								//parent
-													 std::vector<SMPCache * > * prev,	//children
+                           std::vector<SMPCache * > * same,
+													 SMPCache * next, 
+													 std::vector<SMPCache * > * prev,
                            int csize, 
                            int cassoc, 
                            int cbsize, 

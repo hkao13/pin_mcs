@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
     MultiCacheSim *sc = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
     for(unsigned int i = 0; i < num; i++){
-      sc->createNewSCL(c->privateCaches[i]);
+      sc->createNewSCL(c->allCaches[i]);
     } 
 
     SCL_Caches.push_back(sc);

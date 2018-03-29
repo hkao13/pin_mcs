@@ -1,0 +1,12 @@
+#ifndef __COMPRESSION_MODULE_H_
+#define __COMPRESSION_MODULE_H_
+#include "CacheCore.h"
+
+// HENRY - TODO implement the func defs for xor compression and decompression here
+
+linedata_t XOR(linedata_t data1, linedata_t data2){
+	xored = data1 ^ data2;
+	return xored;
+}
+
+#endif
