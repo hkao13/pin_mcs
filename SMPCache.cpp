@@ -25,9 +25,14 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
   /* New stats for true/false sharing for SCL */
   numFalseSharing = 0;
   numTrueSharing = 0;
+  /* Speculative Execution stats */
+  numCorrectSpeculations = 0;
+  numIncorrectSpeculations = 0;
 
   /* Additional stats for number of write-backs */
+  numSilentStores = 0;
   numReplacements = 0;
+  numWritebacksReceived = 0;
 
 }
 
@@ -74,9 +79,13 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Write-On-Shared Misses:      %d\n",numWriteOnSharedMisses);
   fprintf(outFile, "Write-On-Invalid Misses:     %d\n",numWriteOnInvalidMisses);
   fprintf(outFile, "Invalidates Sent:            %d\n",numInvalidatesSent);
+  fprintf(outFile, "Silent Stores:               %d\n",numSilentStores);
   fprintf(outFile, "\n");
   fprintf(outFile, "Replacements:                %d\n",numReplacements);
   fprintf(outFile, "Writebacks Received:         %d\n",numWritebacksReceived);
+  fprintf(outFile, "\n");
+  fprintf(outFile, "Correct Speculations:        %d\n",numCorrectSpeculations);
+  fprintf(outFile, "Incorrect Speculations:      %d\n",numIncorrectSpeculations);
   fprintf(outFile, "\n");
 }
 

@@ -196,64 +196,52 @@ main:
 	movl	$lock, %edi
 	call	pthread_mutex_init
 	.loc 1 95 0
-	movl	$0, %eax
-	call	INSTRUMENT_ON
-	.loc 1 96 0
 	movl	$0, %ebx
 	jmp	.L14
 .L15:
-	.loc 1 97 0 discriminator 3
+	.loc 1 96 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
 	addq	$array, %rax
 	movl	%ebx, (%rax)
-	.loc 1 96 0 discriminator 3
+	.loc 1 95 0 discriminator 3
 	addl	$1, %ebx
 .L14:
-	.loc 1 96 0 is_stmt 0 discriminator 1
+	.loc 1 95 0 is_stmt 0 discriminator 1
 	cmpl	$1022, %ebx
 	jle	.L15
-	.loc 1 103 0 is_stmt 1
-	movl	$0, %eax
-	call	INSTRUMENT_OFF
-	.loc 1 105 0
+	.loc 1 102 0 is_stmt 1
 	movl	%r12d, hold(%rip)
-	.loc 1 107 0
+	.loc 1 104 0
 	leaq	-48(%rbp), %rax
 	movl	$array, %ecx
 	movl	$accessorThread1, %edx
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_create
-	.loc 1 108 0
+	.loc 1 105 0
 	movq	-48(%rbp), %rax
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_join
-	.loc 1 111 0
-	movl	$0, %eax
-	call	INSTRUMENT_ON
-	.loc 1 112 0
+	.loc 1 109 0
 	movl	$1023, %ebx
 	jmp	.L16
 .L17:
-	.loc 1 113 0 discriminator 3
+	.loc 1 110 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
 	addq	$array, %rax
 	movl	(%rax), %r12d
-	.loc 1 112 0 discriminator 3
+	.loc 1 109 0 discriminator 3
 	addl	$1, %ebx
 .L16:
-	.loc 1 112 0 is_stmt 0 discriminator 1
+	.loc 1 109 0 is_stmt 0 discriminator 1
 	cmpl	$2045, %ebx
 	jle	.L17
-	.loc 1 115 0 is_stmt 1
-	movl	$0, %eax
-	call	INSTRUMENT_OFF
-	.loc 1 116 0
+	.loc 1 112 0 is_stmt 1
 	movl	%r12d, hold(%rip)
-	.loc 1 120 0
+	.loc 1 116 0
 	leaq	-48(%rbp), %rax
 	addq	$8, %rax
 	movl	$array, %ecx
@@ -261,14 +249,14 @@ main:
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_create
-	.loc 1 123 0
+	.loc 1 117 0
 	movq	-40(%rbp), %rax
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_join
-	.loc 1 125 0
+	.loc 1 119 0
 	movl	$0, %eax
-	.loc 1 126 0
+	.loc 1 120 0
 	movq	-24(%rbp), %rdx
 	xorq	%fs:40, %rdx
 	je	.L19
@@ -1003,6 +991,8 @@ main:
 	.string	"__size"
 .LASF1:
 	.string	"unsigned char"
+.LASF43:
+	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF0:
 	.string	"long unsigned int"
 .LASF38:
@@ -1011,8 +1001,6 @@ main:
 	.string	"short unsigned int"
 .LASF40:
 	.string	"array"
-.LASF43:
-	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF14:
 	.string	"__pthread_internal_list"
 .LASF22:

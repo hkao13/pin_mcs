@@ -254,9 +254,11 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
       ld = rrs.linedata;
     }
     else { // Get it from the next (parent) level in the hierarchy
-    	if (parent!=NULL)
-       ld = parent->readLine(addr);
-       else if(enable_prints) printf("%d::::NULL PARENT SEEN\n",this->getCPUId());
+
+      if (parent!=NULL) {
+        ld = parent->readLine(addr);
+      }
+      else if(enable_prints) printf("%d::::NULL PARENT SEEN\n",this->getCPUId());
     }
     
     if(st){  // stale data present, compare with the coherent data for T/F sharing stats
@@ -264,10 +266,19 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
 			lcd = st->getData(cache->calcOffset(addr)); //NEEDS CHECK
 			/*True & False Sharing / Approximation Stats*/
 			rcd = ld.data[cache->calcOffset(addr)];
- 	    if (lcd == rcd) 
- 	    	numFalseSharing++;
-      else 
-      	numTrueSharing++;
+
+      //printf("lcd:%d rcd:%d\n", lcd, rcd);
+
+ 	    if (lcd == rcd) {
+        numFalseSharing++;
+
+        numCorrectSpeculations++;
+      }
+      else {
+        numTrueSharing++;
+
+        numIncorrectSpeculations++;
+      } 
     }
     
     /*Fill the line*/
@@ -356,6 +367,7 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
 		
     /*Fill the line with the new written block*/
     if(enable_prints) printf("%d::::PULKIT exiting writeline (miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
+
     fillLine(addr,MSI_MODIFIED,inv_ack.linedata);
     return;
     
@@ -373,6 +385,10 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     writeRemoteAction(addr); 
     numInvalidatesSent++;
 
+    uint32_t prevData = st->getData(cache->calcOffset(addr));
+    if (prevData == val) {
+      numSilentStores++;
+    }
     /*Change the state of the line to Modified to reflect the write*/
     st->changeStateTo(MSI_MODIFIED);
     st->setData(val,cache->calcOffset(addr));
@@ -384,6 +400,12 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     /*Already have it writable: No coherence action required!*/
     numWriteHits++;
     if(enable_prints) printf("%d::::PULKIT exiting writeline (mod hit):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
+    
+    uint32_t prevData = st->getData(cache->calcOffset(addr));
+    if (prevData == val) {
+      numSilentStores++;
+    }
+
     st->setData(val,cache->calcOffset(addr));
     return;
   }

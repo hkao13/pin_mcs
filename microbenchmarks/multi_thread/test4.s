@@ -1,26 +1,27 @@
-	.file	"test2.c"
+	.file	"test4.c"
 	.text
 .Ltext0:
+	.comm	hold,4,4
 	.comm	temp,4,4
 	.comm	lock,40,32
-	.comm	array,131072,64
+	.comm	array,2048,64
 	.globl	INSTRUMENT_ON
 	.type	INSTRUMENT_ON, @function
 INSTRUMENT_ON:
 .LFB2:
-	.file 1 "test2.c"
-	.loc 1 19 0
+	.file 1 "test4.c"
+	.loc 1 20 0
 	.cfi_startproc
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	.loc 1 21 0
-	movl	$1, temp(%rip)
 	.loc 1 22 0
-	movl	$0, %eax
+	movl	$1, temp(%rip)
 	.loc 1 23 0
+	movl	$0, %eax
+	.loc 1 24 0
 	popq	%rbp
 	.cfi_def_cfa 7, 8
 	ret
@@ -31,18 +32,18 @@ INSTRUMENT_ON:
 	.type	INSTRUMENT_OFF, @function
 INSTRUMENT_OFF:
 .LFB3:
-	.loc 1 25 0
+	.loc 1 26 0
 	.cfi_startproc
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	.loc 1 27 0
-	movl	$0, temp(%rip)
 	.loc 1 28 0
-	movl	$0, %eax
+	movl	$0, temp(%rip)
 	.loc 1 29 0
+	movl	$0, %eax
+	.loc 1 30 0
 	popq	%rbp
 	.cfi_def_cfa 7, 8
 	ret
@@ -53,7 +54,7 @@ INSTRUMENT_OFF:
 	.type	accessorThread, @function
 accessorThread:
 .LFB4:
-	.loc 1 31 0
+	.loc 1 32 0
 	.cfi_startproc
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
@@ -64,43 +65,47 @@ accessorThread:
 	subq	$24, %rsp
 	.cfi_offset 3, -24
 	movq	%rdi, -24(%rbp)
-	.loc 1 34 0
+	.loc 1 36 0
 	movl	$lock, %edi
 	call	pthread_mutex_lock
-	.loc 1 36 0
+	.loc 1 38 0
 	movl	$0, %eax
 	call	INSTRUMENT_ON
-	.loc 1 37 0
+	.loc 1 40 0
 	movl	$0, %ebx
 	jmp	.L6
 .L7:
-	.loc 1 38 0 discriminator 3
-	movslq	%ebx, %rax
-	salq	$6, %rax
-	addq	$array, %rax
-	movl	(%rax), %edx
-	movslq	%ebx, %rax
-	salq	$6, %rax
-	addq	$array, %rax
-	movl	(%rax), %eax
-	imull	%edx, %eax
+	.loc 1 41 0 discriminator 3
+	movl	$1717986919, %edx
+	movl	%ebx, %eax
+	imull	%edx
+	sarl	%edx
+	movl	%ebx, %eax
+	sarl	$31, %eax
+	subl	%eax, %edx
+	movl	%edx, %eax
+	movl	%eax, %edx
+	sall	$2, %edx
+	addl	%eax, %edx
+	movl	%ebx, %eax
+	subl	%edx, %eax
 	movslq	%ebx, %rdx
 	salq	$6, %rdx
 	addq	$array, %rdx
 	movl	%eax, (%rdx)
-	.loc 1 37 0 discriminator 3
+	.loc 1 40 0 discriminator 3
 	addl	$1, %ebx
 .L6:
-	.loc 1 37 0 is_stmt 0 discriminator 1
-	cmpl	$2047, %ebx
+	.loc 1 40 0 is_stmt 0 discriminator 1
+	cmpl	$15, %ebx
 	jle	.L7
-	.loc 1 41 0 is_stmt 1
+	.loc 1 45 0 is_stmt 1
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 43 0
+	.loc 1 47 0
 	movl	$lock, %edi
 	call	pthread_mutex_unlock
-	.loc 1 45 0
+	.loc 1 49 0
 	movl	$0, %edi
 	call	pthread_exit
 	.cfi_endproc
@@ -110,82 +115,95 @@ accessorThread:
 	.type	main, @function
 main:
 .LFB5:
-	.loc 1 48 0
+	.loc 1 53 0
 	.cfi_startproc
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
+	pushq	%r12
 	pushq	%rbx
-	subq	$56, %rsp
-	.cfi_offset 3, -24
+	subq	$48, %rsp
+	.cfi_offset 12, -24
+	.cfi_offset 3, -32
 	movl	%edi, -52(%rbp)
 	movq	%rsi, -64(%rbp)
-	.loc 1 48 0
+	.loc 1 53 0
 	movq	%fs:40, %rax
 	movq	%rax, -24(%rbp)
 	xorl	%eax, %eax
-	.loc 1 52 0
+	.loc 1 57 0
 	movl	$0, %esi
 	movl	$lock, %edi
 	call	pthread_mutex_init
-	.loc 1 55 0
+	.loc 1 61 0
 	movl	$0, %eax
 	call	INSTRUMENT_ON
-	.loc 1 56 0
+	.loc 1 62 0
 	movl	$0, %ebx
 	jmp	.L9
 .L10:
-	.loc 1 57 0 discriminator 3
+	.loc 1 63 0 discriminator 3
 	movslq	%ebx, %rax
 	salq	$6, %rax
 	addq	$array, %rax
 	movl	%ebx, (%rax)
-	.loc 1 56 0 discriminator 3
+	.loc 1 62 0 discriminator 3
 	addl	$1, %ebx
 .L9:
-	.loc 1 56 0 is_stmt 0 discriminator 1
-	cmpl	$2047, %ebx
+	.loc 1 62 0 is_stmt 0 discriminator 1
+	cmpl	$15, %ebx
 	jle	.L10
-	.loc 1 59 0 is_stmt 1
+	.loc 1 65 0 is_stmt 1
 	movl	$0, %eax
 	call	INSTRUMENT_OFF
-	.loc 1 61 0
+	.loc 1 68 0
 	leaq	-48(%rbp), %rax
 	movl	$array, %ecx
 	movl	$accessorThread, %edx
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_create
-	.loc 1 62 0
-	leaq	-48(%rbp), %rax
-	addq	$8, %rax
-	movl	$array, %ecx
-	movl	$accessorThread, %edx
-	movl	$0, %esi
-	movq	%rax, %rdi
-	call	pthread_create
-	.loc 1 64 0
+	.loc 1 69 0
 	movq	-48(%rbp), %rax
 	movl	$0, %esi
 	movq	%rax, %rdi
 	call	pthread_join
-	.loc 1 65 0
-	movq	-40(%rbp), %rax
-	movl	$0, %esi
-	movq	%rax, %rdi
-	call	pthread_join
-	.loc 1 67 0
+	.loc 1 72 0
 	movl	$0, %eax
-	.loc 1 68 0
+	call	INSTRUMENT_ON
+	.loc 1 73 0
+	movl	$0, %ebx
+	jmp	.L11
+.L12:
+	.loc 1 74 0 discriminator 3
+	movslq	%ebx, %rax
+	salq	$6, %rax
+	addq	$array, %rax
+	movl	(%rax), %r12d
+	.loc 1 73 0 discriminator 3
+	addl	$1, %ebx
+.L11:
+	.loc 1 73 0 is_stmt 0 discriminator 1
+	cmpl	$15, %ebx
+	jle	.L12
+	.loc 1 76 0 is_stmt 1
+	movl	$0, %eax
+	call	INSTRUMENT_OFF
+	.loc 1 77 0
+	movl	%r12d, hold(%rip)
+	.loc 1 79 0
+	movl	$0, %eax
+	.loc 1 80 0
 	movq	-24(%rbp), %rdx
 	xorq	%fs:40, %rdx
-	je	.L12
+	je	.L14
 	call	__stack_chk_fail
-.L12:
-	addq	$56, %rsp
+.L14:
+	addq	$48, %rsp
 	popq	%rbx
+	popq	%r12
 	popq	%rbp
 	.cfi_def_cfa 7, 8
 	ret
@@ -196,15 +214,15 @@ main:
 	.file 2 "/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h"
 	.section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0x2de
+	.long	0x306
 	.value	0x4
 	.long	.Ldebug_abbrev0
 	.byte	0x8
 	.uleb128 0x1
-	.long	.LASF39
-	.byte	0x1
 	.long	.LASF40
+	.byte	0x1
 	.long	.LASF41
+	.long	.LASF42
 	.quad	.Ltext0
 	.quad	.Letext0-.Ltext0
 	.long	.Ldebug_line0
@@ -385,18 +403,18 @@ main:
 	.long	.LASF29
 	.byte	0x40
 	.byte	0x1
-	.byte	0xc
+	.byte	0xd
 	.long	0x19d
 	.uleb128 0xd
 	.string	"a"
 	.byte	0x1
-	.byte	0xd
+	.byte	0xe
 	.long	0x57
 	.byte	0
 	.uleb128 0xd
 	.string	"c"
 	.byte	0x1
-	.byte	0xe
+	.byte	0xf
 	.long	0x19d
 	.byte	0x4
 	.byte	0
@@ -410,7 +428,7 @@ main:
 	.uleb128 0xe
 	.long	.LASF30
 	.byte	0x1
-	.byte	0x13
+	.byte	0x14
 	.long	0x57
 	.quad	.LFB2
 	.quad	.LFE2-.LFB2
@@ -419,7 +437,7 @@ main:
 	.uleb128 0xe
 	.long	.LASF31
 	.byte	0x1
-	.byte	0x19
+	.byte	0x1a
 	.long	0x57
 	.quad	.LFB3
 	.quad	.LFE3-.LFB3
@@ -428,17 +446,17 @@ main:
 	.uleb128 0xf
 	.long	.LASF32
 	.byte	0x1
-	.byte	0x1f
+	.byte	0x20
 	.long	0x6c
 	.quad	.LFB4
 	.quad	.LFE4-.LFB4
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x222
+	.long	0x22b
 	.uleb128 0x10
 	.string	"arg"
 	.byte	0x1
-	.byte	0x1f
+	.byte	0x20
 	.long	0x6c
 	.uleb128 0x2
 	.byte	0x91
@@ -446,91 +464,111 @@ main:
 	.uleb128 0x11
 	.string	"i"
 	.byte	0x1
-	.byte	0x20
+	.byte	0x21
 	.long	0x57
 	.uleb128 0x1
 	.byte	0x53
+	.uleb128 0x12
+	.string	"b"
+	.byte	0x1
+	.byte	0x22
+	.long	0x57
 	.byte	0
 	.uleb128 0xf
 	.long	.LASF33
 	.byte	0x1
-	.byte	0x30
+	.byte	0x35
 	.long	0x57
 	.quad	.LFB5
 	.quad	.LFE5-.LFB5
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x27b
-	.uleb128 0x12
+	.long	0x28f
+	.uleb128 0x13
 	.long	.LASF34
 	.byte	0x1
-	.byte	0x30
+	.byte	0x35
 	.long	0x57
 	.uleb128 0x3
 	.byte	0x91
 	.sleb128 -68
-	.uleb128 0x12
+	.uleb128 0x13
 	.long	.LASF35
 	.byte	0x1
-	.byte	0x30
-	.long	0x27b
+	.byte	0x35
+	.long	0x28f
 	.uleb128 0x3
 	.byte	0x91
 	.sleb128 -80
 	.uleb128 0x11
 	.string	"acc"
 	.byte	0x1
-	.byte	0x33
-	.long	0x281
+	.byte	0x38
+	.long	0x295
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -64
 	.uleb128 0x11
 	.string	"i"
 	.byte	0x1
-	.byte	0x35
+	.byte	0x3a
 	.long	0x57
 	.uleb128 0x1
 	.byte	0x53
+	.uleb128 0x11
+	.string	"c"
+	.byte	0x1
+	.byte	0x3b
+	.long	0x57
+	.uleb128 0x1
+	.byte	0x5c
 	.byte	0
 	.uleb128 0x5
 	.byte	0x8
 	.long	0x6e
 	.uleb128 0xb
 	.long	0x82
-	.long	0x291
+	.long	0x2a5
 	.uleb128 0xc
 	.long	0x65
 	.byte	0x1
 	.byte	0
-	.uleb128 0x13
+	.uleb128 0x14
 	.long	.LASF36
 	.byte	0x1
 	.byte	0x9
 	.long	0x57
 	.uleb128 0x9
 	.byte	0x3
-	.quad	temp
-	.uleb128 0x13
+	.quad	hold
+	.uleb128 0x14
 	.long	.LASF37
 	.byte	0x1
 	.byte	0xa
+	.long	0x57
+	.uleb128 0x9
+	.byte	0x3
+	.quad	temp
+	.uleb128 0x14
+	.long	.LASF38
+	.byte	0x1
+	.byte	0xb
 	.long	0x16a
 	.uleb128 0x9
 	.byte	0x3
 	.quad	lock
 	.uleb128 0xb
 	.long	0x17c
-	.long	0x2cc
-	.uleb128 0x14
+	.long	0x2f4
+	.uleb128 0xc
 	.long	0x65
-	.value	0x7ff
+	.byte	0x1f
 	.byte	0
-	.uleb128 0x13
-	.long	.LASF38
+	.uleb128 0x14
+	.long	.LASF39
 	.byte	0x1
-	.byte	0x11
-	.long	0x2bb
+	.byte	0x12
+	.long	0x2e4
 	.uleb128 0x9
 	.byte	0x3
 	.quad	array
@@ -777,6 +815,19 @@ main:
 	.byte	0
 	.byte	0
 	.uleb128 0x12
+	.uleb128 0x34
+	.byte	0
+	.uleb128 0x3
+	.uleb128 0x8
+	.uleb128 0x3a
+	.uleb128 0xb
+	.uleb128 0x3b
+	.uleb128 0xb
+	.uleb128 0x49
+	.uleb128 0x13
+	.byte	0
+	.byte	0
+	.uleb128 0x13
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x3
@@ -791,7 +842,7 @@ main:
 	.uleb128 0x18
 	.byte	0
 	.byte	0
-	.uleb128 0x13
+	.uleb128 0x14
 	.uleb128 0x34
 	.byte	0
 	.uleb128 0x3
@@ -806,15 +857,6 @@ main:
 	.uleb128 0x19
 	.uleb128 0x2
 	.uleb128 0x18
-	.byte	0
-	.byte	0
-	.uleb128 0x14
-	.uleb128 0x21
-	.byte	0
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x2f
-	.uleb128 0x5
 	.byte	0
 	.byte	0
 	.byte	0
@@ -833,6 +875,8 @@ main:
 	.section	.debug_line,"",@progbits
 .Ldebug_line0:
 	.section	.debug_str,"MS",@progbits,1
+.LASF41:
+	.string	"test4.c"
 .LASF31:
 	.string	"INSTRUMENT_OFF"
 .LASF24:
@@ -843,7 +887,7 @@ main:
 	.string	"__pthread_mutex_s"
 .LASF18:
 	.string	"__owner"
-.LASF39:
+.LASF40:
 	.string	"GNU C 4.9.2 -mtune=generic -march=x86-64 -g -O0 -fstack-protector-strong"
 .LASF20:
 	.string	"__kind"
@@ -853,17 +897,15 @@ main:
 	.string	"__size"
 .LASF1:
 	.string	"unsigned char"
-.LASF41:
+.LASF42:
 	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF0:
 	.string	"long unsigned int"
-.LASF36:
+.LASF37:
 	.string	"temp"
 .LASF2:
 	.string	"short unsigned int"
-.LASF40:
-	.string	"test2.c"
-.LASF38:
+.LASF39:
 	.string	"array"
 .LASF14:
 	.string	"__pthread_internal_list"
@@ -891,6 +933,8 @@ main:
 	.string	"__align"
 .LASF19:
 	.string	"__nusers"
+.LASF36:
+	.string	"hold"
 .LASF17:
 	.string	"__count"
 .LASF16:
@@ -913,7 +957,7 @@ main:
 	.string	"__next"
 .LASF4:
 	.string	"signed char"
-.LASF37:
+.LASF38:
 	.string	"lock"
 .LASF29:
 	.string	"wonk"

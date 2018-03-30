@@ -38,8 +38,12 @@ public:
   /* New stats for true/false sharing for SCL */
   int numFalseSharing;
   int numTrueSharing;
+  /* Speculative Execution stats */
+  int numCorrectSpeculations;
+  int numIncorrectSpeculations;
 
   /* Additional stats for number of write-backs */
+  int numSilentStores;
   int numReplacements;
   int numWritebacksReceived; // for lower level caches to keep track of writeback received from upstream.
   
