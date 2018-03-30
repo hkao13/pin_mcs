@@ -863,6 +863,8 @@ main:
 	.string	"test2.c"
 .LASF38:
 	.string	"array"
+.LASF41:
+	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF14:
 	.string	"__pthread_internal_list"
 .LASF22:
@@ -877,8 +879,6 @@ main:
 	.string	"__spins"
 .LASF32:
 	.string	"accessorThread"
-.LASF41:
-	.string	"/home/henry/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF34:
 	.string	"argc"
 .LASF7:

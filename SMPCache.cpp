@@ -1,10 +1,12 @@
 #include "SMPCache.h"
 
-SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *main){
+SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev){ 
+//(CPUID, Siblings, Parent, Children), 2nd attribute was cacheVector->same, 3rd was main->next
 
   CPUId = cpuid;
-  allCaches = cacheVector;
-  main_memory = main;
+  siblings = same;
+  parent = next;
+  children = prev;
 
   numReadHits = 0;
   numReadMisses = 0;
@@ -48,7 +50,7 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
                   numWriteOnInvalidMisses,
                   numInvalidatesSent,
                   numReplacements,
-                  numWritebacksRecieved);
+                  numWritebacksReceived);
 
 }
 
@@ -74,7 +76,7 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Invalidates Sent:            %d\n",numInvalidatesSent);
   fprintf(outFile, "\n");
   fprintf(outFile, "Replacements:                %d\n",numReplacements);
-  fprintf(outFile, "Writebacks Recieved:         %d\n",numWritebacksRecieved);
+  fprintf(outFile, "Writebacks Received:         %d\n",numWritebacksReceived);
   fprintf(outFile, "\n");
 }
 
@@ -87,5 +89,5 @@ int SMPCache::getStateAsInt(uint64_t addr){
 }
 
 std::vector<SMPCache * > *SMPCache::getCacheVector(){
-  return allCaches;
+  return siblings;
 }

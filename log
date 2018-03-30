@@ -1,0 +1,298 @@
+commit a51fa28526ea071f018088362e9adf133e2df0bf
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Tue Mar 27 17:30:04 2018 -0400
+
+    added LLC between caches and main mem, not sure if fully works yet
+
+commit 3c3786d62544ad101d565aef15ef150bd10f842f
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 16:47:30 2018 -0400
+
+    compression in makefile and removed SCL stuff
+
+commit 923686dd98fc6261523b34f35ab05002815d4678
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 16:38:03 2018 -0400
+
+    implemented compression, still need to test
+
+commit bb7af07af0dca3193858513e99deaee141944eca
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 16:18:52 2018 -0400
+
+    todo - implement compression module
+
+commit 8dc2fb8d9c85f254efe985f68ac5a580b25dfdaa
+Merge: d26e997 5524cb5
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 16:10:24 2018 -0400
+
+    Merge branch 'master' into xor
+    
+    n empty message aborts
+
+commit 5524cb5e0108ac23c162707ef90227d4acfe59f2
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 16:07:30 2018 -0400
+
+    fixed - dirty bit should be cleared on a a GetS request
+
+commit d26e9975b1cb741b2cd1b9f4b3847d64b8bfb621
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 15:33:48 2018 -0400
+
+    added xorTag array and starting on XOR compression module
+
+commit 1ea4a25c56255bf9dd3553fbaa2c65f28c5973c2
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 23 11:42:43 2018 -0400
+
+    write-back dirty bit bug fix
+
+commit c750f3244e2a440703fb8f8b7b567189c71c1d33
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Thu Mar 22 14:25:49 2018 -0400
+
+    added replacement and writeback stats for verification
+
+commit 83ba7701dfe257a5e9eba777942920b719276908
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Wed Mar 21 18:48:18 2018 -0400
+
+    included dirty bit for more accurate write-back mechanism to main mem
+
+commit c391c27ac25e41c2456da48c564368d89299c4c4
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Tue Mar 20 16:36:25 2018 -0400
+
+    merger and commit of cache heiarchy dev branch
+
+commit 0ac9159217133743e5900730e85c678a7c6889fd
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 16 18:05:09 2018 -0400
+
+    false sharing stat fix
+
+commit 8379c8cd555e8b782ced07c13d674cf363005084
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 16 17:40:57 2018 -0400
+
+    added TLS for writes
+
+commit aaaac3a943aa4204bd22ce996ead6942d2dd2ce9
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 16 17:15:49 2018 -0400
+
+    added thread level storage TLS to solve mismatch between read/writes
+
+commit 35bbdd2b56f47d0d972803cc696aa5f633e99497
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Fri Mar 16 16:11:16 2018 -0400
+
+    small fixes
+
+commit 353ad660c4c9f99526e291c3a85d15ed1f46c821
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Wed Mar 14 21:11:14 2018 -0400
+
+    read sharing miss fix, dump stats updated for false/true shares
+
+commit 88bcd08a2ba82eaaf369f4fa087e713da62ad5d0
+Author: hkao13 <kaohenry1994@live.com>
+Date:   Wed Mar 14 20:20:26 2018 -0400
+
+    added true sharing and false sharing stats
+
+commit 7ce10760d2f121556e99300e43eea9ddc0a06422
+Author: Pulkit Agarwal <pulkit18181@gmail.com>
+Date:   Wed Mar 14 13:59:31 2018 -0400
+
+    changes for invalid line - temp commit for sync to everyone
+
+commit 00702067e0b7f5920f0522690781b6c0d4cf8338
+Author: Victor Kariofillis <vickariofillis@gmail.com>
+Date:   Tue Mar 13 14:02:13 2018 -0700
+
+    fixing segmentation fault because of stacks + bug in return data (st)
+
+commit ce83d6de8e2635f0c8764b7e0fec2a7e9f02fde9
+Author: Pulkit Agarwal <pulkit18181@gmail.com>
+Date:   Mon Mar 12 21:13:00 2018 -0400
+
+    MCS handles values
+
+commit 39a79260c10158a7052bf0ef266602186113a2ac
+Author: Henry Kao <kaohenry1994@live.com>
+Date:   Thu Mar 8 11:41:08 2018 -0800
+
+    small change
+
+commit 26dc222e3b4cb00bb81ce1aa5309983b9f29e76d
+Author: Henry Kao <kaohenry1994@live.com>
+Date:   Thu Mar 8 11:38:16 2018 -0800
+
+    scl begin implementing
+
+commit 10aeb2f0c989d1705eb1239f700e9aa9cd3c7102
+Author: Henry Kao <kaohenry1994@live.com>
+Date:   Wed Mar 7 14:13:51 2018 -0800
+
+    began implementing the scl stuff
+
+commit e51adaf222bfb8785bb2d0d7b4a978a65f2890ec
+Author: Henry Kao <kaohenry1994@live.com>
+Date:   Wed Mar 7 11:44:26 2018 -0800
+
+    implement writeLine with write values, but untested.
+
+commit 659a88fce06f48a024a8aff172dcc5fa0f473fc4
+Author: root <root@ubuntu.(none)>
+Date:   Wed Mar 7 11:11:39 2018 -0800
+
+    reading now stores values inside the cache line
+
+commit c4c23a22038a5a10e7da5975cb9cbb6bb8144b06
+Author: root <root@ubuntu.(none)>
+Date:   Wed Mar 7 10:11:26 2018 -0800
+
+    starting to implement storing values within the cache
+
+commit 06cb609a759419c72dbc7f91e7b6d7e66df0a8c9
+Merge: dd56221 d92c891
+Author: pulkit18181 <pulkit18181@gmail.com>
+Date:   Mon Mar 5 18:18:25 2018 -0500
+
+    Merge branch 'master' of https://github.com/hkao13/pin_mcs into pulkit
+
+commit d92c89136ea88f61d69c99dcd956ba82ea846124
+Author: root <root@ubuntu.(none)>
+Date:   Mon Mar 5 14:57:55 2018 -0800
+
+    makefile now automatically builds MSI_SMPCache
+
+commit dd56221e712eadfc831c576e48b64e4728dd251f
+Merge: 945ccb4 33aecab
+Author: pulkit18181 <pulkit18181@gmail.com>
+Date:   Mon Mar 5 17:52:00 2018 -0500
+
+    Merge branch 'master' of https://github.com/hkao13/pin_mcs into pulkit
+
+commit 33aecab535d706cec7cd7fabb41aafc71f85a594
+Author: root <root@ubuntu.(none)>
+Date:   Mon Mar 5 14:35:34 2018 -0800
+
+    instrumentation multithread changes plus benchmark
+
+commit 945ccb4b8cd459dabfdbd828ae6843e7cd3c8c41
+Author: pulkit18181 <pulkit18181@gmail.com>
+Date:   Sat Mar 3 17:23:11 2018 -0800
+
+    fixed compilation and makefile
+
+commit ded0c6f519be19fdc4bcf51849db2d6f79bd1daf
+Author: pulkit18181 <pulkit18181@gmail.com>
+Date:   Sat Mar 3 15:31:57 2018 -0800
+
+    compile clean and added prints
+
+commit 811e7967683e88871d7c84cf9578f6a3f1e54009
+Author: root <root@ubuntu.(none)>
+Date:   Fri Mar 2 08:44:36 2018 -0800
+
+    new basic microbenchmarks for verification
+
+commit 9d8e8b65a63c9ac289c089c63396a214a92fccdf
+Author: root <root@ubuntu.(none)>
+Date:   Thu Mar 1 13:03:57 2018 -0800
+
+    added total read/write stats to terminal print out
+
+commit 18549bfae0160d3966f8b584ba33b27a54f1cb77
+Author: root <root@ubuntu.(none)>
+Date:   Thu Mar 1 12:45:22 2018 -0800
+
+    changed default output from pin tool to not concise for easier reading, added a few more benchmarks to test
+
+commit 5c2461ebddc10cc2cc06302b8bf1f7396e87ad1c
+Author: Henry <henry@henry-VirtualBox.(none)>
+Date:   Wed Feb 28 15:19:46 2018 -0500
+
+    mircobench stuff
+
+commit dfb6393e368a324fffcc7fe954c8d33a578cff82
+Author: Henry <henry@henry-VirtualBox.(none)>
+Date:   Wed Feb 28 14:26:02 2018 -0500
+
+    adding microbenchs
+
+commit f124feb1c771f9528d43509c94b027591f4ab57b
+Author: Henry <henry@henry-VirtualBox.(none)>
+Date:   Wed Feb 28 14:20:08 2018 -0500
+
+    first commit
+
+commit 09c8875cfa88ed4bb091f52551525a6366e9a78e
+Author: vagrant <vagrant@precise64.(none)>
+Date:   Wed Sep 25 00:08:00 2013 +0000
+
+    Committing changes that work on Ubuntu 11.10 with pinkit 61206
+
+commit daadfccaf3e2ac3d79d9fdb760d054f792df2f66
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Thu Jan 26 14:30:37 2012 -0800
+
+    committing a change to not use a reference implementation by default, and to add a knob to control whether to or not.
+
+commit f47b44c02271c562fa869dd21faef97379702e64
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Thu Jan 26 14:07:00 2012 -0800
+
+    Big commit to fix some protocol issues and clean up the code for release
+
+commit 55ac3d3ab2585d4ee985925ed545a02be1e0ef79
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Mon Apr 11 16:07:26 2011 -0700
+
+    comitting Makefile changes
+
+commit 8cf6db0b50e9e6f3bfbd05da387fd53b22126fa4
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Mon Apr 11 16:01:37 2011 -0700
+
+    added markdown syntax to the readme
+
+commit 78bf383f5db48c305112b8c885817c42ec76a08f
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Tue Mar 1 16:29:47 2011 -0800
+
+    committing the changed files
+
+commit 4aa66df7098bebb7ebfbe83f0aac076d11e0297b
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Fri Jun 11 14:45:25 2010 -0700
+
+    Added better event counters
+
+commit b50fc06df4be1492df4bc9be6e1cba38029d138a
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Wed Jun 9 15:34:04 2010 -0700
+
+    Added definitions for event counters to the readme file
+
+commit ac43412a65f140501606f87e168a0313a90e85d1
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Tue Mar 23 12:58:44 2010 -0700
+
+    Updated README
+
+commit 36d0233cd79dd9f0ddcce806c85f26df790c1b5d
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Tue Mar 23 12:42:38 2010 -0700
+
+    Added License File
+
+commit c1d6f3d52d28266014727ce1bf62078a38e3cd10
+Author: Brandon Lucia <blucia@gmail.com>
+Date:   Tue Mar 23 12:33:47 2010 -0700
+
+    Initial Checkin

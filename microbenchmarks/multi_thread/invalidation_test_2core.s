@@ -1178,8 +1178,8 @@ main:
 	.string	"accessorThreadRead1"
 .LASF35:
 	.string	"accessorThreadRead2"
-.LASF46:
-	.string	"/home/henry/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
+.LASF27:
+	.string	"pthread_mutex_t"
 .LASF31:
 	.string	"INSTRUMENT_OFF"
 .LASF24:
@@ -1214,6 +1214,8 @@ main:
 	.string	"short unsigned int"
 .LASF33:
 	.string	"array"
+.LASF46:
+	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF14:
 	.string	"__pthread_internal_list"
 .LASF22:
@@ -1222,8 +1224,6 @@ main:
 	.string	"main"
 .LASF3:
 	.string	"unsigned int"
-.LASF27:
-	.string	"pthread_mutex_t"
 .LASF28:
 	.string	"long long unsigned int"
 .LASF36:

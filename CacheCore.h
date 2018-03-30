@@ -376,12 +376,14 @@ private:
   Addr_t tag;
   linedata_t linedata;
 
+  Addr_t xorTag; // Henry - extra tag to store which other cache line it is XOR'd with
+
 protected:
   unsigned state;
 
 public:
   bool islineInvalid;
-  bool dirtyBit;
+//  bool dirtyBit;	//DIRTY_BIT
   
   virtual unsigned getState() const {
     return state;
@@ -392,11 +394,22 @@ public:
   }
  
  Addr_t getTag() const { return tag; }
+ 
  void setTag(Addr_t a) {
    I(a);
    tag = a; 
  }
  void clearTag() { islineInvalid = true; }
+
+ Addr_t getXorTag() const { return xorTag; }
+
+ void setXorTag(Addr_t a){
+  I(a);
+  xorTag = a;
+ }
+
+ void clearXorTag() { xorTag = 0; }
+
  void initialize(void *c) { 
    tag = 0;
    islineInvalid = true;
@@ -406,7 +419,7 @@ public:
  void setData(uint32_t   data, Addr_t offset) {
   linedata.data[offset] = data;
   islineInvalid=false;
-  setDirty();
+//  setDirty();	//DIRTY_BIT
  }
 
  void setData(linedata_t data               ) {
@@ -422,11 +435,11 @@ public:
 
  virtual void invalidate() {islineInvalid=true; }
 
- virtual bool isDirty() const { return (dirtyBit==true); }
+// virtual bool isDirty() const { return (dirtyBit==true); }	//DIRTY_BIT
 
- virtual void setDirty() {dirtyBit = true;}
+// virtual void setDirty() {dirtyBit = true;}
 
- virtual void setClean() {dirtyBit = false;}
+// virtual void setClean() {dirtyBit = false;}
 
  virtual bool isLocked() const {
    return false;

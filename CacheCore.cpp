@@ -156,7 +156,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
                              // findLineDebug instead
 
   Line **theSet = &content[this->calcIndex4Tag(tag)];
-  if (enable_prints) printf("searching set#=%d\n",this->calcIndex4Tag(tag));
+  if (enable_prints) printf("searching set#=%d-%d\n",tag,this->calcIndex4Tag(tag));
 
 //   // Check most typical case
 //   if ((*theSet)->getTag() == tag && !(*theSet)->islineInvalid) {
@@ -169,17 +169,15 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
 
   Line **lineHit=0;
   Line **setEnd = theSet + assoc;
-
   // For sure that position 0 is not (short-cut)
   {
-    int ii=0;
+    int ii=0;ii=ii;
     Line **l = theSet + 0;
     while(l < setEnd) {
       if (enable_prints) printf("searching tag=%x findline %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
       l++;
     }
   }
-
 
   // First check for any tags that do match, doesn't matter if invalid
   {
@@ -205,7 +203,6 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
       l++;
     }
   }
-
 
   if (lineHit == 0)
     return 0;

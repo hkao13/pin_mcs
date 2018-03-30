@@ -3,7 +3,6 @@
 
 #include "MESI_SMPCache.h"
 #include "MSI_SMPCache.h"
-#include "SCL_Read_SMPCache.h"
 
 #ifndef PIN
 #include <pthread.h>
@@ -21,14 +20,17 @@ public:
   int num_caches;
 
   //The vector that contains the caches
-  std::vector<SMPCache * > allCaches;
+  std::vector<SMPCache * > privateCaches;
   std::vector<SMPCache * > main; // just a wrapper to hold main_memory
+  std::vector<SMPCache * > llc; // just a wrapper to hold llc
 
   SMPCache * main_memory;
+  SMPCache * llc_memory;
 
   //The lock that protects the vector so it isn't corrupted by concurrent updates
-  PIN_LOCK allCachesLock;
+  PIN_LOCK privateCachesLock;
   PIN_LOCK mainLock;
+  PIN_LOCK LLCLock;
 
   //Cache Parameters
   int cache_size;
@@ -46,17 +48,19 @@ public:
 
   //Adds a cache to the multicachesim
   void createNewCache();
+
+  // Sim for the LLC and XOR LLC
+  void createLLC();
+
+  // Main memory sim.
   void createMain();
-  //attach cache to new cache (For SCL) - HENRY
-  void createNewSCL(SMPCache *attachCache);
- 
+  
   //These three functions implement the CacheInterface interface 
   uint32_t readLine(unsigned long tid, unsigned long rdPC, uint64_t addr);
   void writeLine(unsigned long tid, unsigned long wrPC, uint64_t addr, uint32_t val);
-  void dumpStatsForAllCaches(bool concise);
+  void dumpStatsForPrivateCaches(bool concise);
+  void dumpStatsForLLC(bool concise);
   void dumpStatsForMain(bool concise);
-  // Speculative readLine for SCL - HENRY
-  void readLineSpeculative(unsigned long tid, unsigned long rdPC, uint64_t addr);
 
   //Utility Function to get the cache object that has the specified CPUid
   SMPCache *findCacheByCPUId(unsigned int CPUid);

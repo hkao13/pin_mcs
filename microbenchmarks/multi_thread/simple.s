@@ -1562,6 +1562,8 @@ main:
 	.string	"shrdPtr"
 .LASF18:
 	.string	"_IO_write_end"
+.LASF83:
+	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF84:
 	.string	"_IO_lock_t"
 .LASF41:
@@ -1582,8 +1584,6 @@ main:
 	.string	"_chain"
 .LASF30:
 	.string	"_vtable_offset"
-.LASF83:
-	.string	"/home/henry/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF73:
 	.string	"accessorThread"
 .LASF54:

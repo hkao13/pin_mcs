@@ -13,9 +13,10 @@ public:
   CacheGeneric<StateGeneric<> > *cache, *linkedCache; // one for SCL -HENRY
 
   //A vector of all the caches in the multicachesim
-  std::vector<SMPCache * > *allCaches;
+  std::vector<SMPCache * > *siblings; //Instead of allCaches
+  std::vector<SMPCache * > *children;
   
-  SMPCache *main_memory;
+  SMPCache *parent; //Instead of main_memory
   
   //Stats about the events the cache saw during execution
   int numReadHits;
@@ -40,23 +41,25 @@ public:
 
   /* Additional stats for number of write-backs */
   int numReplacements;
-  int numWritebacksRecieved; // for lower level caches to keep track of writeback recieved from upstream.
+  int numWritebacksReceived; // for lower level caches to keep track of writeback received from upstream.
   
-  SMPCache(int cpuid, std::vector<SMPCache * > * cacheVector, SMPCache *main);
+  SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev);
   virtual ~SMPCache(){}
   
   int getCPUId();
   std::vector<SMPCache * > *getCacheVector();
   //Readline performs a read, and uses readRemoteAction to 
   //check for data in other caches
-  virtual  uint32_t readLine(uint32_t rdPC, uint64_t addr)=0;
-
+  virtual  uint32_t readWord(uint32_t rdPC, uint64_t addr)=0;
+  virtual linedata_t readLine(uint64_t addr)=0;
+  
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
-  virtual void writeLine(uint32_t wrPC, uint64_t addr, uint32_t val)=0;
- 
+  virtual void writeWord(uint32_t wrPC, uint64_t addr, uint32_t val)=0;
+  virtual void writeLine(uint64_t addr, linedata_t ld)=0;
+  
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 
-  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val, bool dirty) = 0;
+  virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val) = 0;
 
   virtual char *Identify() = 0;
 
@@ -68,5 +71,5 @@ public:
 
 };
 
-typedef SMPCache *(*CacheFactory)(int, std::vector<SMPCache*> *, SMPCache*, int, int, int, int, const char *, bool);
+typedef SMPCache *(*CacheFactory)(int, std::vector<SMPCache*> *, SMPCache*, std::vector<SMPCache*> *, int, int, int, int, const char *, bool);
 #endif

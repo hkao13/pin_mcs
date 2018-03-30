@@ -72,7 +72,7 @@ int main(int argc, char** argv){
   for(i = mcs.begin(), e = mcs.end(); i != e; i++){ 
     fprintf(stderr,"%s",(*i)->Identify());
     fprintf(stderr,"--------------------------------\n");
-    (*i)->dumpStatsForAllCaches();
+    (*i)->dumpStatsForPrivateCaches();
     fprintf(stderr,"********************************\n");
   }
 }

@@ -1011,6 +1011,8 @@ main:
 	.string	"short unsigned int"
 .LASF40:
 	.string	"array"
+.LASF43:
+	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF14:
 	.string	"__pthread_internal_list"
 .LASF22:
@@ -1023,8 +1025,6 @@ main:
 	.string	"long long unsigned int"
 .LASF21:
 	.string	"__spins"
-.LASF43:
-	.string	"/home/henry/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF35:
 	.string	"argc"
 .LASF7:
