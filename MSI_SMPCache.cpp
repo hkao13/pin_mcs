@@ -49,21 +49,14 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
     /*No state*/ exit(1);
     return;
   }
-  if(enable_prints) printf("%d::::PULKIT entering fillline2:: addr=%lx\n",this->getCPUId(),addr);
   if ((!st->islineInvalid) && parent!=NULL){
-    if(enable_prints) printf("%d::::PULKIT entering fillline2a:: addr=%lx\n",this->getCPUId(),addr);
-    linedata_t xx = st->getData();
-    uint32_t yy = cache->calcAddr4Tag(st->getTag());
-    if(enable_prints) printf("%d::::PULKIT entering fillline2b:: addr=%lx\n",this->getCPUId(),addr);
-  	parent->writeLine(yy,xx); // Pushing the evicted or replaced line to the next level
-    if(enable_prints) printf("%d::::PULKIT entering fillline2v:: addr=%lx\n",this->getCPUId(),addr);
-  } 
-    if(enable_prints) printf("%d::::PULKIT entering fillline3:: addr=%lx\n",this->getCPUId(),addr);
+  	parent->writeLine(cache->calcAddr4Tag(st->getTag()),st->getData()); // Pushing the evicted or replaced line to the next level
+  	numReplacements++;
+  }
   /*Set the tags to the tags for the newly cached block*/
   st->setTag(cache->calcTag(addr));
   st->setData(val);
 
-    if(enable_prints) printf("%d::::PULKIT entering fillline4:: addr=%lx\n",this->getCPUId(),addr);
   /*Set the state of the block to the msi_state passed in*/
   st->changeStateTo((MSIState_t)msi_state);
   if(enable_prints) printf("%d::::HENRY value set in fillline:: addr=%lx, val=%x\n",this->getCPUId(),addr, st->getData(cache->calcOffset(addr)));
@@ -150,7 +143,7 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
 linedata_t MSI_SMPCache::readLine(uint64_t addr){
 
 	MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine(addr);  
-	linedata_t ld;
+	linedata_t ld = linedata_t();
 	
 	if(!st || (st && !(st->isValid())) ){
 
@@ -177,9 +170,10 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
     
 		  if(parent==NULL){
 				printf("last level reached\n");
-			 	exit(1);
+			 	// exit(1);
 		 	}
-			ld = parent->readLine(addr);
+		 	else 
+				ld = parent->readLine(addr);
     }    
     
     fillLine(addr, MSI_SHARED, ld);
@@ -199,6 +193,7 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
 void MSI_SMPCache::writeLine(uint64_t addr, linedata_t ld){ // only used for evicted lines due to replacement
   if(enable_prints) printf("%d::::PULKIT entering writeline:: addr=%lx\n",this->getCPUId(),addr);
 	MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine(addr);  
+	numWritebacksReceived++;
 
 	if(!st || (st && !(st->isValid())) ){	//Write Miss
 		// printf("inclusiveness not maintained\n");
@@ -253,7 +248,7 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
     else { // Get it from the next (parent) level in the hierarchy
     	if (parent!=NULL)
        ld = parent->readLine(addr);
-       else if(enable_prints) printf("%d::::NULL PARENT SEEN\n",this->getCPUId());
+       else printf("%d::::NULL PARENT SEEN\n",this->getCPUId());
     }
     
     if(st){  // stale data present, compare with the coherent data for T/F sharing stats
@@ -261,10 +256,13 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
 			lcd = st->getData(cache->calcOffset(addr)); //NEEDS CHECK
 			/*True & False Sharing / Approximation Stats*/
 			rcd = ld.data[cache->calcOffset(addr)];
- 	    if (lcd == rcd) 
+			if(enable_prints) printf("%d::::PULKIT TF STATS readline:: READING LINE addr=%lx, offset:%d\n",this->getCPUId(),addr,cache->calcOffset(addr));
+ 	    if (lcd == rcd) {
  	    	numFalseSharing++;
-      else 
+ 	    	if(enable_prints) printf("False Sharing++");}
+      else {
       	numTrueSharing++;
+      	if(enable_prints) printf("True Sharing++");}
     }
     
     /*Fill the line*/
@@ -349,6 +347,8 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
 		// Let the other caches snoop this write access and update their state accordingly.  This action is effectively putting the write on the bus.
     MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);
     numInvalidatesSent++;
+    if (inv_ack.empty)
+    	inv_ack.linedata = 	parent->readLine(addr);
 		inv_ack.linedata.data[cache->calcOffset(addr)] = val;
 		
     /*Fill the line with the new written block*/
