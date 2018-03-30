@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-#define MAXVAL 2048
+#define MAXVAL 4096
 #define NUMTHREADS 2
 
 int hold;
@@ -38,8 +38,8 @@ void *accessorThread1(void *arg){
   INSTRUMENT_ON();
 
 
-  for (i=0; i < MAXVAL; i++) {
-    b = array[i].a;
+  for (i=0; i < MAXVAL*2; i++) {
+    array[i].a = i;
   }
   
 
@@ -96,27 +96,31 @@ int main(int argc, char *argv[]){
   for (i=0; i < MAXVAL*2; i++) {
     array[i].a = i;
   }
+  //for (i=0; i < MAXVAL*2; i++) {
+  //  c = array[i].a;
+  //}
   INSTRUMENT_OFF();
   //for (i=MAXVAL; i < MAXVAL*2; i++) {
   //  c = array[i].a;
   //}
+  usleep(1000);
+  
 
-  hold = c;
-
-  pthread_create(&acc[0],NULL,accessorThread2,(void *)&array);
+  pthread_create(&acc[0],NULL,accessorThread1,(void *)&array);
   pthread_join(acc[0],NULL);
 
 
 
-  for (i=MAXVAL; i < MAXVAL*2; i++) {
+  INSTRUMENT_ON();
+  for (i=0; i < MAXVAL*2; i++) {
     c = array[i].a;
   }
+  INSTRUMENT_OFF();
   hold = c;
 
 
-
-  pthread_create(&acc[1],NULL,accessorThread2,(void *)&array);
-  pthread_join(acc[1],NULL);
+  //pthread_create(&acc[1],NULL,accessorThread2,(void *)&array);
+  //pthread_join(acc[1],NULL);
 
   return 0;
 }

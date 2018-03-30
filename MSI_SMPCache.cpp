@@ -176,10 +176,13 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
     else { // Get it from the next (parent)) level in the hierarchy
     
 		  if(parent==NULL){
-				printf("last level reached\n");
-			 	exit(1);
+				//printf("last level reached\n");
+        ld = linedata_t(); // HENRY, use a NULL line as a placeholder
+			 	//exit(1);
 		 	}
-			ld = parent->readLine(addr);
+      else {
+        ld = parent->readLine(addr);
+      }
     }    
     
     fillLine(addr, MSI_SHARED, ld);
