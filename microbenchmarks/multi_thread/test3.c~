@@ -114,6 +114,8 @@ int main(int argc, char *argv[]){
 
 
   pthread_create(&acc[1],NULL,accessorThread2,(void *)&array);
+
+  
   pthread_join(acc[1],NULL);
 
   return 0;

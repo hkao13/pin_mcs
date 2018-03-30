@@ -1,4 +1,5 @@
 #include "MultiCacheSim.h"
+#include "math.h"
 
 MultiCacheSim::MultiCacheSim(FILE *cachestats, int size, int assoc, int bsize, CacheFactory c){
 
@@ -110,7 +111,6 @@ void MultiCacheSim::createNewCache(){
     #endif
 }
 
-
 void MultiCacheSim::createLLC() {
 
   #ifndef PIN
@@ -120,10 +120,19 @@ void MultiCacheSim::createLLC() {
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(0, &llc, main_memory, &privateCaches, cache_size*128, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, ceil(log2i(num_caches))*cache_size*4, ceil(log2i(num_caches))*cache_assoc*4, cache_bsize, 1, "LRU", false);
   llc.push_back(newcache);
   llc_memory = newcache;
-
+  
+  std::vector<SMPCache * >::iterator cacheIter;
+  std::vector<SMPCache * >::iterator lastCacheIter;
+  for(cacheIter = privateCaches.begin(), 
+      lastCacheIter = privateCaches.end(); 
+      cacheIter != lastCacheIter; 
+      cacheIter++){
+      MSI_SMPCache *child = (MSI_SMPCache*)*cacheIter;
+      child->parent = newcache;
+  }
   #ifndef PIN
   pthread_mutex_unlock(&LLCLock);
   #else
@@ -141,39 +150,25 @@ void MultiCacheSim::createMain(){
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(0, &main, NULL, &llc, cache_size*128, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(17, &main, NULL, &llc, cache_size*64, cache_assoc*64, cache_bsize, 1, "LRU", false);
   main.push_back(newcache);
   main_memory = newcache;
+
+  std::vector<SMPCache * >::iterator cacheIter;
+  std::vector<SMPCache * >::iterator lastCacheIter;
+  for(cacheIter = llc.begin(), 
+      lastCacheIter = llc.end(); 
+      cacheIter != lastCacheIter; 
+      cacheIter++){
+      MSI_SMPCache *child = (MSI_SMPCache*)*cacheIter;
+      child->parent = newcache;
+  }
 
   #ifndef PIN
   pthread_mutex_unlock(&mainLock);
   #else
   PIN_ReleaseLock(&mainLock); 
   #endif
-}
-
-// this is for SCL Caches (MSHRs) to link actual Caches with SCL.
-void MultiCacheSim::createNewSCL(SMPCache *attachCache){
-
-    #ifndef PIN
-    pthread_mutex_lock(&privateCachesLock);
-    #else
-    PIN_GetLock(&privateCachesLock,1); 
-    #endif
-
-    SMPCache * newcache;
-    newcache = this->cacheFactory(num_caches++, &privateCaches, NULL, NULL, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
-    newcache->linkedCache = attachCache -> cache;
-    printf("SCL MSHR %d linked to Cache %d\n", newcache->getCPUId(), attachCache->getCPUId());
-
-    privateCaches.push_back(newcache);
-
-
-    #ifndef PIN
-    pthread_mutex_unlock(&privateCachesLock);
-    #else
-    PIN_ReleaseLock(&privateCachesLock); 
-    #endif
 }
 
 uint32_t MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, uint64_t addr){
@@ -189,7 +184,7 @@ uint32_t MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, uint64_t
     if(!cacheToRead){
       return 0;
     }
-    val = cacheToRead->readLine(rdPC,addr);
+    val = cacheToRead->readWord(rdPC,addr);
     //printf ("addr = %lx, val = %lx\n", addr, val);
 
 
@@ -213,7 +208,7 @@ void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, uint64_t ad
     if(!cacheToWrite){
       return;
     }
-    cacheToWrite->writeLine(wrPC,addr, val);
+    cacheToWrite->writeWord(wrPC,addr, val);
 
 
     #ifndef PIN
@@ -224,30 +219,6 @@ void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, uint64_t ad
     return;
 }
 
-
-// Speculative readLine for SCL - HENRY
-void MultiCacheSim::readLineSpeculative(unsigned long tid, unsigned long rdPC, uint64_t addr){
-    #ifndef PIN
-    pthread_mutex_lock(&privateCachesLock);
-    #else
-    PIN_GetLock(&privateCachesLock,1); 
-    #endif
-
-
-    SMPCache * cacheToRead = findCacheByCPUId(tidToCPUId(tid));
-    if(!cacheToRead){
-      return;
-    }
-    cacheToRead->readLine(rdPC,addr);
-
-
-    #ifndef PIN
-    pthread_mutex_unlock(&privateCachesLock);
-    #else
-    PIN_ReleaseLock(&privateCachesLock); 
-    #endif
-    return;
-}
 
 int MultiCacheSim::getStateAsInt(unsigned long tid, uint64_t addr){
 

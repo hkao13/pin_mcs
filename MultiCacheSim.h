@@ -55,17 +55,12 @@ public:
   // Main memory sim.
   void createMain();
   
-  //attach cache to new cache (For SCL) - HENRY
-  void createNewSCL(SMPCache *attachCache);
- 
   //These three functions implement the CacheInterface interface 
   uint32_t readLine(unsigned long tid, unsigned long rdPC, uint64_t addr);
   void writeLine(unsigned long tid, unsigned long wrPC, uint64_t addr, uint32_t val);
   void dumpStatsForPrivateCaches(bool concise);
   void dumpStatsForLLC(bool concise);
   void dumpStatsForMain(bool concise);
-  // Speculative readLine for SCL - HENRY
-  void readLineSpeculative(unsigned long tid, unsigned long rdPC, uint64_t addr);
 
   //Utility Function to get the cache object that has the specified CPUid
   SMPCache *findCacheByCPUId(unsigned int CPUid);

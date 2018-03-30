@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-#define MAXVAL 1023
+#define MAXVAL 2048
 #define NUMTHREADS 2
 
 int hold;
@@ -91,17 +91,19 @@ int main(int argc, char *argv[]){
   pthread_mutex_init(&lock,NULL);
   register int i;
   register int c;
-
-  for (i=0; i < MAXVAL; i++) {
+  
+  INSTRUMENT_ON();
+  for (i=0; i < MAXVAL*2; i++) {
     array[i].a = i;
   }
+  INSTRUMENT_OFF();
   //for (i=MAXVAL; i < MAXVAL*2; i++) {
   //  c = array[i].a;
   //}
 
   hold = c;
 
-  pthread_create(&acc[0],NULL,accessorThread1,(void *)&array);
+  pthread_create(&acc[0],NULL,accessorThread2,(void *)&array);
   pthread_join(acc[0],NULL);
 
 

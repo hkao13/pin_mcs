@@ -26,10 +26,6 @@ bool do_instrumentation = false;
 
 long int writecount;
 ADDRINT writeaddr; THREADID writetid; ADDRINT writeinst;
-bool useSCL = false;
-std::vector<MultiCacheSim *> SCL_Caches;
-
-
 
 KNOB<bool> KnobStopOnError(KNOB_MODE_WRITEONCE, "pintool",
 			   "stopOnProtoBug", "false", "Stop the Simulation when a deviation is detected between the test protocol and the reference");//default cache is verbose 
@@ -42,9 +38,6 @@ KNOB<bool> KnobUseReference(KNOB_MODE_WRITEONCE, "pintool",
 
 KNOB<bool> KnobConcise(KNOB_MODE_WRITEONCE, "pintool",
 			   "concise", "false", "Print output concisely");//default cache is verbose
-
-KNOB<bool> KnobUseSCL(KNOB_MODE_WRITEONCE, "pintool",
-         "usescl", "false", "Use the SCL"); // SCL Knob
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
 			   "csize", "65536", "Cache Size");//default cache is 64KB
@@ -63,9 +56,6 @@ KNOB<string> KnobProtocol(KNOB_MODE_WRITEONCE, "pintool",
 
 KNOB<string> KnobReference(KNOB_MODE_WRITEONCE, "pintool",
 			   "reference", "obj-intel64/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
-
-KNOB<string> KnobSCL(KNOB_MODE_WRITEONCE, "pintool",
-         "scl", "obj-intel64/SCL_Read_SMPCache.so", "Speculative Cache Lookup file");
 
 #define MAX_NTHREADS 64
 unsigned long instrumentationStatus[MAX_NTHREADS];
@@ -174,15 +164,6 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
   }
   std::vector<MultiCacheSim *>::iterator i,e;
 
-  /* Speculative load */
-  if (useSCL) {
-
-    for(i = SCL_Caches.begin(), e = SCL_Caches.end(); i != e; i++){
-      (*i) -> readLineSpeculative(tid, inst, addr);
-    }
-    
-  }
-
   // Get the value of the memory address, uncomment below to see.
   ADDRINT * addr_ptr = (ADDRINT*)addr;
   //uint32_t value1, value2;
@@ -271,10 +252,6 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
 
     writecount--;
     
-    if (useSCL) {
-      // TODO for write update
-    }
-
     if(useRef){
       ReferenceProtocol->writeLine(writetid,writeinst,writeaddr,tdata->data);
     }
@@ -427,13 +404,14 @@ int main(int argc, char *argv[])
 
     c = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
 
-    c->createLLC();
-    c->createMain(); // Creates the simulated main memory
 
+		// IMPORTANT -> ALWAYS FOLLOW THE ORDER (LOWER LEVEL, THEN NEXT THEN NEXT) ex first all L1, then all L2 (whether shared or not), etc etc
     for(unsigned int i = 0; i < num; i++){
       c->createNewCache();
     } 
-
+    c->createLLC();	 // Creates the simulated Last Level Cache
+    c->createMain(); // Creates the simulated main memory
+    
     Caches.push_back(c);
 
     ct = strtok(NULL,","); 
@@ -466,36 +444,6 @@ int main(int argc, char *argv[])
     } 
 
     printf("---------------------------------------------------------------Using Reference Implementation %s\n",KnobReference.Value().c_str());
-
-  }
-
-  useSCL = KnobUseSCL.Value();
-  if (useSCL && c) {
-    //printf("---------------------------------------------------------------Using Speculative Cache Lookup.\n");
-
-    void *chand = dlopen( KnobSCL.Value().c_str(), RTLD_LAZY | RTLD_LOCAL );
-    if( chand == NULL ){
-      printf("---------------------------------------------------------------Couldn't Load SCL: %s\n", argv[1]);
-      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
-      exit(1);
-    }
-  
-    CacheFactory cfac = (CacheFactory)dlsym(chand, "Create");
-    if( chand == NULL ){
-      printf("---------------------------------------------------------------Couldn't get the Create function\n");
-      printf("---------------------------------------------------------------dlerror: %s\n", dlerror());
-      exit(1);
-    }
-  
-    MultiCacheSim *sc = new MultiCacheSim(stdout, csize, assoc, bsize, cfac);
-
-    for(unsigned int i = 0; i < num; i++){
-      sc->createNewSCL(c->privateCaches[i]);
-    } 
-
-    SCL_Caches.push_back(sc);
-
-    printf("---------------------------------------------------------------Using SCL Implementation %s\n",KnobSCL.Value().c_str());
 
   }
 
