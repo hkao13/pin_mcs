@@ -1,0 +1,10 @@
+1. First modify the parsec-env.sh script with your own path variables.
+
+2. Next run the parsec-env.sh script using:
+	source ./parsec-env.sh
+
+3. Run Mario's script instrument-parsec.sh using:
+	 ./instrument-parsec.sh -p "~/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/obj-intel64/mcs.so -numcaches 2 -protos ~/HostShare/ubuntu15VM_share/pin/source/tools/pin_mcs/obj-intel64/MSI_SMPCache.so"
+
+	Note that full paths are needed to specify the pintool location as well as whatever the pintool needs as an option, in this example the protocol object. Also note the quotes around the pintool argument.
+

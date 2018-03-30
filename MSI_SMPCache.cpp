@@ -259,9 +259,11 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
 			if(enable_prints) printf("%d::::PULKIT TF STATS readline:: READING LINE addr=%lx, offset:%d\n",this->getCPUId(),addr,cache->calcOffset(addr));
  	    if (lcd == rcd) {
  	    	numFalseSharing++;
+		numCorrectSpeculations++;
  	    	if(enable_prints) printf("False Sharing++");}
       else {
       	numTrueSharing++;
+        numIncorrectSpeculations++;
       	if(enable_prints) printf("True Sharing++");}
     }
     
@@ -370,6 +372,10 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     writeRemoteAction(addr); 
     numInvalidatesSent++;
 
+    uint32_t prevData = st->getData(cache->calcOffset(addr));
+    if (prevData == val) {
+      numSilentStores++;
+    }
     /*Change the state of the line to Modified to reflect the write*/
     st->changeStateTo(MSI_MODIFIED);
     st->setData(val,cache->calcOffset(addr));
@@ -381,6 +387,12 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     /*Already have it writable: No coherence action required!*/
     numWriteHits++;
     if(enable_prints) printf("%d::::PULKIT exiting writeline (mod hit):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
+    
+    uint32_t prevData = st->getData(cache->calcOffset(addr));
+    if (prevData == val) {
+      numSilentStores++;
+    }
+
     st->setData(val,cache->calcOffset(addr));
     return;
   }

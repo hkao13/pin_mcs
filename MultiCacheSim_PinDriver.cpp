@@ -22,8 +22,6 @@ bool useRef = false;
 //bool enable_prints = false;
 bool henry_debug = false;
 
-bool do_instrumentation = false;
-
 long int writecount;
 ADDRINT writeaddr; THREADID writetid; ADDRINT writeinst;
 
@@ -38,6 +36,9 @@ KNOB<bool> KnobUseReference(KNOB_MODE_WRITEONCE, "pintool",
 
 KNOB<bool> KnobConcise(KNOB_MODE_WRITEONCE, "pintool",
 			   "concise", "false", "Print output concisely");//default cache is verbose
+
+KNOB<bool> KnobInstrumentAll(KNOB_MODE_WRITEONCE, "pintool",
+          "instrAll", "false", "Instrument everything - for parsec");
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
 			   "csize", "65536", "Cache Size");//default cache is 64KB
@@ -97,53 +98,36 @@ VOID TurnInstrumentationOff(ADDRINT tid){
   instrumentationStatus[PIN_ThreadId()] = false; 
 }
 
-VOID ToggleInstrumentation()
-{
-  do_instrumentation = !do_instrumentation;
-}
-
 VOID instrumentRoutine(RTN rtn, VOID *v){
     
-  if(strstr(RTN_Name(rtn).c_str(),"INSTRUMENT_OFF")){
-    RTN_Open(rtn);
-    RTN_InsertCall(rtn, 
-                   IPOINT_BEFORE, 
-                   (AFUNPTR)TurnInstrumentationOff, 
-                   IARG_THREAD_ID,
-                   IARG_END);
-    RTN_Close(rtn);
+  if (!KnobInstrumentAll.Value()) {
+
+    if(strstr(RTN_Name(rtn).c_str(),"INSTRUMENT_OFF")){
+      RTN_Open(rtn);
+      RTN_InsertCall(rtn, 
+                     IPOINT_BEFORE, 
+                     (AFUNPTR)TurnInstrumentationOff, 
+                     IARG_THREAD_ID,
+                     IARG_END);
+      RTN_Close(rtn);
+    }
+    if(strstr(RTN_Name(rtn).c_str(),"INSTRUMENT_ON")){
+      RTN_Open(rtn);
+      RTN_InsertCall(rtn, 
+                     IPOINT_BEFORE, 
+                     (AFUNPTR)TurnInstrumentationOn, 
+                     IARG_THREAD_ID,
+                     IARG_END);
+      RTN_Close(rtn);
+    }    
+
   }
-   
   
-  if(strstr(RTN_Name(rtn).c_str(),"INSTRUMENT_ON")){
-    RTN_Open(rtn);
-    RTN_InsertCall(rtn, 
-                   IPOINT_BEFORE, 
-                   (AFUNPTR)TurnInstrumentationOn, 
-                   IARG_THREAD_ID,
-                   IARG_END);
-    RTN_Close(rtn);
-  }
 
 }
 
 VOID instrumentImage(IMG img, VOID *v)
 {
-
-  RTN rtn = RTN_FindByName(img, "start_instrumentation");
-
-  if(RTN_Valid(rtn)) {
-    RTN_Open(rtn);
-
-    RTN_InsertCall(
-        rtn,
-        IPOINT_BEFORE,
-        AFUNPTR(ToggleInstrumentation),
-        IARG_END
-        );
-
-    RTN_Close(rtn);
-  }
 
 }
 
@@ -362,8 +346,15 @@ int main(int argc, char *argv[])
 
   PIN_InitLock(&globalLock);
   
+  
   for(int i = 0; i < MAX_NTHREADS; i++){
     instrumentationStatus[i] = false;
+  }
+
+  if (KnobInstrumentAll.Value()) {
+    for(int i = 0; i < MAX_NTHREADS; i++){
+      instrumentationStatus[i] = true;
+    }
   }
 
   // Obtain  a key for TLS storage.
