@@ -14,7 +14,11 @@ Options:
 -p pin tool
 "
 # defaults
+<<<<<<< HEAD
 benchmarks=(splash2x.ocean_ncp)
+=======
+benchmarks=(blackscholes)
+>>>>>>> 2fed6c88ca30df8ae3fc20234944eaa708c5d085
 threads=2
 inputs=(test)
 runs=1
@@ -163,7 +167,11 @@ do
       # output the system configuration and info
       lscpu > $output_dir/lscpu.txt
 
+<<<<<<< HEAD
       pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 --"
+=======
+      pin_command="$pin -injection child -mt -t $pin_tool --"
+>>>>>>> 2fed6c88ca30df8ae3fc20234944eaa708c5d085
       if [ "$pin_tool" == "none" ]
       then
         pin_command=""
@@ -172,10 +180,15 @@ do
       time_command="/usr/bin/time -f \"%e,%U,%S,%K,%M,%D,%F,%R,%W,%c,%w\" -o $output_dir/info.txt"
 
       # run benchmark
+<<<<<<< HEAD
       # $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
       #  -s "$time_command $pin_command"
       $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
         -s "$pin_command"
+=======
+      $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
+        -s "$time_command $pin_command"
+>>>>>>> 2fed6c88ca30df8ae3fc20234944eaa708c5d085
 
       gzip $output_dir/$file
 
