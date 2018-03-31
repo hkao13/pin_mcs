@@ -51,12 +51,13 @@ public:
 
   // BEGIN CacheCore interface 
   bool isValid() const {
-    return (state != (unsigned)MSI_INVALID);
+    if ( hit1) return (islineInvalid1==false);
+    if (!hit1) return (islineInvalid2==false); else return 0;
   }
 
   void invalidate() {
-    clearTag();
-    state = (unsigned)MSI_INVALID;
+    if ( hit1) islineInvalid1=false;
+    if (!hit1) islineInvalid2=false;
   }
     
   bool isLocked() const {
@@ -65,18 +66,15 @@ public:
   // END CacheCore interface
 
   unsigned getState() const {
-    return state;
+    if ( hit1) return state1;
+    if (!hit1) return state2; else return 0;
   }
 
   void changeStateTo(MSIState_t newstate) {
     // not supposed to invalidate through this interface
     I(newstate != (unsigned)MSI_INVALID);
-    state = (unsigned)newstate;
-
-    //if (newstate == (unsigned)MSI_MODIFIED) {	//DIRTY_BIT
-      //setDirty();
-      //printf("setting dirty bit \n");
-    //}
+    if ( hit1) state1 = (unsigned)newstate;
+    if (!hit1) state2 = (unsigned)newstate;
   }
 
 };

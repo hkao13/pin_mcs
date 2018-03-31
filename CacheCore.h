@@ -376,70 +376,141 @@ private:
   Addr_t tag;
   linedata_t linedata;
 
-  Addr_t xorTag; // Henry - extra tag to store which other cache line it is XOR'd with
+  Addr_t tag1;
+  linedata_t linedata1;
+
+  Addr_t tag2;
+  linedata_t linedata2;
 
 protected:
   unsigned state;
+  unsigned state1;
+  unsigned state2;
+  bool islineInvalid;
+  bool islineInvalid1;
+  bool islineInvalid2;
 
 public:
-  bool islineInvalid;
-//  bool dirtyBit;	//DIRTY_BIT
+  bool hit1;
+  bool is_xor_cache;
   
-  virtual unsigned getState() const {
-    return state;
-  }
-
   virtual ~StateGeneric() {
     tag = 0;
+    tag1 = 0;
+    tag2 = 0;
   }
  
- Addr_t getTag() const { return tag; }
- 
- void setTag(Addr_t a) {
-   I(a);
-   tag = a; 
- }
- void clearTag() { islineInvalid = true; }
-
- Addr_t getXorTag() const { return xorTag; }
-
- void setXorTag(Addr_t a){
-  I(a);
-  xorTag = a;
- }
-
- void clearXorTag() { xorTag = 0; }
 
  void initialize(void *c) { 
    tag = 0;
    islineInvalid = true;
+   tag1 = 0;
+   tag2 = 0;
+   islineInvalid1 = true;
+   islineInvalid2 = true;
  }
 
- // Set cache line data at the given offset - HENRY
+ // -------------------------------------------------------
+ // ------------------- WRAPPERS --------------------------
+ // -------------------------------------------------------
+  virtual unsigned getState() const {
+    if ( hit1) return state1;
+    if (!hit1) return state2; else return 0;
+  }
+ Addr_t getTag() const {
+   if ( hit1) return tag1;
+   if (!hit1) return tag2; else return 0;
+ }
+ Addr_t getTag_paired() const {
+   if ( hit1) return tag1;
+   if (!hit1) return tag2; else return 0;
+ }
+ void setTag(Addr_t a) {
+   I(a);
+   if ( hit1) tag1 = a; 
+   if (!hit1) tag2 = a; 
+ }
+ void clearTag() {
+   if ( hit1) islineInvalid1 = true;
+   if (!hit1) islineInvalid2 = true;
+ }
  void setData(uint32_t   data, Addr_t offset) {
-  linedata.data[offset] = data;
-  islineInvalid=false;
-//  setDirty();	//DIRTY_BIT
+  if ( hit1) linedata1.data[offset] = data;
+  if (!hit1) linedata2.data[offset] = data;
+  if ( hit1) islineInvalid1=false;
+  if (!hit1) islineInvalid2=false;
+ }
+ void setData(linedata_t data) {
+  if ( hit1) linedata1      = data;
+  if (!hit1) linedata2      = data;
+  if ( hit1) islineInvalid1 = false;
+  if (!hit1) islineInvalid2 = false;
+ }
+ uint32_t   getData (Addr_t offset)  {
+   if ( hit1) return linedata1.data[offset];
+   if (!hit1) return linedata2.data[offset]; else return 0;
+ }
+ linedata_t getData ()  {
+   if ( hit1) return linedata1;
+   if (!hit1) return linedata2; else return linedata1;
+ }
+ virtual bool isValid() const {
+   if ( hit1) return (islineInvalid1==false);
+   if (!hit1) return (islineInvalid2==false); else return 0;
+ }
+ virtual void invalidate() {
+   if ( hit1) islineInvalid1=true;
+   if (!hit1) islineInvalid2=true;
  }
 
- void setData(linedata_t data               ) {
-  linedata              = data;
-  islineInvalid=false;
-}
 
- // Get the cache line data at the given offset - HENRY
- uint32_t   getData (Addr_t offset)  {return linedata.data[offset];}
- linedata_t getData (             )  {return linedata        ;}
 
- virtual bool isValid() const { return (islineInvalid==false); }
+ // -------------------------------------------------------
+ // ------------------- PART 1 ----------------------------
+ // -------------------------------------------------------
+ Addr_t getTag1() const { return tag1; }
+ void setTag1(Addr_t a){
+  I(a);
+  tag1 = a;
+ }
+ void clearTag1() { tag1 = 0; }
+ void setData1(uint32_t   data, Addr_t offset) {
+   linedata1.data[offset] = data;
+   islineInvalid1=false;
+ }
+ void setData1(linedata_t data               ) {
+   linedata1              = data;
+   islineInvalid1=false;
+ }
+ uint32_t   getData1 (Addr_t offset)  {return linedata1.data[offset];}
+ linedata_t getData1 (             )  {return linedata1        ;}
+ bool isValid1() const { return (islineInvalid1==false); }
+ void invalidate1() {islineInvalid1=true; }
 
- virtual void invalidate() {islineInvalid=true; }
 
-// virtual bool isDirty() const { return (dirtyBit==true); }	//DIRTY_BIT
+ // -------------------------------------------------------
+ // ------------------- PART 2 ----------------------------
+ // -------------------------------------------------------
+ Addr_t getTag2() const { return tag2; }
+ void setTag2(Addr_t a){
+  I(a);
+  tag2 = a;
+ }
+ void clearTag2() { tag2 = 0; }
+ void setData2(uint32_t   data, Addr_t offset) {
+   linedata2.data[offset] = data;
+   islineInvalid2=false;
+ }
+ void setData2(linedata_t data               ) {
+   linedata2              = data;
+   islineInvalid2=false;
+ }
+ uint32_t   getData2 (Addr_t offset)  {return linedata2.data[offset];}
+ linedata_t getData2 (             )  {return linedata2        ;}
+ bool isValid2() const { return (islineInvalid2==false); }
+ void invalidate2() {islineInvalid2=true; }
 
-// virtual void setDirty() {dirtyBit = true;}
 
-// virtual void setClean() {dirtyBit = false;}
 
  virtual bool isLocked() const {
    return false;

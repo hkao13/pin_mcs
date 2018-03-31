@@ -156,17 +156,6 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
                              // findLineDebug instead
 
   Line **theSet = &content[this->calcIndex4Tag(tag)];
-  if (enable_prints) printf("searching set#=%d-%d\n",tag,this->calcIndex4Tag(tag));
-
-//   // Check most typical case
-//   if ((*theSet)->getTag() == tag && !(*theSet)->islineInvalid) {
-//     //this assertion is not true for SMP; it is valid to return invalid line
-// #if !defined(SESC_SMP) && !defined(SESC_CRIT)
-//     I((*theSet)->isValid());  
-// #endif
-//     return *theSet;
-//   }
-
   Line **lineHit=0;
   Line **setEnd = theSet + assoc;
   // For sure that position 0 is not (short-cut)
@@ -174,7 +163,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
     int ii=0;ii=ii;
     Line **l = theSet + 0;
     while(l < setEnd) {
-      if (enable_prints) printf("searching tag=%x findline %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
+      if (enable_prints) printf("searching tag=%x findline %d tag1=%x invalid1=%d tag2=%x invalid2=%d\n",tag,ii++, (*l)->getTag1(),!(*l)->isValid1(), (*l)->getTag2(), !(*l)->isValid2());
       l++;
     }
   }
@@ -183,8 +172,14 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
   {
     Line **l = theSet + 0;
     while(l < setEnd) {
-      if ((*l)->getTag() == tag) {
+      if ((*l)->getTag1() == tag) {
         lineHit = l;
+	(*l)->hit1=true;
+        break;
+      }
+      if ((*l)->getTag2() == tag && (*l)->is_xor_cache) {
+        lineHit = l;
+	(*l)->hit1 = false;
         break;
       }
       l++;
@@ -196,8 +191,14 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
   {
     Line **l = theSet + 0;
     while(l < setEnd) {
-      if ((*l)->getTag() == tag && !(*l)->islineInvalid) {
+      if ((*l)->getTag1() == tag && !!(*l)->isValid1()) {
         lineHit = l;
+	(*l)->hit1 = true;
+        break;
+      }
+      if ((*l)->getTag2() == tag && !!(*l)->isValid2() && (*l)->is_xor_cache) {
+        lineHit = l;
+	(*l)->hit1 = false;
         break;
       }
       l++;
@@ -319,19 +320,13 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
 *CacheAssoc<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked)
 { 
 
-  Addr_t tag    = this->calcTag(addr);
-  Line **theSet = &content[this->calcIndex4Tag(tag)];
-  if (enable_prints) printf("searching set#=%d\n",this->calcIndex4Tag(tag));
+  Addr_t tag      = this->calcTag(addr);
+  Line **theSet   = &content[this->calcIndex4Tag(tag)];
+  Line **lineHit  = 0;
+  Line **lineFree = 0; // Order of preference, invalid, locked
+  Line **setEnd   = theSet + assoc;
 
-  // Check most typical case
-  if ((*theSet)->getTag() == tag && !(*theSet)->islineInvalid) {
-    GI(tag,(*theSet)->isValid());
-    return *theSet;
-  }
-
-  Line **lineHit=0;
-  Line **lineFree=0; // Order of preference, invalid, locked
-  Line **setEnd = theSet + assoc;
+  if (enable_prints) printf("flr searching set#=%d\n",this->calcIndex4Tag(tag));
   
   // Start in reverse order so that get the youngest invalid possible,
   // and the oldest isLocked possible (lineFree)
@@ -339,16 +334,29 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
     int ii=0;
     Line **l = setEnd -1;
     while(l >= theSet) {
-      if (enable_prints) printf("searching tag=%x replace %d tag=%x invalid=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid);
-      //printf("searching tag=%x replace %d tag=%x invalid=%d dirty=%d\n",tag,ii++, (*l)->getTag(), (*l)->islineInvalid, (*l)->dirtyBit);
-      if ((*l)->getTag() == tag && !(*l)->islineInvalid) {
+      if (enable_prints) printf("searching tag=%x replace %d tag1=%x invalid1=%d tag2=%x invalid2=%d\n",tag,ii++, (*l)->getTag1(), !(*l)->isValid1(), (*l)->getTag2(), !(*l)->isValid2());
+      if ((*l)->getTag1() == tag && !!(*l)->isValid1()) {
         lineHit = l;
+	(*l)->hit1 = true;
         break;
       }
-      if (!(*l)->isValid() && (*l)->islineInvalid)
+      if ((*l)->getTag2() == tag && !!(*l)->isValid2() && (*l)->is_xor_cache) {
+        lineHit = l;
+	(*l)->hit1 = true;
+        break;
+      }
+      if (!(*l)->isValid1() && !(*l)->isValid1()){
+	(*l)->hit1 = true;
         lineFree = l;
-      else if (lineFree == 0 && !(*l)->isLocked())
+      }
+      else if (!(*l)->isValid2() && !(*l)->isValid2() && (*l)->is_xor_cache){
+	(*l)->hit1 = false;
         lineFree = l;
+      }
+      else if (lineFree == 0 && !(*l)->isLocked()){
+	(*l)->hit1 = true;
+        lineFree = l;
+      }
 
       // If line is invalid, isLocked must be false
       GI(!(*l)->isValid(), !(*l)->isLocked()); 
@@ -508,8 +516,8 @@ typename CacheDMSkew<State, Addr_t, Energy>::Line *CacheDMSkew<State, Addr_t, En
   }
 
   // BEGIN Skew cache
-  Addr_t tag2 = this->calcTag(addr ^ (addr>>7));
-  line = content[this->calcIndex4Tag(tag2)];
+  Addr_t tag_alt = this->calcTag(addr ^ (addr>>7));
+  line = content[this->calcIndex4Tag(tag_alt)];
 
   if (line->getTag() == tag) {
     I(line->isValid());
@@ -539,8 +547,8 @@ typename CacheDMSkew<State, Addr_t, Energy>::Line
     return 0;
 
   // BEGIN Skew cache
-  Addr_t tag2 = this->calcTag(addr ^ (addr>>7));
-  Line *line2 = content[this->calcIndex4Tag(tag2)];
+  Addr_t tag_alt = this->calcTag(addr ^ (addr>>7));
+  Line *line2 = content[this->calcIndex4Tag(tag_alt)];
 
   if (line2->getTag() == tag) {
     I(line2->isValid());
