@@ -266,9 +266,10 @@ linedata_t MSI_SMPCache::children_readLine(uint64_t addr){
 	else{
 		ld = rrs.linedata;
 		numChildrenRequests++;
+		return ld;
 	}
 
-	return ld;
+	
 
 }
 
