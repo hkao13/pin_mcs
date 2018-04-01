@@ -100,7 +100,7 @@ void MultiCacheSim::createNewCache(){
     #endif
 
     SMPCache * newcache;
-    newcache = this->cacheFactory(num_caches++, &privateCaches, llc_memory, NULL, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
+    newcache = this->cacheFactory(num_caches++, &privateCaches, llc_memory, NULL, false, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
     privateCaches.push_back(newcache);
 
 
@@ -120,7 +120,7 @@ void MultiCacheSim::createLLC() {
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, ceil(log2i(num_caches))*cache_size*4, ceil(log2i(num_caches))*cache_assoc*4, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, true, ceil(log2i(num_caches))*cache_size*4, ceil(log2i(num_caches))*cache_assoc*4, cache_bsize, 1, "LRU", false);
   llc.push_back(newcache);
   llc_memory = newcache;
   
@@ -150,7 +150,7 @@ void MultiCacheSim::createMain(){
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(17, &main, NULL, &llc, cache_size*64, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(17, &main, NULL, &llc, false, cache_size*64, cache_assoc*64, cache_bsize, 1, "LRU", false);
   main.push_back(newcache);
   main_memory = newcache;
 

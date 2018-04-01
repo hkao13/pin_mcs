@@ -17,6 +17,7 @@ public:
   std::vector<SMPCache * > *children;
   
   SMPCache *parent; //Instead of main_memory
+  bool is_xor_cache;
   
   //Stats about the events the cache saw during execution
   int numReadHits;
@@ -77,5 +78,5 @@ public:
 
 };
 
-typedef SMPCache *(*CacheFactory)(int, std::vector<SMPCache*> *, SMPCache*, std::vector<SMPCache*> *, int, int, int, int, const char *, bool);
+typedef SMPCache *(*CacheFactory)(int, std::vector<SMPCache*> *, SMPCache*, std::vector<SMPCache*> *, bool, int, int, int, int, const char *, bool);
 #endif

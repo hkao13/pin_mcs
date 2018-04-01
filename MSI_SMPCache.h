@@ -51,6 +51,7 @@ public:
                std::vector<SMPCache * > * same, //siblings
                SMPCache * next, 								//parent
                std::vector<SMPCache * > * prev,	//children
+               bool isxor,
                int csize, 
                int cassoc, 
                int cbsize, 

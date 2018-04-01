@@ -12,6 +12,7 @@ MSI_SMPCache::MSI_SMPCache(int cpuid,
                            std::vector<SMPCache * > * same,    //siblings
                            SMPCache * next,                    //parent
                            std::vector<SMPCache * > * prev,    //children
+                           bool isxor,
                            int csize,
                            int cassoc,
                            int cbsize,
@@ -27,6 +28,7 @@ MSI_SMPCache::MSI_SMPCache(int cpuid,
                                             cbsize,
                                             caddressable,
                                             repPol,
+                                            isxor,
                                             cskew);
   cache = (CacheGeneric<StateGeneric<> >*)c;
 
@@ -492,8 +494,8 @@ MSI_SMPCache::~MSI_SMPCache(){
 
 }
 
-extern "C" SMPCache *Create(int num, std::vector<SMPCache*> *same, SMPCache* next, std::vector<SMPCache*> *prev, int csize, int casso, int bs, int addrble, const char *repl, bool skw){
+extern "C" SMPCache *Create(int num, std::vector<SMPCache*> *same, SMPCache* next, std::vector<SMPCache*> *prev, bool isxor, int csize, int casso, int bs, int addrble, const char *repl, bool skw){
   //cvec->same, main->next
-  return new MSI_SMPCache(num,same,next,prev,csize,casso,bs,addrble,repl,skw);
+  return new MSI_SMPCache(num,same,next,prev,isxor,csize,casso,bs,addrble,repl,skw);
 
 }

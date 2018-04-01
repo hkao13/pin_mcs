@@ -41,7 +41,7 @@ static bool enable_prints = false;
 // Class CacheGeneric, the combinational logic of Cache
 //
 template<class State, class Addr_t, bool Energy>
-CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create(int32_t size, int32_t assoc, int32_t bsize, int32_t addrUnit, const char *pStr, bool skew)
+CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create(int32_t size, int32_t assoc, int32_t bsize, int32_t addrUnit, const char *pStr, bool isxor, bool skew)
 {
   CacheGeneric *cache;
 
@@ -53,10 +53,10 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
     cache = new CacheDM<State, Addr_t, Energy>(size, bsize, addrUnit, pStr);
   }else if(size == (assoc * bsize)) {
     // TODO: Fully assoc can use STL container for speed
-    cache = new CacheAssoc<State, Addr_t, Energy>(size, assoc, bsize, addrUnit, pStr);
+    cache = new CacheAssoc<State, Addr_t, Energy>(size, assoc, bsize, addrUnit, isxor, pStr);
   }else{
     // Associative Cache
-    cache = new CacheAssoc<State, Addr_t, Energy>(size, assoc, bsize, addrUnit, pStr);
+    cache = new CacheAssoc<State, Addr_t, Energy>(size, assoc, bsize, addrUnit, isxor, pStr);
   }
 
   I(cache);
@@ -117,7 +117,7 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
  *********************************************************/
 
 template<class State, class Addr_t, bool Energy>
-CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32_t blksize, int32_t addrUnit, const char *pStr) 
+CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32_t blksize, int32_t addrUnit, bool isxor, const char *pStr) 
   : CacheGeneric<State, Addr_t, Energy>(size, assoc, blksize, addrUnit) 
 {
   I(numLines>0);
@@ -137,6 +137,8 @@ CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32
   for(uint32_t i = 0; i < numLines; i++) {
     mem[i].initialize(this);
     mem[i].invalidate();
+    mem[i].is_xor_cache = isxor;
+    mem[i].invalidate2();
     content[i] = &mem[i];
   }
   
