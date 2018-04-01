@@ -40,7 +40,7 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
 
 void SMPCache::conciseDumpStatsToFile(FILE* outFile){
 
-  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
                   CPUId,
                   numReadHits,
                   numReadMisses,
@@ -57,7 +57,8 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
                   numWriteOnInvalidMisses,
                   numInvalidatesSent,
                   numReplacements,
-                  numWritebacksReceived);
+                  numWritebacksReceived,
+                  numChildrenRequests);
 
 }
 
@@ -90,7 +91,6 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Incorrect Speculations:         %6d\n",numIncorrectSpeculations);
   fprintf(outFile, "\n");
   fprintf(outFile, "Children Requests:         %6d\n",numChildrenRequests);
-  fprintf(outFile, "\n");
 }
 
 int SMPCache::getCPUId(){

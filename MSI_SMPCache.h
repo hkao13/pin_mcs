@@ -62,6 +62,7 @@ public:
   //check for data in other caches
   
   virtual uint32_t readWord(uint32_t rdPC, uint64_t addr);//SMPCache Interface Function
+  virtual linedata_t readLine(uint64_t addr);
   virtual linedata_t children_readLine(uint64_t addr);
   virtual MSI_SMPCache::RemoteReadService readRemoteAction(uint64_t addr);
   virtual MSI_SMPCache::RemoteReadService children_readRemoteAction(uint64_t addr);

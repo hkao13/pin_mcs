@@ -34,6 +34,8 @@ public:
   int numWriteOnSharedMisses;
   int numWriteOnInvalidMisses;
   int numInvalidatesSent;
+  
+  numChildrenRequests;
 
   /* New stats for true/false sharing for SCL */
   int numFalseSharing;
