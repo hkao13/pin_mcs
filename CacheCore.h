@@ -48,6 +48,18 @@ struct linedata_t {
     for (int ii=0; ii<256; ii++)
       data[ii] = INT_NAN; //FIXME-HENRY: use INT32_MAX as an interger NaN value since NaN is only for floats.
   }
+  bool operator==(linedata_t rhs) {
+		for (int ii=0; ii<256; ii++)
+	    if (data[ii]!=rhs.data[ii])
+	    	return 0;
+		return 1;	    	
+	}
+  linedata_t operator^(linedata_t rhs) {
+		linedata_t compressedLine;
+		for (int i = 0; i < 256; i++)
+			compressedLine.data[i] = data[i] ^ rhs.data[i];
+		return compressedLine;
+	}
 };
 
 #ifdef SESC_ENERGY
@@ -425,6 +437,14 @@ public:
    if ( hit1) return tag1;
    if (!hit1) return tag2; else return 0;
  }
+ Addr_t compare_with_paired(linedata_t line) const {
+   if (!hit1) return (line==linedata1);
+   if ( hit1) return (line==linedata2); else return (line==linedata1);
+ }
+ Addr_t getState_paired() const {
+   if (!hit1) return state1;
+   if ( hit1) return state2; else return 0;
+ }
  void setTag(Addr_t a) {
    I(a);
    if ( hit1) tag1 = a; 
@@ -453,6 +473,9 @@ public:
  linedata_t getData ()  {
    if ( hit1) return linedata1;
    if (!hit1) return linedata2; else return linedata1;
+ }
+ linedata_t getData_xor ()  {
+   return linedata1^linedata2;
  }
  virtual bool isValid() const {
    if ( hit1) return (islineInvalid1==false);

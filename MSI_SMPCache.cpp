@@ -174,15 +174,38 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
         // printf("last level reached\n");
         // exit(1);
       }
-      else
-        ld = parent->readLine(addr);
+      else{
+				ld = parent->readLine(addr);
+      }
     }
 
     fillLine(addr, MSI_SHARED, ld);
   }
-  else{
+  else{ // HIT
     numReadHits++;
-    ld = st->getData();
+    
+ 		if (st->getTag_paired()==0) 													// (Ac/-)normal cache or unpaired line
+	    ld = st->getData();
+    else { // xor cache for sure
+		  if (st->getState_paired()==MSI_MODIFIED) 						// (Ac/Bd) paired with dirty line, go to parent
+			  ld = st->getData();
+			else{ // try to un-xor it
+				MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
+				if (rrs.providedData){// sharers are present
+						bool dirty = st->compare_with_paired(rrs.linedata);
+						if (dirty) 																		// (Ac/Bd) paired with dirty line, go to parent
+   						 ld = parent->readLine(addr); 
+						else { 																				// (Ac/BcS) sharers are clean, used the data from sharers to un-xor the xor-data
+		           ld = 	(rrs.linedata ^ st->getData_xor()); 
+						}
+				} 
+				else { 																						// (Ac/BcNS) no way to un-xor the data, go main memory
+					ld = parent->readLine(addr);
+				}
+				///// --------------- FIXME ------------- do something with parent returned line
+			}
+    
+    }
   }
 
   return ld;
@@ -214,36 +237,10 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::children_readRemoteAction(uint64_t
     /*If otherState == NULL here, the tags didn't match, so the
      *other cache didn't have this line cached*/
     if(otherState){
-      /*The tags matched -- need to do snoop actions*/
-
-      /*Other cache has recently written the line*/
-      if(otherState->getState() == MSI_MODIFIED){
-
-        /*Modified transitions to Shared on a remote Read*/
-        otherState->changeStateTo(MSI_SHARED);
-
-
-        /*Return a Remote Read Service indicating that
-         *1)The line was not shared (the false param)
-         *2)The line was provided by otherCache, as only it had it cached
-         */
-        return MSI_SMPCache::RemoteReadService(false,true,otherState->getData()); // no need to check for MSB, as it is in modified state
-
-        /*Other cache has recently read the line*/
-      }else if(otherState->getState() == MSI_SHARED && otherState->isValid()){
-
-        /*Return a Remote Read Service indicating that
-         *1)The line was shared (the true param)
-         *2)The line was provided by otherCache
-         */
-        return MSI_SMPCache::RemoteReadService(true,true,otherState->getData());
-
-        /*Line was cached, but invalid*/
-      }else if(otherState->getState() == MSI_INVALID){
-
-        /*Do Nothing*/
-
-      }
+    
+		  if(!otherState->getState() == MSI_INVALID){
+		  	return MSI_SMPCache::RemoteReadService(otherState->getState() == MSI_SHARED,true,otherState->getData()); // no need to check for MSB, as it is in modified state
+		  }
 
     }/*Else: Tag didn't match. Nothing to do for this cache*/
 
@@ -263,7 +260,7 @@ linedata_t MSI_SMPCache::children_readLine(uint64_t addr){
   linedata_t ld = linedata_t();
 
 	if(!rrs.providedData){
-		if(enable_prints) printf("Data not found in L1");
+		if(enable_prints) printf("Data not found in L1\n");
 	}
 	else{
 		ld = rrs.linedata;
