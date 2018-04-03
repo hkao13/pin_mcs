@@ -1,5 +1,10 @@
 #include "MSI_SMPCache.h"
 
+#define APPROX_THRESHOLD 0.5
+
+#define ENABLE_CD_W 0
+#define ENABLE_CD_IA 0
+
 //bool enable_prints=0;
 int main_memory_size_used=0;
 int main_memory_size_used_max=0;
@@ -110,7 +115,7 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
          *1)The line was not shared (the false param)
          *2)The line was provided by otherCache, as only it had it cached
         */
-        return MSI_SMPCache::RemoteReadService(false,true,otherState->getData()); // no need to check for MSB, as it is in modified state
+        return MSI_SMPCache::RemoteReadService(false,true,otherState->getData(),true); // no need to check for MSB, as it is in modified state
 
       /*Other cache has recently read the line*/
       }else if(otherState->getState() == MSI_SHARED && otherState->isValid()){  
@@ -169,7 +174,7 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
     else { // Get it from the next (parent)) level in the hierarchy
     
 		  if(parent==NULL){
-				printf("last level reached\n");
+				// printf("last level reached\n");
 			 	// exit(1);
 		 	}
 		 	else 
@@ -246,25 +251,46 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
       ld = rrs.linedata;
     }
     else { // Get it from the next (parent) level in the hierarchy
-    	if (parent!=NULL)
-       ld = parent->readLine(addr);
-       else printf("%d::::NULL PARENT SEEN\n",this->getCPUId());
+    	if (parent!=NULL) {
+        ld = parent->readLine(addr);
+      } 
+      else {
+        printf("%d::::NULL PARENT SEEN\n",this->getCPUId());
+      } 
     }
     
     if(st){  // stale data present, compare with the coherent data for T/F sharing stats
-	    uint32_t lcd, rcd; //local cache data, remote cache data
+	    
+      uint32_t lcd, rcd; //local cache data, remote cache data
 			lcd = st->getData(cache->calcOffset(addr)); //NEEDS CHECK
-			/*True & False Sharing / Approximation Stats*/
 			rcd = ld.data[cache->calcOffset(addr)];
-			if(enable_prints) printf("%d::::PULKIT TF STATS readline:: READING LINE addr=%lx, offset:%d\n",this->getCPUId(),addr,cache->calcOffset(addr));
- 	    if (lcd == rcd) {
- 	    	numFalseSharing++;
-		numCorrectSpeculations++;
- 	    	if(enable_prints) printf("False Sharing++");}
+
+      // using unit64 for bound to avoid rollover on uint32 values
+      uint64_t lowBound = (uint64_t)( (1 - APPROX_THRESHOLD) * rcd );
+      uint64_t highBound = (uint64_t)( (1 + APPROX_THRESHOLD) * rcd );
+      
+      if(enable_prints) printf("%d::::PULKIT TF STATS readline:: READING LINE addr=%lx, offset:%d\n",this->getCPUId(),addr,cache->calcOffset(addr));
+ 	    
+      if (lcd == rcd) {
+        if (rrs.dirtyBit) {
+          numFalseSharingSilentStore++;
+        }
+        else {
+          numFalseSharing++;
+        }
+		    numCorrectSpeculations++;
+ 	    	if(enable_prints) printf("False Sharing++");
+      }
+      else if ( (lcd >= lowBound) && (lcd <= highBound) ) {
+        printf("Low Bound: %ld, Data: %d High Bound: %ld\n", lowBound, lcd, highBound);
+        numCorrectApproxSpeculations++;
+      }
       else {
       	numTrueSharing++;
         numIncorrectSpeculations++;
       	if(enable_prints) printf("True Sharing++");}
+
+      
     }
     
     /*Fill the line*/
@@ -291,7 +317,7 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
 // ================================================================
 // *****INVALIDATE LINES In SIBLINGS (writeRemoteAction)
 // ================================================================
-MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr){
+MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr, uint32_t val = INT_NAN){
     
     /*This method implements snoop behavior on all the other caches that this cache might be interacting with*/
     MSI_SMPCache::InvalidateReply reply = MSI_SMPCache::InvalidateReply(true);
@@ -314,12 +340,26 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr){
       MSI_SMPCacheState* otherState = 
         (MSI_SMPCacheState *)otherCache->cache->findLine(addr);
 
+      /*
+        CD-W. Update on every write if any sharers exist (even if invalid).
+      */
+      if (otherState && ENABLE_CD_W) {
+        otherState->setData(val, cache->calcOffset(addr));
+      }
+
       /*if it is cached by otherCache*/
       if(otherState && otherState->isValid()){
 
           /*The reply contains data, so "empty" is false*/
           reply.empty = false;
           reply.linedata = otherState->getData();
+
+          /*
+            CD-IA. Use invalidation piggyback to update all invalid blocks
+          */
+          if (ENABLE_CD_IA) {
+            otherState->setData(val, cache->calcOffset(addr));
+          }
 
           /*Invalidate the line, because we're writing*/
           otherState->invalidate();
@@ -334,7 +374,7 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr){
 // ================================================================
 // *****WRITE WORD (only to be called by MCS.cpp)
 // ================================================================
-void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
+void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=INT_NAN){
 
   /*Find the line to which this address maps*/ 
   MSI_SMPCacheState * st = (MSI_SMPCacheState *)cache->findLine(addr);    
@@ -345,14 +385,13 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     if(st){ // We're writing to an invalid line
       numWriteOnInvalidMisses++;
     }
- 
 		// Let the other caches snoop this write access and update their state accordingly.  This action is effectively putting the write on the bus.
-    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr);
+    MSI_SMPCache::InvalidateReply inv_ack = writeRemoteAction(addr, val);
     numInvalidatesSent++;
-    if (inv_ack.empty)
+    if (inv_ack.empty) {
     	inv_ack.linedata = 	parent->readLine(addr);
+    }
 		inv_ack.linedata.data[cache->calcOffset(addr)] = val;
-		
     /*Fill the line with the new written block*/
     if(enable_prints) printf("%d::::PULKIT exiting writeline (miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
     fillLine(addr,MSI_MODIFIED,inv_ack.linedata);
@@ -369,7 +408,7 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     numWriteOnSharedMisses++;
 
     /*Let the other sharers snoop this write, and invalidate themselves*/
-    writeRemoteAction(addr); 
+    writeRemoteAction(addr, val); 
     numInvalidatesSent++;
 
     uint32_t prevData = st->getData(cache->calcOffset(addr));
@@ -394,6 +433,11 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     }
 
     st->setData(val,cache->calcOffset(addr));
+
+    if (ENABLE_CD_W) {
+      writeRemoteAction(addr, val);
+    }
+    
     return;
   }
 

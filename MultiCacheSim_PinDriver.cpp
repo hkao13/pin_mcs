@@ -146,6 +146,9 @@ void Read(THREADID tid, ADDRINT addr, ADDRINT inst){
   if(useRef){
     ReferenceProtocol->readLine(tid,inst,addr);
   }
+
+  //printf("READ\n");
+
   std::vector<MultiCacheSim *>::iterator i,e;
 
   // Get the value of the memory address, uncomment below to see.
@@ -219,6 +222,8 @@ void WriteData(){ //Should add all the necessary arguments for updating the virt
   if (isStack(writeaddr)) {if (enable_prints) printf("---------------------------------------------------------------access to the stack , hence ignoring %lx\n",writeaddr); writecount=0; return;}
 
   PIN_GetLock(&globalLock, 1);
+
+  //printf("READ\n");
 
   //Reading from memory
   if (writecount > 0){

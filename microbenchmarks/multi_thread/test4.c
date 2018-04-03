@@ -38,7 +38,7 @@ void *accessorThread(void *arg){
   INSTRUMENT_ON();
 
   for (i=0; i < MAXVAL; i++) {
-    array[i].a = i%5;
+    array[i].a = (i%5);
   }
   
   

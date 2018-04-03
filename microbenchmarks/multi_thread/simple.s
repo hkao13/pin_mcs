@@ -1488,6 +1488,8 @@ main:
 	.string	"__next"
 .LASF71:
 	.string	"newval"
+.LASF83:
+	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF46:
 	.string	"long long int"
 .LASF4:
@@ -1562,8 +1564,6 @@ main:
 	.string	"shrdPtr"
 .LASF18:
 	.string	"_IO_write_end"
-.LASF83:
-	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF84:
 	.string	"_IO_lock_t"
 .LASF41:

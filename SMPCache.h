@@ -37,10 +37,13 @@ public:
 
   /* New stats for true/false sharing for SCL */
   int numFalseSharing;
+  int numFalseSharingSilentStore;
   int numTrueSharing;
+
   /* Speculative Execution stats */
   int numCorrectSpeculations;
   int numIncorrectSpeculations;
+  int numCorrectApproxSpeculations;
 
   /* Additional stats for number of write-backs */
   int numSilentStores;

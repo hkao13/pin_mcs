@@ -196,7 +196,7 @@ uint32_t MultiCacheSim::readLine(unsigned long tid, unsigned long rdPC, uint64_t
     return val;
 }
   
-void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, uint64_t addr, uint32_t val = 0){
+void MultiCacheSim::writeLine(unsigned long tid, unsigned long wrPC, uint64_t addr, uint32_t val = INT_NAN){
     #ifndef PIN
     pthread_mutex_lock(&privateCachesLock);
     #else

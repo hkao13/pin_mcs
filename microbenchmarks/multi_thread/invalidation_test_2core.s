@@ -1204,6 +1204,8 @@ main:
 	.string	"__size"
 .LASF1:
 	.string	"unsigned char"
+.LASF46:
+	.string	"/mnt/hgfs/ubuntu15VM_share/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF43:
 	.string	"wonk_array"
 .LASF0:
@@ -1214,8 +1216,6 @@ main:
 	.string	"short unsigned int"
 .LASF33:
 	.string	"array"
-.LASF46:
-	.string	"/home/vic/Documents/pin/source/tools/pin_mcs/microbenchmarks/multi_thread"
 .LASF14:
 	.string	"__pthread_internal_list"
 .LASF22:
