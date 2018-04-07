@@ -147,7 +147,7 @@ MESI_SMPCache::InvalidateReply MESI_SMPCache::writeRemoteAction(uint64_t addr){
 }
 
 
-void MESI_SMPCache::writeLine(uint32_t wrPC, uint64_t addr){
+void MESI_SMPCache::writeLine(uint32_t wrPC, uint32_t msi_state, uint64_t addr){
 
   MESI_SMPCacheState * st = (MESI_SMPCacheState *)cache->findLine(addr);    
     

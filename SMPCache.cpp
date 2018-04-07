@@ -23,6 +23,9 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
   numInvalidatesSent = 0;
   
   numChildrenRequests = 0;
+  numChildrenRequests_total[0] = 0;
+  numChildrenRequests_total[1] = 0;
+  numChildrenRequests_total[2] = 0;
 
   /* New stats for true/false sharing for SCL */
   numFalseSharing = 0;
@@ -33,6 +36,7 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
 
   /* Additional stats for number of write-backs */
   numSilentStores = 0;
+  numSilentEvictions = 0;
   numReplacements = 0;
   numWritebacksReceived = 0;
 
@@ -83,6 +87,7 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Write-On-Invalid Misses:        %6d\n",numWriteOnInvalidMisses);
   fprintf(outFile, "Invalidates Sent:               %6d\n",numInvalidatesSent);
   fprintf(outFile, "Silent Stores:                  %6d\n",numSilentStores);
+  fprintf(outFile, "Silent Evictions                %6d\n",numSilentEvictions);
   fprintf(outFile, "\n");                           
   fprintf(outFile, "Replacements:                   %6d\n",numReplacements);
   fprintf(outFile, "Writebacks Received:            %6d\n",numWritebacksReceived);
@@ -90,7 +95,14 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Correct Speculations:           %6d\n",numCorrectSpeculations);
   fprintf(outFile, "Incorrect Speculations:         %6d\n",numIncorrectSpeculations);
   fprintf(outFile, "\n");
-  fprintf(outFile, "Children Requests:              %6d\n",numChildrenRequests);
+  fprintf(outFile, "Children Requests useful:       %6d\n",numChildrenRequests);
+  fprintf(outFile, "Children Requests not useful[0]:%6d\n",numChildrenRequests_total[0]);
+  fprintf(outFile, "Children Requests not useful[1]:%6d\n",numChildrenRequests_total[1]);
+  fprintf(outFile, "Children Requests not useful[2]:%6d\n",numChildrenRequests_total[2]);
+  fprintf(outFile, "Children Requests total:        %6d\n",(numChildrenRequests_total[0]+
+                                                            numChildrenRequests_total[1]+
+                                                            numChildrenRequests_total[2]+
+                                                            numChildrenRequests));
 }
 
 int SMPCache::getCPUId(){

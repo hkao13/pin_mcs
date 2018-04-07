@@ -4,6 +4,7 @@
 int main_memory_size_used=0;
 int main_memory_size_used_max=0;
 
+linedata_t empty_ld = linedata_t();
 
 // ================================================================
 // *****CONSTRUCTOR
@@ -42,44 +43,123 @@ MSI_SMPCache::MSI_SMPCache(int cpuid,
 
 void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=linedata_t()){
 
+  if(enable_prints) printf("%d::::PULKIT entering fillline:: addr=%lx\n",this->getCPUId(),addr);
   MSI_SMPCacheState *st;
-  MSI_SMPCache::RemoteReadService rrs = MSI_SMPCache::RemoteReadService(false,false);
-  do {
-    st = (MSI_SMPCacheState *)cache->findLine2Replace(addr);                // find line based on repl-policy
+  int mytry=0;
+
+  /*Loop until you find an appropriate line to replace*/
+  do{
+
+    /*Find line based on repl-policy*/
+    st = (MSI_SMPCacheState *)cache->findLine2Replace(addr);
     if (st==NULL){
-      printf("no line to replace");
+      printf("EXIT --- no line to replace\n");
       exit(1);
     }
-    if (st->isValid()){
-      rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag()));   // check if the line is there in your prev level for inclusion
+
+    /*Line is empty*/
+    if (!st->isValid() && !st->isValid_paired()){
+      st->setTag(cache->calcTag(addr));
+      st->setData(val);
+      st->setData_paired(empty_ld);
+      st->changeStateTo(MSI_SHARED);
+      break;
     }
-  }while(rrs.providedData);                                                 // maintaining inclusion
 
-  if(enable_prints) printf("%d::::PULKIT entering fillline:: addr=%lx\n",this->getCPUId(),addr);
+    /* Case: (A,-) */
+    else if(st->isValid() && !st->isValid_paired()){ //non-xor cache
+      MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag()));
+      if(!rrs.providedData) {
+        if(parent==NULL){
+          printf("EXIT --- replacement in main memory, increase size1\n");
+          exit(1);
+        }
+        parent->writeLine(cache->calcAddr4Tag(st->getTag()),st->getState(),st->getData_xor());
+        numReplacements++;
 
-  if(st==0){
-    /*No state*/ exit(1);
-    return;
-  }
-  if (st->isValid() && parent!=NULL){
-    MSI_SMPCache::RemoteReadService rrs = readRemoteAction(addr);
-    if (rrs.providedData==false)                                         // only the last sharer writes to the parent
-    parent->writeLine(cache->calcAddr4Tag(st->getTag()),st->getData()); // Pushing the evicted or replaced line to the next level
-    numReplacements++;
-  }
-  else if (st->isValid() && parent==NULL){
-    printf("increase the size of main memory");
+        // valid for all cases
+        st->setTag(cache->calcTag(addr));
+        st->setData(val);
+        st->setData_paired(empty_ld);
+        st->changeStateTo(MSI_SHARED);
+        break;
+      }
+    }
+
+    /* Case: (A,-) */
+    else if(!st->isValid() && st->isValid_paired()){
+      linedata_t ld;
+      bool dirty = st->getState_paired() == MSI_MODIFIED;
+      MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
+
+      if(rrs.providedData) {ld = rrs.linedata;       numChildrenRequests_total[0]++;}
+      else                 ld = st->getData_xor();
+      
+      if (dirty && !rrs.providedData) { // make it clean if dirty+LastCopy
+        if(parent==NULL){
+          printf("EXIT --- replacement in last level (main memory), increase size2\n");
+          exit(1);
+        }
+        parent->writeLine(cache->calcAddr4Tag(st->getTag_paired()),MSI_MODIFIED,st->getData_xor());
+        st->changeStateTo_paired(MSI_SHARED);
+      }
+
+      // valid for all cases
+      st->setTag(cache->calcTag(addr));
+      st->setData(val);
+      st->setData_paired(ld);
+      st->changeStateTo(MSI_SHARED);
+      break;
+    }
+
+    
+    /* Case: (A,B) */
+    else if (st->isValid() && st->isValid_paired()) {
+      
+      MSI_SMPCache::RemoteReadService rrs_A = children_readRemoteAction(cache->calcAddr4Tag(st->getTag()));
+      MSI_SMPCache::RemoteReadService rrs_B = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
+
+      if(!rrs_A.providedData && !rrs_B.providedData){     /* (A(C+NS),B(C+NS))*/ // SILENT EVICT BOTH
+        st->setTag(cache->calcTag(addr));
+        st->setData(val);
+        st->setData_paired(empty_ld);
+        st->changeStateTo(MSI_SHARED);
+        st->invalidate_paired();
+        break;
+      }
+
+      else if (rrs_A.providedData && rrs_B.providedData){ /* (A(X+S),B(X+S)) */ // A,B has sharers, can't evict any one
+        // Don't choose this. We have to maintain inclusiveness
+      }
+
+      else if (rrs_A.providedData){                       /* (A(X+S),B(C+NS))*/ // A has sharers, keep A, evict B
+        st->setTag_paired(cache->calcTag(addr));
+        st->setData_paired(val);
+        st->setData(rrs_A.linedata);
+        numChildrenRequests_total[1]++;
+        st->changeStateTo_paired(MSI_SHARED);
+        break;
+      }
+
+      else if (rrs_B.providedData){                       /* (A(C+NS),B(X+S))*/ // B has sharers, keep B, evict A
+        st->setTag(cache->calcTag(addr));
+        st->setData(val);
+        st->setData_paired(rrs_B.linedata);
+        numChildrenRequests_total[1]++;
+        st->changeStateTo(MSI_SHARED);
+        break;
+      }
+
+      else {
+        printf("EXIT --- not expected to reach here\n");
+        exit(1);
+      }
+    }
+    mytry++;
+  }while(mytry<1000);
+  if (mytry==1000) {
     exit(1);
   }
-  /*Set the tags to the tags for the newly cached block*/
-  st->setTag(cache->calcTag(addr));
-  st->setData(val);
-
-  /*Set the state of the block to the msi_state passed in*/
-  st->changeStateTo((MSIState_t)msi_state);
-  if(enable_prints) printf("%d::::HENRY value set in fillline:: addr=%lx, val=%x\n",this->getCPUId(),addr, st->getData(cache->calcOffset(addr)));
-
-  return;
 }
 
 
@@ -123,20 +203,11 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
         /*Modified transitions to Shared on a remote Read*/
         otherState->changeStateTo(MSI_SHARED);
 
-        if (parent!=NULL){ // now dirty sharers, pass the modified flag to next level (parent)
-          MSI_SMPCacheState* parent_state = (MSI_SMPCacheState *)parent->cache->findLine(addr);
-          if (parent_state==NULL) {
-            printf("inclusivity not maintained at parent");
-            exit(1);
-          }
-          parent_state->changeStateTo(MSI_MODIFIED);
-        }
-
         /*Return a Remote Read Service indicating that
          *1)The line was not shared (the false param)
          *2)The line was provided by otherCache, as only it had it cached
          */
-        return MSI_SMPCache::RemoteReadService(false,true,otherState->getData()); // no need to check for MSB, as it is in modified state
+        return MSI_SMPCache::RemoteReadService(false,true,otherState->getData_xor()); // no need to check for MSB, as it is in modified state
 
         /*Other cache has recently read the line*/
       }else if(otherState->getState() == MSI_SHARED && otherState->isValid()){
@@ -145,7 +216,7 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::readRemoteAction(uint64_t addr){
          *1)The line was shared (the true param)
          *2)The line was provided by otherCache
          */
-        return MSI_SMPCache::RemoteReadService(true,true,otherState->getData());
+        return MSI_SMPCache::RemoteReadService(true,true,otherState->getData_xor());
 
         /*Line was cached, but invalid*/
       }else if(otherState->getState() == MSI_INVALID){
@@ -195,7 +266,7 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
     else { // Get it from the next (parent)) level in the hierarchy
 
       if(parent==NULL){
-        // printf("last level reached\n");
+        // printf("EXIT --- last level reached\n");
         // exit(1);
       }
       else
@@ -207,27 +278,29 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
   else{ // HIT
     numReadHits++;
     
-    if (st->getTag_paired()==0) 							// (Ac/-)normal cache or unpaired line
-      ld = st->getData();
-    else { // xor cache for sure
-      if (st->getState_paired()==MSI_MODIFIED) 						// (Ac/Bd) paired with dirty line, go to parent
-        ld = st->getData();
-      else{ // try to un-xor it
-        MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
-        if (rrs.providedData){// sharers are present
-          bool dirty = st->compare_with_paired(rrs.linedata);
-          if (dirty) 									// (Ac/Bd) paired with dirty line, go to parent
-            ld = parent->readLine(addr); 
-          else { 									// (Ac/BcS) sharers are clean, used the data from sharers to un-xor the xor-data
-            ld = 	(rrs.linedata ^ st->getData_xor()); 
-          }
-        } 
-        else { 										// (Ac/BcNS) no way to un-xor the data, go main memory
-          ld = parent->readLine(addr);
+    if (st->isValid_paired()==0){                                                         // (Ac/-)normal cache or unpaired line
+      ld = st->getData_xor();
+    }
+    else { // xor line for sure
+      MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
+      if (rrs.providedData){// sharers are present
+        if (st->getState_paired()==MSI_MODIFIED)                                        // (Ac/Bd) paired with dirty line, go to parent
+          ld = parent->readLine(addr); 
+        else {                                                                        // (Ac/BcS) sharers are clean, used the data from sharers to un-xor the xor-data
+          ld = (rrs.linedata ^ st->getData_xor());
+          numChildrenRequests++;
         }
-        ///// --------------- FIXME ------------- do something with parent returned line
       }
-    
+      else if (st->getState_paired()==MSI_SHARED) {                                      // (Ac/BcNS) no way to un-xor the data, go main memory
+        ld = parent->readLine(addr);
+      }
+      else {
+        printf("EXIT --- UNEXPECTED CASE, paired DIRTY DATA with no sharers in xor line\n");
+        enable_prints = true;
+        enable_prints2 = true;
+        (MSI_SMPCacheState *)cache->findLine(addr);
+        exit(1);
+      }
     }
   }
 
@@ -262,8 +335,8 @@ MSI_SMPCache::RemoteReadService MSI_SMPCache::children_readRemoteAction(uint64_t
 
     // If otherState == NULL here, the tags didn't match, so the other cache didn't have this line cached
     if(otherState)
-      if(!otherState->getState() == MSI_INVALID)
-        return MSI_SMPCache::RemoteReadService(otherState->getState() == MSI_SHARED,true,otherState->getData()); // no need to check for MSB, as it is in modified state
+      if(!(otherState->getState() == MSI_INVALID))
+        return MSI_SMPCache::RemoteReadService(otherState->getState() == MSI_SHARED,true,otherState->getData_xor()); // no need to check for MSB, as it is in modified state
   }
 
   /*If all other caches were MSI_INVALID*/
@@ -282,7 +355,6 @@ linedata_t MSI_SMPCache::children_readLine(uint64_t addr){
   }
   else{
     ld = rrs.linedata;
-    numChildrenRequests++;
   }
   return ld;
 }
@@ -290,23 +362,61 @@ linedata_t MSI_SMPCache::children_readLine(uint64_t addr){
 // ================================================================
 // *****WRITE LINE
 // ================================================================
-void MSI_SMPCache::writeLine(uint64_t addr, linedata_t ld){ // only used for evicted lines due to replacement
+void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ // only used for evicted lines due to replacement
   if(enable_prints) printf("%d::::PULKIT entering writeline:: addr=%lx\n",this->getCPUId(),addr);
   MSI_SMPCacheState *st = (MSI_SMPCacheState *)cache->findLine(addr);
   numWritebacksReceived++;
 
-  if(!st || (st && !(st->isValid())) ){    //Write Miss
-    // printf("inclusiveness not maintained\n");
-    // exit(1);
+  if(parent!=NULL && (!st || (st && !(st->isValid()))) ){ //Write Miss -> ERROR
+    printf("EXIT --- inclusiveness not maintained\n");
+    exit(1);
     fillLine(addr,MSI_MODIFIED,ld);
   }
 
   else{ //Write Hit
     if(enable_prints) printf("%d::::PULKIT entering writeline1:: addr=%lx\n",this->getCPUId(),addr);
     numWriteHits++;
-    st->setData(ld);
-  }
+    
+    if (st->getState()==MSI_SHARED && msi_state==MSI_SHARED) return;               // (xx) clean
+    
+    if (st->isValid_paired()==0){                                                 // (--) unpaired line
+      st->setData(ld);
+      st->setData_paired(empty_ld);
+      st->changeStateTo(MSI_MODIFIED);
+      return;
+    }
 
+    MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
+    if (!rrs.providedData){// no sharers are present
+      if (st->getState_paired()==MSI_MODIFIED) {                                  // (BdNS) paired but no sharers, ERROR
+        printf("EXIT --- assumption voilated 'dirty will never be paired'\n");
+        enable_prints = true;
+        enable_prints2 = true;
+        (MSI_SMPCacheState *)cache->findLine(addr);
+        exit(1);
+      }
+      
+      st->setData(ld);                                                            // (BcNS) paired but no sharers, discard B
+      st->setData_paired(empty_ld);
+      st->changeStateTo(MSI_MODIFIED);
+      st->invalidate_paired();
+      return;
+    }
+
+    // XOR CACHE NEVER PAIRS THE ONLY COPY OF DIRTY DATA
+    if (parent!=NULL) {// dirty line and paired, writeback to parent, and then consider this line clean
+      parent->writeLine(addr,msi_state,ld);
+      msi_state = MSI_SHARED;
+    }
+    
+    st->setData(ld);                                                          // (BxS) paired and has sharers
+    st->setData_paired(rrs.linedata);                                         // (BxS) paired and has sharers
+    numChildrenRequests_total[2]++;
+    st->changeStateTo(MSI_SHARED);
+    return;
+  }
+  
+  // FIXME --- maintain statistics
 }
 
 
@@ -360,11 +470,11 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
       if (lcd == rcd) {
         numFalseSharing++;
         numCorrectSpeculations++;
-        if(enable_prints) printf("False Sharing++");}
+        if(enable_prints) printf("False Sharing++\n");}
       else {
         numTrueSharing++;
         numIncorrectSpeculations++;
-        if(enable_prints) printf("True Sharing++");}
+        if(enable_prints) printf("True Sharing++\n");}
     }
 
     /*Fill the line*/
@@ -419,7 +529,7 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr){
 
       /*The reply contains data, so "empty" is false*/
       reply.empty = false;
-      reply.linedata = otherState->getData();
+      reply.linedata = otherState->getData_xor();
 
       /*Invalidate the line, because we're writing*/
       otherState->invalidate();
@@ -430,6 +540,12 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr){
 }
 
 
+void MSI_SMPCache::find_and_make_modified(uint64_t addr){ // to be called from children
+  MSI_SMPCacheState * st = (MSI_SMPCacheState *)cache->findLine(addr);
+  if(st && st->isValid() && st->getState()==MSI_SHARED){
+    st->changeStateTo(MSI_MODIFIED);
+  }
+}
 
 // ================================================================
 // *****WRITE WORD (only to be called by MCS.cpp)
@@ -456,6 +572,7 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     /*Fill the line with the new written block*/
     if(enable_prints) printf("%d::::PULKIT exiting writeline (miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
     fillLine(addr,MSI_MODIFIED,inv_ack.linedata);
+    parent->find_and_make_modified(addr);
     return;
 
   }else if(st->getState() == MSI_SHARED){
@@ -479,6 +596,7 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=0){
     /*Change the state of the line to Modified to reflect the write*/
     st->changeStateTo(MSI_MODIFIED);
     st->setData(val,cache->calcOffset(addr));
+    parent->find_and_make_modified(addr);
     if(enable_prints) printf("%d::::PULKIT exiting writeline (shared miss):: WRITING word addr=%lx & val=%x\n",this->getCPUId(),addr,val);
     return;
 

@@ -51,7 +51,7 @@ public:
 
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
-  virtual void writeLine(uint32_t wrPC, uint64_t addr);//SMPCache Interface Function
+  virtual void writeLine(uint32_t wrPC, uint32_t msi_state, uint64_t addr);//SMPCache Interface Function
   virtual MESI_SMPCache::InvalidateReply writeRemoteAction(uint64_t addr);
  
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 

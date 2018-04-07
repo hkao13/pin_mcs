@@ -1,6 +1,15 @@
 #include "MultiCacheSim.h"
 #include "math.h"
 
+static inline int numbits(int x) {
+  if (x==0) return 1;
+  else {
+    int ii;
+    for (ii=0;x!=0; ii++,x/=2);
+    return ii;
+  }
+}
+
 MultiCacheSim::MultiCacheSim(FILE *cachestats, int size, int assoc, int bsize, CacheFactory c){
 
   cacheFactory = c;
@@ -100,7 +109,7 @@ void MultiCacheSim::createNewCache(){
     #endif
 
     SMPCache * newcache;
-    newcache = this->cacheFactory(num_caches++, &privateCaches, llc_memory, NULL, false, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
+    newcache = this->cacheFactory(num_caches++, &privateCaches, llc_memory, NULL, false /*isxor*/, cache_size, cache_assoc, cache_bsize, 1, "LRU", false);
     privateCaches.push_back(newcache);
 
 
@@ -120,7 +129,7 @@ void MultiCacheSim::createLLC() {
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, true, ceil(log2i(num_caches))*cache_size*4, ceil(log2i(num_caches))*cache_assoc*4, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, true /*isxor*/, pow(2,numbits(num_caches))*cache_size*4, pow(2,numbits(num_caches))*cache_assoc*4, cache_bsize, 1, "LRU", false);
   llc.push_back(newcache);
   llc_memory = newcache;
   
@@ -150,7 +159,7 @@ void MultiCacheSim::createMain(){
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(17, &main, NULL, &llc, false, cache_size*64, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(17, &main, NULL, &llc, false /*isxor*/, cache_size*64, cache_assoc*64, cache_bsize, 1, "LRU", false);
   main.push_back(newcache);
   main_memory = newcache;
 

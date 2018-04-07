@@ -77,6 +77,13 @@ public:
     if (!hit1) state2 = (unsigned)newstate;
   }
 
+  void changeStateTo_paired(MSIState_t newstate) {
+    // not supposed to invalidate through this interface
+    I(newstate != (unsigned)MSI_INVALID);
+    if (!hit1) state1 = (unsigned)newstate;
+    if ( hit1) state2 = (unsigned)newstate;
+  }
+
 };
 
 #endif //MSISMPCACHESTATE_H

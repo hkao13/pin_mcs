@@ -33,7 +33,8 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #include "CacheCore.h"
 
-static bool enable_prints = false;
+static bool enable_prints  = true;
+static bool enable_prints2 = false;
 
 #define k_RANDOM     "RANDOM"
 #define k_LRU        "LRU"
@@ -141,6 +142,8 @@ CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32
     mem[i].invalidate2();
     content[i] = &mem[i];
   }
+
+  printf("csize=%d, bs=%d, assoc=%d, numsets=%d(%d),numlines=%d, isxor=%d\n",size, blksize, assoc, 0, 0,numLines, isxor);//maskSets,numLines);
   
   irand = 0;
 }
@@ -160,12 +163,13 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
   Line **theSet = &content[this->calcIndex4Tag(tag)];
   Line **lineHit=0;
   Line **setEnd = theSet + assoc;
+  if (enable_prints) printf("flp searching set#=%d\n",this->calcIndex4Tag(tag));
   // For sure that position 0 is not (short-cut)
   {
     int ii=0;ii=ii;
     Line **l = theSet + 0;
     while(l < setEnd) {
-      if (enable_prints) printf("searching tag=%x findline %d tag1=%x invalid1=%d tag2=%x invalid2=%d\n",tag,ii++, (*l)->getTag1(),!(*l)->isValid1(), (*l)->getTag2(), !(*l)->isValid2());
+      if (enable_prints2) printf("searching tag=%x findline %d tag1=%x invalid1=%d state1=%d, tag2=%x invalid2=%d state2=%d\n",tag,ii++, (*l)->getTag1(),!(*l)->isValid1(), (*l)->getState1(), (*l)->getTag2(), !(*l)->isValid2(), (*l)->getState2());
       l++;
     }
   }
@@ -193,12 +197,12 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
   {
     Line **l = theSet + 0;
     while(l < setEnd) {
-      if ((*l)->getTag1() == tag && !!(*l)->isValid1()) {
+      if ((*l)->getTag1() == tag && (*l)->isValid1()) {
         lineHit = l;
 	(*l)->hit1 = true;
         break;
       }
-      if ((*l)->getTag2() == tag && !!(*l)->isValid2() && (*l)->is_xor_cache) {
+      if ((*l)->getTag2() == tag && (*l)->isValid2() && (*l)->is_xor_cache) {
         lineHit = l;
 	(*l)->hit1 = false;
         break;
@@ -336,22 +340,45 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
     int ii=0;
     Line **l = setEnd -1;
     while(l >= theSet) {
-      if (enable_prints) printf("searching tag=%x replace %d tag1=%x invalid1=%d tag2=%x invalid2=%d\n",tag,ii++, (*l)->getTag1(), !(*l)->isValid1(), (*l)->getTag2(), !(*l)->isValid2());
-      if ((*l)->getTag1() == tag && !!(*l)->isValid1()) {
+      if (enable_prints2) printf("searching tag=%x replace(try1) %d tag1=%x invalid1=%d tag2=%x invalid2=%d\n",tag,ii++, (*l)->getTag1(), !(*l)->isValid1(), (*l)->getTag2(), !(*l)->isValid2());
+      if ((*l)->getTag1() == tag && (*l)->isValid1()) {
         lineHit = l;
 	(*l)->hit1 = true;
         break;
       }
-      if ((*l)->getTag2() == tag && !!(*l)->isValid2() && (*l)->is_xor_cache) {
+      if ((*l)->getTag2() == tag && (*l)->isValid2() && (*l)->is_xor_cache) {
         lineHit = l;
 	(*l)->hit1 = true;
         break;
       }
-      if (!(*l)->isValid1() && !(*l)->isValid1()){
+      if (!(*l)->isValid1() && !(*l)->isValid2() && (*l)->is_xor_cache){
+	(*l)->hit1 = true;
+        lineFree = l;
+        break;
+      }
+      else if (!(*l)->isValid1() && !(*l)->is_xor_cache){
+	(*l)->hit1 = true;
+        lineFree = l;
+        break;
+      }
+
+      // If line is invalid, isLocked must be false
+      GI(!(*l)->isValid(), !(*l)->isLocked()); 
+      l--;
+    }
+  }
+
+  if (lineHit==NULL && lineFree==NULL) {
+    int ii=0;
+    Line **l = setEnd -1;
+    while(l >= theSet) {
+      if (enable_prints2) printf("searching tag=%x replace(try2) %d tag1=%x invalid1=%d tag2=%x invalid2=%d\n",tag,ii++, (*l)->getTag1(), !(*l)->isValid1(), (*l)->getTag2(), !(*l)->isValid2());
+
+      if (!(*l)->isValid1()){
 	(*l)->hit1 = true;
         lineFree = l;
       }
-      else if (!(*l)->isValid2() && !(*l)->isValid2() && (*l)->is_xor_cache){
+      if (!(*l)->isValid2() && (*l)->is_xor_cache){
 	(*l)->hit1 = false;
         lineFree = l;
       }
@@ -359,9 +386,6 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
 	(*l)->hit1 = true;
         lineFree = l;
       }
-
-      // If line is invalid, isLocked must be false
-      GI(!(*l)->isValid(), !(*l)->isLocked()); 
       l--;
     }
   }

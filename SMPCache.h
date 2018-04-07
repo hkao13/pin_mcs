@@ -37,6 +37,7 @@ public:
   int numInvalidatesSent;
   
   int numChildrenRequests;
+  int numChildrenRequests_total[3];
 
   /* New stats for true/false sharing for SCL */
   int numFalseSharing;
@@ -47,6 +48,7 @@ public:
 
   /* Additional stats for number of write-backs */
   int numSilentStores;
+  int numSilentEvictions;
   int numReplacements;
   int numWritebacksReceived; // for lower level caches to keep track of writeback received from upstream.
   
@@ -63,10 +65,11 @@ public:
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
   virtual void writeWord(uint32_t wrPC, uint64_t addr, uint32_t val)=0;
-  virtual void writeLine(uint64_t addr, linedata_t ld)=0;
+  virtual void writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld)=0;
   
   //Fill line touches cache state, bringing addr's block in, and setting its state to mesi_state 
   virtual void fillLine(uint64_t addr, uint32_t mesi_state, linedata_t val) = 0;
+  virtual void find_and_make_modified(uint64_t addr)=0;
 
   virtual char *Identify() = 0;
 

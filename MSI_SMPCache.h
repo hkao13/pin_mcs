@@ -67,7 +67,7 @@ public:
   virtual linedata_t children_readLine(uint64_t addr);
   virtual MSI_SMPCache::RemoteReadService readRemoteAction(uint64_t addr);
   virtual MSI_SMPCache::RemoteReadService children_readRemoteAction(uint64_t addr);
-	virtual void writeLine(uint64_t addr, linedata_t ld);
+  virtual void writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld);
   //Writeline performs a write, and uses writeRemoteAction
   //to check for data in other caches
   virtual void writeWord(uint32_t wrPC, uint64_t addr, uint32_t val);//SMPCache Interface Function
@@ -77,6 +77,7 @@ public:
   virtual void fillLine(uint64_t addr, uint32_t msi_state, linedata_t val);//SMPCache Interface Function
 
   virtual char *Identify();
+  virtual void find_and_make_modified(uint64_t addr);
  
   //Dump the stats for this cache to outFile
   //virtual void dumpStatsToFile(FILE* outFile);

@@ -204,7 +204,7 @@ void Write(THREADID tid, ADDRINT addr, ADDRINT inst){
   writeaddr = addr;
   writetid  = tid;
   writeinst = inst;
-  writecount++;
+  if (!isStack(addr)) writecount++;
   if (enable_prints) printf("---------------------------------------------------------------Write: ADDR: %lx...... writecount=%ld\n", addr, writecount);
 
   PIN_ReleaseLock(&globalLock);

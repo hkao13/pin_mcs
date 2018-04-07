@@ -429,26 +429,31 @@ public:
     if ( hit1) return state1;
     if (!hit1) return state2; else return 0;
   }
+ Addr_t getState_paired() const {
+   if (!hit1) return state1;
+   if ( hit1) return state2; else return 0;
+ }
  Addr_t getTag() const {
    if ( hit1) return tag1;
    if (!hit1) return tag2; else return 0;
  }
  Addr_t getTag_paired() const {
-   if ( hit1) return tag1;
-   if (!hit1) return tag2; else return 0;
- }
- Addr_t compare_with_paired(linedata_t line) const {
-   if (!hit1) return (line==linedata1);
-   if ( hit1) return (line==linedata2); else return (line==linedata1);
- }
- Addr_t getState_paired() const {
-   if (!hit1) return state1;
-   if ( hit1) return state2; else return 0;
+   if (!hit1) return tag1;
+   if ( hit1) return tag2; else return 0;
  }
  void setTag(Addr_t a) {
    I(a);
    if ( hit1) tag1 = a; 
    if (!hit1) tag2 = a; 
+   if ( hit1) islineInvalid1 = false;
+   if (!hit1) islineInvalid2 = false;
+ }
+ void setTag_paired(Addr_t a) {
+   I(a);
+   if (!hit1) tag1 = a; 
+   if ( hit1) tag2 = a; 
+   if (!hit1) islineInvalid1 = false;
+   if ( hit1) islineInvalid2 = false;
  }
  void clearTag() {
    if ( hit1) islineInvalid1 = true;
@@ -457,14 +462,14 @@ public:
  void setData(uint32_t   data, Addr_t offset) {
   if ( hit1) linedata1.data[offset] = data;
   if (!hit1) linedata2.data[offset] = data;
-  if ( hit1) islineInvalid1=false;
-  if (!hit1) islineInvalid2=false;
  }
  void setData(linedata_t data) {
   if ( hit1) linedata1      = data;
   if (!hit1) linedata2      = data;
-  if ( hit1) islineInvalid1 = false;
-  if (!hit1) islineInvalid2 = false;
+ }
+ void setData_paired(linedata_t data) {
+  if (!hit1) linedata1      = data;
+  if ( hit1) linedata2      = data;
  }
  uint32_t   getData (Addr_t offset)  {
    if ( hit1) return linedata1.data[offset];
@@ -481,9 +486,17 @@ public:
    if ( hit1) return (islineInvalid1==false);
    if (!hit1) return (islineInvalid2==false); else return 0;
  }
+ virtual bool isValid_paired() const {
+   if (!hit1) return (islineInvalid1==false);
+   if ( hit1) return (islineInvalid2==false); else return 0;
+ }
  virtual void invalidate() {
    if ( hit1) islineInvalid1=true;
    if (!hit1) islineInvalid2=true;
+ }
+ virtual void invalidate_paired() {
+   if (!hit1) islineInvalid1=true;
+   if ( hit1) islineInvalid2=true;
  }
 
 
@@ -499,16 +512,15 @@ public:
  void clearTag1() { tag1 = 0; }
  void setData1(uint32_t   data, Addr_t offset) {
    linedata1.data[offset] = data;
-   islineInvalid1=false;
  }
  void setData1(linedata_t data               ) {
    linedata1              = data;
-   islineInvalid1=false;
  }
  uint32_t   getData1 (Addr_t offset)  {return linedata1.data[offset];}
  linedata_t getData1 (             )  {return linedata1        ;}
  bool isValid1() const { return (islineInvalid1==false); }
  void invalidate1() {islineInvalid1=true; }
+ unsigned getState1() const { return state1; }
 
 
  // -------------------------------------------------------
@@ -522,16 +534,15 @@ public:
  void clearTag2() { tag2 = 0; }
  void setData2(uint32_t   data, Addr_t offset) {
    linedata2.data[offset] = data;
-   islineInvalid2=false;
  }
  void setData2(linedata_t data               ) {
    linedata2              = data;
-   islineInvalid2=false;
  }
  uint32_t   getData2 (Addr_t offset)  {return linedata2.data[offset];}
  linedata_t getData2 (             )  {return linedata2        ;}
  bool isValid2() const { return (islineInvalid2==false); }
  void invalidate2() {islineInvalid2=true; }
+ unsigned getState2() const { return state2; }
 
 
 
