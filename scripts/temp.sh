@@ -1,7 +1,10 @@
 #!/bin/bash
 
+export PARSECDIR=/home/henry/PARSEC-BAD/parsec-benchmark/
+export PATH=$PATH:$PARSECDIR
+
 # input the parsec directory here
-export PARSEC_ROOT=/home/henry/parsec-benchmark
+export PARSEC_ROOT=/home/henry/PARSEC-BAD/parsec-benchmark/
 export PATH=$PATH:$PARSEC_ROOT
 
 # input the pin directory here

@@ -41,13 +41,13 @@ KNOB<bool> KnobInstrumentAll(KNOB_MODE_WRITEONCE, "pintool",
           "instrAll", "false", "Instrument everything - for parsec");
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
-			   "csize", "65536", "Cache Size");//default cache is 64KB
+			   "csize", "32768", "Cache Size");//default cache is 64KB
 
 KNOB<unsigned int> KnobBlockSize(KNOB_MODE_WRITEONCE, "pintool",
-			   "bsize", "64", "Block Size");//default block is 64B
+			   "bsize", "32", "Block Size");//default block is 64B
 
 KNOB<unsigned int> KnobAssoc(KNOB_MODE_WRITEONCE, "pintool",
-			   "assoc", "2", "Associativity");//default associativity is 2-way
+			   "assoc", "4", "Associativity");//default associativity is 2-way
 
 KNOB<unsigned int> KnobNumCaches(KNOB_MODE_WRITEONCE, "pintool",
 			   "numcaches", "1", "Number of Caches to Simulate");
@@ -57,6 +57,9 @@ KNOB<string> KnobProtocol(KNOB_MODE_WRITEONCE, "pintool",
 
 KNOB<string> KnobReference(KNOB_MODE_WRITEONCE, "pintool",
 			   "reference", "obj-intel64/MESI_SMPCache.so", "Reference Protocol that is compared to test Protocols for Correctness");
+
+KNOB<string> KnobOutput(KNOB_MODE_WRITEONCE, "pintool",
+         "o", "stdout", "Output file");
 
 #define MAX_NTHREADS 64
 unsigned long instrumentationStatus[MAX_NTHREADS];
@@ -324,7 +327,7 @@ VOID Fini(INT32 code, VOID *v)
   
   std::vector<MultiCacheSim *>::iterator i,e;
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
-    PIN_GetLock(&globalLock,1);
+    PIN_GetLock(&globalLock,1);    
     (*i)->dumpStatsForPrivateCaches(KnobConcise.Value());
     (*i)->dumpStatsForLLC(KnobConcise.Value());
     (*i)->dumpStatsForMain(KnobConcise.Value());
@@ -367,7 +370,8 @@ int main(int argc, char *argv[])
   if(-1 == tls_key) {
     printf("number of already allocated keys reached the MAX_CLIENT_TLS_KEYS limit\n");
     PIN_ExitProcess(1);
-  }
+  } 
+
 
   unsigned long csize = KnobCacheSize.Value();
   unsigned long bsize = KnobBlockSize.Value();

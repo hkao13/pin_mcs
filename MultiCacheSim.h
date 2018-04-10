@@ -4,6 +4,9 @@
 #include "MESI_SMPCache.h"
 #include "MSI_SMPCache.h"
 
+#include <iostream>
+#include <fstream>
+
 #ifndef PIN
 #include <pthread.h>
 #else

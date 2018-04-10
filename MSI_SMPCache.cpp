@@ -3,7 +3,7 @@
 #define APPROX_THRESHOLD 0.5
 
 #define ENABLE_CD_W 0
-#define ENABLE_CD_IA 0
+#define ENABLE_CD_IA 1
 
 //bool enable_prints=0;
 int main_memory_size_used=0;
@@ -266,8 +266,8 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
 			rcd = ld.data[cache->calcOffset(addr)];
 
       // using unit64 for bound to avoid rollover on uint32 values
-      uint64_t lowBound = (uint64_t)( (1 - APPROX_THRESHOLD) * rcd );
-      uint64_t highBound = (uint64_t)( (1 + APPROX_THRESHOLD) * rcd );
+      uint64_t lowBound = (uint64_t)( (1 - APPROX_THRESHOLD) * lcd );
+      uint64_t highBound = (uint64_t)( (1 + APPROX_THRESHOLD) * lcd );
       
       if(enable_prints) printf("%d::::PULKIT TF STATS readline:: READING LINE addr=%lx, offset:%d\n",this->getCPUId(),addr,cache->calcOffset(addr));
  	    
@@ -281,8 +281,8 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
 		    numCorrectSpeculations++;
  	    	if(enable_prints) printf("False Sharing++");
       }
-      else if ( (lcd >= lowBound) && (lcd <= highBound) ) {
-        printf("Low Bound: %ld, Data: %d High Bound: %ld\n", lowBound, lcd, highBound);
+      else if ( (rcd >= lowBound) && (rcd <= highBound) ) {
+        //printf("Low Bound: %ld, Data: %d High Bound: %ld\n", lowBound, lcd, highBound);
         numCorrectApproxSpeculations++;
       }
       else {

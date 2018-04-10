@@ -1,0 +1,112 @@
+-----Cache 0-----
+Read Hits:                   1017
+Read Misses:                 49
+Total Reads:                 1066
+Read-On-Invalid Misses:      16
+Read Requests Sent:          49
+Rd Misses Serviced Remotely: 16
+Rd Misses Serviced by Shared: 0
+Rd Misses Serviced by Modified: 16
+Rd Misses from False Sharing: 0
+Rd Misses from Silent Stores: 5
+Rd Misses from True Sharing:  11
+
+Write Hits:                  47
+Write Misses:                36
+Total Writes:                83
+Write-On-Shared Misses:      4
+Write-On-Invalid Misses:     2
+Invalidates Sent:            36
+Silent Stores:               6
+
+Replacements:                0
+Writebacks Received:         0
+
+Correct Speculations:        5
+Approx. Speculations:        0
+Incorrect Speculations:      11
+
+-----Cache 1-----
+Read Hits:                   355
+Read Misses:                 32
+Total Reads:                 387
+Read-On-Invalid Misses:      0
+Read Requests Sent:          32
+Rd Misses Serviced Remotely: 26
+Rd Misses Serviced by Shared: 21
+Rd Misses Serviced by Modified: 5
+Rd Misses from False Sharing: 0
+Rd Misses from Silent Stores: 0
+Rd Misses from True Sharing:  0
+
+Write Hits:                  3
+Write Misses:                20
+Total Writes:                23
+Write-On-Shared Misses:      3
+Write-On-Invalid Misses:     0
+Invalidates Sent:            20
+Silent Stores:               0
+
+Replacements:                0
+Writebacks Received:         0
+
+Correct Speculations:        0
+Approx. Speculations:        0
+Incorrect Speculations:      0
+
+-----Cache 16-----
+Read Hits:                   0
+Read Misses:                 69
+Total Reads:                 69
+Read-On-Invalid Misses:      0
+Read Requests Sent:          69
+Rd Misses Serviced Remotely: 0
+Rd Misses Serviced by Shared: 0
+Rd Misses Serviced by Modified: 0
+Rd Misses from False Sharing: 0
+Rd Misses from Silent Stores: 0
+Rd Misses from True Sharing:  0
+
+Write Hits:                  0
+Write Misses:                0
+Total Writes:                0
+Write-On-Shared Misses:      0
+Write-On-Invalid Misses:     0
+Invalidates Sent:            0
+Silent Stores:               0
+
+Replacements:                0
+Writebacks Received:         0
+
+Correct Speculations:        0
+Approx. Speculations:        0
+Incorrect Speculations:      0
+
+-----Cache 17-----
+Read Hits:                   0
+Read Misses:                 69
+Total Reads:                 69
+Read-On-Invalid Misses:      0
+Read Requests Sent:          69
+Rd Misses Serviced Remotely: 0
+Rd Misses Serviced by Shared: 0
+Rd Misses Serviced by Modified: 0
+Rd Misses from False Sharing: 0
+Rd Misses from Silent Stores: 0
+Rd Misses from True Sharing:  0
+
+Write Hits:                  0
+Write Misses:                0
+Total Writes:                0
+Write-On-Shared Misses:      0
+Write-On-Invalid Misses:     0
+Invalidates Sent:            0
+Silent Stores:               0
+
+Replacements:                0
+Writebacks Received:         0
+
+Correct Speculations:        0
+Approx. Speculations:        0
+Incorrect Speculations:      0
+

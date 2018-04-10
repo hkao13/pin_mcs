@@ -14,7 +14,8 @@ Options:
 -p pin tool
 "
 # defaults
-benchmarks=(fluidanimate)
+benchmarks=(fluidanimate swaptions)
+#benchmarks=(splash2x.ocean_cp)
 threads=2
 inputs=(test)
 runs=1
@@ -62,16 +63,16 @@ done
 if [ "$benchmarks" == "all" ]
 then
   benchmarks=(
-  blackscholes
-  bodytrack
-  canneal
+  #blackscholes
+  #bodytrack
+  #canneal
   #dedup
-  facesim
-  ferret
+  #facesim
+  #ferret
   #fluidanimate
-  raytrace
-  streamcluster
-  swaptions
+  #raytrace
+  #streamcluster
+  #swaptions
   #vips
   #splash2x.barnes
   splash2x.cholesky
@@ -164,7 +165,7 @@ do
       lscpu > $output_dir/lscpu.txt
 
 
-      pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 --"
+      pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 -concise 1 --"
 
       if [ "$pin_tool" == "none" ]
       then
@@ -175,13 +176,16 @@ do
 
       # run benchmark
 
+      echo "Running benchmark: ${benchmark}"
+
       # $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
       #  -s "$time_command $pin_command"
-      $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
-        -s "$pin_command"
+       $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
+        -s "$pin_command" > $output_dir/$file
+      #$parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
+      #  -s "$pin_command"
 
-
-      gzip $output_dir/$file
+      #gzip $output_dir/$file
 
       # ensure unique salts
       sleep 1
