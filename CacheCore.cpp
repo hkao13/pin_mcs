@@ -33,7 +33,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #include "CacheCore.h"
 
-static bool enable_prints  = true;
+static bool enable_prints  = false;
 static bool enable_prints2 = false;
 
 #define k_RANDOM     "RANDOM"
