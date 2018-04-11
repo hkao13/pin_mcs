@@ -74,14 +74,19 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
           printf("EXIT --- replacement in main memory, increase size1\n");
           exit(1);
         }
-        parent->writeLine(cache->calcAddr4Tag(st->getTag()),st->getState(),st->getData_xor());
-        numReplacements++;
+        
+        uint32_t   temp_addr  = cache->calcAddr4Tag(st->getTag());
+        uint32_t   temp_state = st->getState();
+        linedata_t temp_data  = st->getData_xor();
 
         // valid for all cases
         st->setTag(cache->calcTag(addr));
         st->setData(val);
         st->setData_paired(empty_ld);
         st->changeStateTo(MSI_SHARED);
+
+        parent->writeLine(temp_addr,temp_state,temp_data);
+        numReplacements++;
         break;
       }
     }
@@ -368,13 +373,15 @@ void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ 
   numWritebacksReceived++;
 
   if(parent!=NULL && (!st || (st && !(st->isValid()))) ){ //Write Miss -> ERROR
+    enable_prints2 = true;
+    (MSI_SMPCacheState *)cache->findLine(addr);
     printf("EXIT --- inclusiveness not maintained\n");
     exit(1);
     fillLine(addr,MSI_MODIFIED,ld);
   }
 
   else{ //Write Hit
-    if(enable_prints) printf("%d::::PULKIT entering writeline1:: addr=%lx\n",this->getCPUId(),addr);
+    if(enable_prints) printf("%d::::PULKIT entering writeline hit:: addr=%lx\n",this->getCPUId(),addr);
     numWriteHits++;
     
     if (st->getState()==MSI_SHARED && msi_state==MSI_SHARED) return;               // (xx) clean
@@ -396,7 +403,9 @@ void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ 
         exit(1);
       }
       
+      (MSI_SMPCacheState *)cache->findLine(addr); // IMPORTANT, because the hit1 flag was changed above. so recomputing the hit1-flag
       st->setData(ld);                                                            // (BcNS) paired but no sharers, discard B
+      st->setTag(cache->calcTag(addr));
       st->setData_paired(empty_ld);
       st->changeStateTo(MSI_MODIFIED);
       st->invalidate_paired();
@@ -542,8 +551,16 @@ MSI_SMPCache::InvalidateReply  MSI_SMPCache::writeRemoteAction(uint64_t addr){
 
 void MSI_SMPCache::find_and_make_modified(uint64_t addr){ // to be called from children
   MSI_SMPCacheState * st = (MSI_SMPCacheState *)cache->findLine(addr);
-  if(st && st->isValid() && st->getState()==MSI_SHARED){
-    st->changeStateTo(MSI_MODIFIED);
+  if(st && st->isValid()) {
+    if (st->getState()==MSI_SHARED){
+      st->changeStateTo(MSI_MODIFIED);
+    }
+  }
+  else {
+    enable_prints2 = true;
+    (MSI_SMPCacheState *)cache->findLine(addr);
+    printf("EXIT ---- line not found");
+    exit(1);
   }
 }
 
