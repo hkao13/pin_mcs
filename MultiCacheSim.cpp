@@ -129,7 +129,7 @@ void MultiCacheSim::createLLC() {
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, true /*isxor*/, pow(2,numbits(num_caches))*cache_size*4, pow(2,numbits(num_caches))*cache_assoc*4, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(16, &llc, main_memory, &privateCaches, true /*isxor*/, pow(2,numbits(num_caches))*cache_size*4, pow(2,numbits(num_caches))*cache_assoc*4, cache_bsize, 1, "RANDOM", false);
   llc.push_back(newcache);
   llc_memory = newcache;
   

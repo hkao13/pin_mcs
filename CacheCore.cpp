@@ -33,7 +33,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #include "CacheCore.h"
 
-static bool enable_prints  = true;
+static bool enable_prints  = false;
 static bool enable_prints2 = false;
 
 #define k_RANDOM     "RANDOM"
@@ -219,6 +219,9 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
   // No matter what is the policy, move lineHit to the *theSet. This
   // increases locality
   Line *tmp = *lineHit;
+
+  // HENRY -- commenting this part out to not change MRU when peeking at line
+  /*
   {
     Line **l = lineHit;
     while(l > theSet) {
@@ -228,6 +231,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
     }
     *theSet = tmp;
   }
+  */
 
   return tmp;
 }
