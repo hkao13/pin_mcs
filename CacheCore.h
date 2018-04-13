@@ -552,6 +552,11 @@ public:
 
  virtual void dump(const char *str) {
  }
+ 
+ bool isXor() const {
+   return (is_xor_cache == true);
+ }
+ 
 };
 
 #ifndef CACHECORE_CPP

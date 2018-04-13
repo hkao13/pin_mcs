@@ -52,7 +52,18 @@ public:
   int numReplacements;
   int numWritebacksReceived; // for lower level caches to keep track of writeback received from upstream.
   
-  SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev);
+  /* Stats for XOR utilization */
+  // For reads
+  int numNonXorReadHits;
+  int numXorReadHits;
+  int numXorReadMissOnDirty;
+  int numXorReadMissOnNoSharers;
+  // For writes
+  int numXorStoreWithPair;
+  int numXorStoreNotPairedNoSharers;
+  int numXorStoreNotPairedNoPair;
+  
+  SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev, bool isxor);
   virtual ~SMPCache(){}
   
   int getCPUId();

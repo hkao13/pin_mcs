@@ -20,7 +20,7 @@ MSI_SMPCache::MSI_SMPCache(int cpuid,
                            int caddressable,
                            const char * repPol,
                            bool cskew) :
-  SMPCache(cpuid,same,next,prev){
+  SMPCache(cpuid,same,next,prev, isxor){
 
   printf("Making a MSI cache with cpuid %d\n",cpuid);
   CacheGeneric<MSI_SMPCacheState> *c =
@@ -285,19 +285,24 @@ linedata_t MSI_SMPCache::readLine(uint64_t addr){
     
     if (st->isValid_paired()==0){                                                         // (Ac/-)normal cache or unpaired line
       ld = st->getData_xor();
+      numNonXorReadHits++;
     }
     else { // xor line for sure
       MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
       if (rrs.providedData){// sharers are present
-        if (st->getState_paired()==MSI_MODIFIED)                                        // (Ac/Bd) paired with dirty line, go to parent
-          ld = parent->readLine(addr); 
+        if (st->getState_paired()==MSI_MODIFIED) {                                       // (Ac/Bd) paired with dirty line, go to parent
+          ld = parent->readLine(addr);
+	  numXorReadMissOnDirty++;
+	}
         else {                                                                        // (Ac/BcS) sharers are clean, used the data from sharers to un-xor the xor-data
           ld = (rrs.linedata ^ st->getData_xor());
           numChildrenRequests++;
+	  numXorReadHits++;
         }
       }
       else if (st->getState_paired()==MSI_SHARED) {                                      // (Ac/BcNS) no way to un-xor the data, go main memory
         ld = parent->readLine(addr);
+	numXorReadMissOnNoSharers++;
       }
       else {
         printf("EXIT --- UNEXPECTED CASE, paired DIRTY DATA with no sharers in xor line\n");
@@ -390,10 +395,11 @@ void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ 
       st->setData(ld);
       st->setData_paired(empty_ld);
       st->changeStateTo(MSI_MODIFIED);
+      numXorStoreNotPairedNoPair++;
       return;
     }
 
-    MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
+    MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));	
     if (!rrs.providedData){// no sharers are present
       if (st->getState_paired()==MSI_MODIFIED) {                                  // (BdNS) paired but no sharers, ERROR
         printf("EXIT --- assumption voilated 'dirty will never be paired'\n");
@@ -409,6 +415,7 @@ void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ 
       st->setData_paired(empty_ld);
       st->changeStateTo(MSI_MODIFIED);
       st->invalidate_paired();
+      numXorStoreNotPairedNoSharers++;
       return;
     }
 
@@ -422,6 +429,7 @@ void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ 
     st->setData_paired(rrs.linedata);                                         // (BxS) paired and has sharers
     numChildrenRequests_total[2]++;
     st->changeStateTo(MSI_SHARED);
+    numXorStoreWithPair++;
     return;
   }
   

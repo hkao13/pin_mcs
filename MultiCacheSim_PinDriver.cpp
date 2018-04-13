@@ -320,9 +320,13 @@ VOID Fini(INT32 code, VOID *v)
   std::vector<MultiCacheSim *>::iterator i,e;
   for(i = Caches.begin(), e = Caches.end(); i != e; i++){
     PIN_GetLock(&globalLock,1);
+    printf("\n");
     (*i)->dumpStatsForPrivateCaches(KnobConcise.Value());
+    printf("\n");
     (*i)->dumpStatsForLLC(KnobConcise.Value());
+    printf("\n");
     (*i)->dumpStatsForMain(KnobConcise.Value());
+    printf("\n");
     PIN_ReleaseLock(&globalLock);
   }
   
