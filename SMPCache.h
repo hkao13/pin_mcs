@@ -62,6 +62,11 @@ public:
   int numXorStoreWithPair;
   int numXorStoreNotPairedNoSharers;
   int numXorStoreNotPairedNoPair;
+  // For numReplacements
+  int numNonXorReplacements;
+  int numXorPairedReplacements;
+  int numXorEvictSingle;
+  int numXorEvictDouble;
   
   SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev, bool isxor);
   virtual ~SMPCache(){}

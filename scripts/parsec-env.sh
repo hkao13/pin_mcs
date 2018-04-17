@@ -11,3 +11,7 @@ export PATH=$PATH:$PIN_ROOT
 # input the data directory here
 export DATA_ROOT="./output"
 export PATH=$PATH:$DATA_ROOT
+
+export PARSECPLAT="amd64-linux.gcc-pthreads"
+
+export PARSECDIR="./"

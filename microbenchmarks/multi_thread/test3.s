@@ -4,7 +4,7 @@
 	.comm	hold,4,4
 	.comm	temp,4,4
 	.comm	lock,40,32
-	.comm	array,130944,64
+	.comm	array,8388608,64
 	.globl	INSTRUMENT_ON
 	.type	INSTRUMENT_ON, @function
 INSTRUMENT_ON:
@@ -86,7 +86,7 @@ accessorThread1:
 	addl	$1, %ebx
 .L6:
 	.loc 1 41 0 is_stmt 0 discriminator 1
-	cmpl	$1022, %ebx
+	cmpl	$65535, %ebx
 	jle	.L7
 	.loc 1 51 0 is_stmt 1
 	movl	$0, %eax
@@ -138,10 +138,10 @@ accessorThread2:
 	addl	$1, %ebx
 .L9:
 	.loc 1 69 0 is_stmt 0 discriminator 1
-	cmpl	$1022, %ebx
+	cmpl	$65535, %ebx
 	jle	.L10
 	.loc 1 74 0 is_stmt 1
-	movl	$1023, %ebx
+	movl	$65536, %ebx
 	jmp	.L11
 .L12:
 	.loc 1 75 0 discriminator 3
@@ -153,7 +153,7 @@ accessorThread2:
 	addl	$1, %ebx
 .L11:
 	.loc 1 74 0 is_stmt 0 discriminator 1
-	cmpl	$2045, %ebx
+	cmpl	$131071, %ebx
 	jle	.L12
 	.loc 1 78 0 is_stmt 1
 	movl	$0, %eax
@@ -208,7 +208,7 @@ main:
 	addl	$1, %ebx
 .L14:
 	.loc 1 95 0 is_stmt 0 discriminator 1
-	cmpl	$1022, %ebx
+	cmpl	$65535, %ebx
 	jle	.L15
 	.loc 1 102 0 is_stmt 1
 	movl	%r12d, hold(%rip)
@@ -225,7 +225,7 @@ main:
 	movq	%rax, %rdi
 	call	pthread_join
 	.loc 1 109 0
-	movl	$1023, %ebx
+	movl	$65536, %ebx
 	jmp	.L16
 .L17:
 	.loc 1 110 0 discriminator 3
@@ -237,7 +237,7 @@ main:
 	addl	$1, %ebx
 .L16:
 	.loc 1 109 0 is_stmt 0 discriminator 1
-	cmpl	$2045, %ebx
+	cmpl	$131071, %ebx
 	jle	.L17
 	.loc 1 112 0 is_stmt 1
 	movl	%r12d, hold(%rip)
@@ -275,7 +275,7 @@ main:
 	.file 2 "/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h"
 	.section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0x34f
+	.long	0x351
 	.value	0x4
 	.long	.Ldebug_abbrev0
 	.byte	0x8
@@ -655,10 +655,10 @@ main:
 	.quad	lock
 	.uleb128 0xb
 	.long	0x17c
-	.long	0x33d
+	.long	0x33f
 	.uleb128 0x14
 	.long	0x65
-	.value	0x7fd
+	.long	0x1ffff
 	.byte	0
 	.uleb128 0x13
 	.long	.LASF40
@@ -948,7 +948,7 @@ main:
 	.uleb128 0x49
 	.uleb128 0x13
 	.uleb128 0x2f
-	.uleb128 0x5
+	.uleb128 0x6
 	.byte	0
 	.byte	0
 	.byte	0

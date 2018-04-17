@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-#define MAXVAL 1023
+#define MAXVAL 65536
 #define NUMTHREADS 2
 
 int hold;

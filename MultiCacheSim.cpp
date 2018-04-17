@@ -159,7 +159,7 @@ void MultiCacheSim::createMain(){
   #endif
 
   SMPCache * newcache;
-  newcache = this->cacheFactory(17, &main, NULL, &llc, false /*isxor*/, cache_size*64, cache_assoc*64, cache_bsize, 1, "LRU", false);
+  newcache = this->cacheFactory(17, &main, NULL, &llc, false /*isxor*/, cache_size*1024, cache_assoc*1024, cache_bsize, 1, "LRU", false);
   main.push_back(newcache);
   main_memory = newcache;
 

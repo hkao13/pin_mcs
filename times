@@ -1,0 +1,168 @@
+TIMING:
+16	16384	1.00e-06	5
+Time Step 0
+Processor 0
+	Total Time = 50322552
+Processor 1
+	Total Time = 50017763
+Processor 2
+	Total Time = 49947051
+Processor 3
+	Total Time = 50049040
+Processor 4
+	Total Time = 49999878
+Processor 5
+	Total Time = 50002555
+Processor 6
+	Total Time = 49969110
+Processor 7
+	Total Time = 50141949
+Processor 8
+	Total Time = 50002560
+Processor 9
+	Total Time = 50004460
+Processor 10
+	Total Time = 49929761
+Processor 11
+	Total Time = 49967456
+Processor 12
+	Total Time = 49949626
+Processor 13
+	Total Time = 49933515
+Processor 14
+	Total Time = 50938147
+Processor 15
+	Total Time = 50308094
+Time Step 1
+Processor 0
+	Total Time = 51116861
+Processor 1
+	Total Time = 51408085
+Processor 2
+	Total Time = 51600159
+Processor 3
+	Total Time = 51535676
+Processor 4
+	Total Time = 51361289
+Processor 5
+	Total Time = 51685521
+Processor 6
+	Total Time = 51499143
+Processor 7
+	Total Time = 51092941
+Processor 8
+	Total Time = 51505028
+Processor 9
+	Total Time = 51576209
+Processor 10
+	Total Time = 51632301
+Processor 11
+	Total Time = 51656708
+Processor 12
+	Total Time = 51603729
+Processor 13
+	Total Time = 51631807
+Processor 14
+	Total Time = 50756608
+Processor 15
+	Total Time = 51210375
+Time Step 2
+Processor 0
+	Total Time = 53008356
+Processor 1
+	Total Time = 52828029
+Processor 2
+	Total Time = 52946547
+Processor 3
+	Total Time = 52795791
+Processor 4
+	Total Time = 53164646
+Processor 5
+	Total Time = 52752786
+Processor 6
+	Total Time = 52989040
+Processor 7
+	Total Time = 52888380
+Processor 8
+	Total Time = 52673007
+Processor 9
+	Total Time = 52750267
+Processor 10
+	Total Time = 52928899
+Processor 11
+	Total Time = 52639646
+Processor 12
+	Total Time = 52813209
+Processor 13
+	Total Time = 52727578
+Processor 14
+	Total Time = 52756895
+Processor 15
+	Total Time = 52913917
+Time Step 3
+Processor 0
+	Total Time = 49040716
+Processor 1
+	Total Time = 48724339
+Processor 2
+	Total Time = 48813733
+Processor 3
+	Total Time = 48671587
+Processor 4
+	Total Time = 48587572
+Processor 5
+	Total Time = 48873290
+Processor 6
+	Total Time = 48889510
+Processor 7
+	Total Time = 48991974
+Processor 8
+	Total Time = 48943669
+Processor 9
+	Total Time = 49072702
+Processor 10
+	Total Time = 48765143
+Processor 11
+	Total Time = 49091249
+Processor 12
+	Total Time = 49125962
+Processor 13
+	Total Time = 49032932
+Processor 14
+	Total Time = 48978004
+Processor 15
+	Total Time = 48908044
+Time Step 4
+Processor 0
+	Total Time = 49433555
+Processor 1
+	Total Time = 49704345
+Processor 2
+	Total Time = 49518171
+Processor 3
+	Total Time = 49887678
+Processor 4
+	Total Time = 49916986
+Processor 5
+	Total Time = 49342401
+Processor 6
+	Total Time = 49622857
+Processor 7
+	Total Time = 49852253
+Processor 8
+	Total Time = 49685170
+Processor 9
+	Total Time = 49598036
+Processor 10
+	Total Time = 49798678
+Processor 11
+	Total Time = 49631917
+Processor 12
+	Total Time = 49381771
+Processor 13
+	Total Time = 49697523
+Processor 14
+	Total Time = 49584950
+Processor 15
+	Total Time = 49375193
+END

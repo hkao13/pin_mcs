@@ -52,6 +52,11 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
   numXorStoreWithPair = 0;
   numXorStoreNotPairedNoSharers = 0;
   numXorStoreNotPairedNoPair = 0;
+  // For numReplacements
+  numNonXorReplacements = 0;
+  numXorPairedReplacements = 0;
+  numXorEvictSingle = 0;
+  numXorEvictDouble = 0;
 
 }
 
@@ -127,13 +132,19 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
     fprintf(outFile, "\n");
     fprintf(outFile, "Non-XOR Read Hits:            %6d, %3.2f%%\n",numNonXorReadHits, ((float)numNonXorReadHits/(float)numReadHits)*100 );
     fprintf(outFile, "XOR Read Hits (Clean Sharer): %6d, %3.2f%%\n",numXorReadHits, ((float)numXorReadHits/(float)numReadHits)*100);
-    fprintf(outFile, "XOR Read Miss (Dirty Sharer): %6d, %3.2f%%\n",numXorReadMissOnDirty, ((float)numXorReadMissOnDirty/(float)numReadMisses)*100);
-    fprintf(outFile, "XOR Read Miss (No Sharer):    %6d, %3.2f%%\n",numXorReadMissOnNoSharers, ((float)numXorReadMissOnNoSharers/(float)numReadMisses)*100);
+    fprintf(outFile, "XOR Read Miss (Dirty Sharer): %6d, %3.2f%%\n",numXorReadMissOnDirty, ((float)numXorReadMissOnDirty/(float)numReadHits)*100);
+    fprintf(outFile, "XOR Read Miss (No Sharer):    %6d, %3.2f%%\n",numXorReadMissOnNoSharers, ((float)numXorReadMissOnNoSharers/(float)numReadHits)*100);
     
     fprintf(outFile, "\n");
     fprintf(outFile, "XOR Store Paired:               %6d, %3.2f%%\n",numXorStoreWithPair, ((float)numXorStoreWithPair/(float)numWriteHits)*100 );
     fprintf(outFile, "XOR Store Unpaired (No Pair):   %6d, %3.2f%%\n",numXorStoreNotPairedNoPair, ((float)numXorStoreNotPairedNoPair/(float)numWriteHits)*100 );
     fprintf(outFile, "XOR Store Unpaired (No Sharer): %6d, %3.2f%%\n",numXorStoreNotPairedNoSharers, ((float)numXorStoreNotPairedNoSharers/(float)numWriteHits)*100 );
+    
+    fprintf(outFile, "\n");
+    fprintf(outFile, "Non-XOR Replacement:            %6d, %3.2f%%\n",numNonXorReplacements, ((float)numNonXorReplacements/(float)numReplacements)*100 );
+    fprintf(outFile, "XOR Replacement (Paired):       %6d, %3.2f%%\n",numXorPairedReplacements, ((float)numXorPairedReplacements/(float)numReplacements)*100 );
+    fprintf(outFile, "XOR Evict Single (1 No Sharer): %6d, %3.2f%%\n",numXorEvictSingle, ((float)numXorEvictSingle/(float)numReplacements)*100 );
+    fprintf(outFile, "XOR Evict Double (2 No Sharer): %6d, %3.2f%%\n",numXorEvictDouble, ((float)numXorEvictDouble/(float)numReplacements)*100 );
   }
 }
 

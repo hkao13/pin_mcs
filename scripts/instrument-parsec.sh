@@ -16,7 +16,7 @@ Options:
 # defaults
 
 
-benchmarks=(blackscholes)
+benchmarks=(parsec)
 threads=2
 inputs=(test)
 runs=1
@@ -24,7 +24,7 @@ output=$DATA_ROOT
 file="output.txt"
 parsecmgmt=$PARSEC_ROOT/bin/parsecmgmt
 pin=$PIN_ROOT/pin.sh
-pin_tool=""
+pin_tool="$PIN_ROOT/source/tools/pin_mcs/obj-intel64/mcs.so"
 
 while getopts "b:hi:r:t:o:p:f:" OPTION;
 do
@@ -166,18 +166,18 @@ do
       lscpu > $output_dir/lscpu.txt
 
 
-      pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 --"
+      pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 -protos $PIN_ROOT/source/tools/pin_mcs/obj-intel64/MSI_SMPCache.so --"
       if [ "$pin_tool" == "none" ]
       then
         pin_command=""
       fi
 
       time_command="/usr/bin/time -f \"%e,%U,%S,%K,%M,%D,%F,%R,%W,%c,%w\" -o $output_dir/info.txt"
-
+      
       # run benchmark
       # $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
       #  -s "$time_command $pin_command"
-      $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
+      $parsecmgmt -a run -p $benchmark -i $input -n $threads \
         -s "$pin_command"
 
       #gzip $output_dir/$file

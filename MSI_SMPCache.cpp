@@ -63,6 +63,14 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
       st->setData(val);
       st->setData_paired(empty_ld);
       st->changeStateTo(MSI_SHARED);
+      
+      if (parent) {
+	uint32_t   temp_addr  = cache->calcAddr4Tag(st->getTag());
+        uint32_t   temp_state = st->getState();
+        linedata_t temp_data  = st->getData_xor();
+	parent->writeLine(temp_addr,temp_state,temp_data);
+      }
+      
       break;
     }
 
@@ -87,12 +95,14 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
 
         parent->writeLine(temp_addr,temp_state,temp_data);
         numReplacements++;
+	numNonXorReplacements++;
         break;
       }
     }
 
     /* Case: (A,-) */
     else if(!st->isValid() && st->isValid_paired()){
+      //printf("fasdfasdfasfasd\n");
       linedata_t ld;
       bool dirty = st->getState_paired() == MSI_MODIFIED;
       MSI_SMPCache::RemoteReadService rrs = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
@@ -114,13 +124,15 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
       st->setData(val);
       st->setData_paired(ld);
       st->changeStateTo(MSI_SHARED);
+      numReplacements++;
+      numXorPairedReplacements++;
       break;
     }
 
     
     /* Case: (A,B) */
     else if (st->isValid() && st->isValid_paired()) {
-      
+      //printf("fasdfasdfasfasd\n");
       MSI_SMPCache::RemoteReadService rrs_A = children_readRemoteAction(cache->calcAddr4Tag(st->getTag()));
       MSI_SMPCache::RemoteReadService rrs_B = children_readRemoteAction(cache->calcAddr4Tag(st->getTag_paired()));
 
@@ -130,6 +142,8 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
         st->setData_paired(empty_ld);
         st->changeStateTo(MSI_SHARED);
         st->invalidate_paired();
+	numReplacements++;
+	numXorEvictDouble++;
         break;
       }
 
@@ -143,6 +157,8 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
         st->setData(rrs_A.linedata);
         numChildrenRequests_total[1]++;
         st->changeStateTo_paired(MSI_SHARED);
+	numReplacements++;
+	numXorEvictSingle++;
         break;
       }
 
@@ -152,6 +168,8 @@ void MSI_SMPCache::fillLine(uint64_t addr, uint32_t msi_state, linedata_t val=li
         st->setData_paired(rrs_B.linedata);
         numChildrenRequests_total[1]++;
         st->changeStateTo(MSI_SHARED);
+	numReplacements++;
+	numXorEvictSingle++;
         break;
       }
 
@@ -387,10 +405,11 @@ void MSI_SMPCache::writeLine(uint64_t addr, uint32_t msi_state, linedata_t ld){ 
 
   else{ //Write Hit
     if(enable_prints) printf("%d::::PULKIT entering writeline hit:: addr=%lx\n",this->getCPUId(),addr);
-    numWriteHits++;
+    
     
     if (st->getState()==MSI_SHARED && msi_state==MSI_SHARED) return;               // (xx) clean
     
+    numWriteHits++;
     if (st->isValid_paired()==0){                                                 // (--) unpaired line
       st->setData(ld);
       st->setData_paired(empty_ld);
