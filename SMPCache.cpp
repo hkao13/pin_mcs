@@ -35,12 +35,16 @@ SMPCache::SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, s
   numSilentStores = 0;
   numReplacements = 0;
   numWritebacksReceived = 0;
+  
+// Silent Stores Part
+  numInvalidatesAvoided = 0;
+  numInvalidatesAvoidedFromApprox = 0;
 
 }
 
 void SMPCache::conciseDumpStatsToFile(FILE* outFile){
 
-  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+  fprintf(outFile,"%lu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
                   CPUId,
                   numReadHits,
                   numReadMisses,
@@ -62,12 +66,19 @@ void SMPCache::conciseDumpStatsToFile(FILE* outFile){
                   numWritebacksReceived,
                   numCorrectSpeculations,
                   numCorrectApproxSpeculations,
-                  numIncorrectSpeculations);
+                  numIncorrectSpeculations,
+		  numInvalidatesAvoided,
+		  numInvalidatesAvoidedFromApprox
+ 	);
 
 }
 
 void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "-----Cache %lu-----\n",CPUId);
+  
+  float falseSharePercent = 100 * (float)numFalseSharing/(float)numReadMisses;
+  float silentStorePercent = 100 * (float)numFalseSharingSilentStore/(float)numReadMisses;
+  float trueSharePercent = 100 * (float)numTrueSharing/(float)numReadMisses;
 
   fprintf(outFile, "Read Hits:                   %d\n",numReadHits);
   fprintf(outFile, "Read Misses:                 %d\n",numReadMisses);
@@ -77,9 +88,9 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Rd Misses Serviced Remotely: %d\n",numReadMissesServicedByOthers);
   fprintf(outFile, "Rd Misses Serviced by Shared: %d\n",numReadMissesServicedByShared);
   fprintf(outFile, "Rd Misses Serviced by Modified: %d\n",numReadMissesServicedByModified);
-  fprintf(outFile, "Rd Misses from False Sharing: %d\n", numFalseSharing);
-  fprintf(outFile, "Rd Misses from Silent Stores: %d\n", numFalseSharingSilentStore);
-  fprintf(outFile, "Rd Misses from True Sharing:  %d\n", numTrueSharing);
+  fprintf(outFile, "Rd Misses from False Sharing: %d, %3.2f\n", numFalseSharing, falseSharePercent);
+  fprintf(outFile, "Rd Misses from Silent Stores: %d, %3.2f\n", numFalseSharingSilentStore, silentStorePercent);
+  fprintf(outFile, "Rd Misses from True Sharing:  %d, %3.2f\n", numTrueSharing, trueSharePercent);
   fprintf(outFile, "\n");
   fprintf(outFile, "Write Hits:                  %d\n",numWriteHits);
   fprintf(outFile, "Write Misses:                %d\n",numWriteMisses);
@@ -95,6 +106,9 @@ void SMPCache::dumpStatsToFile(FILE* outFile){
   fprintf(outFile, "Correct Speculations:        %d\n",numCorrectSpeculations);
   fprintf(outFile, "Approx. Speculations:        %d\n",numCorrectApproxSpeculations);
   fprintf(outFile, "Incorrect Speculations:      %d\n",numIncorrectSpeculations);
+  fprintf(outFile, "\n");
+  fprintf(outFile, "Invalidates Avoided:          %d\n",numInvalidatesAvoided);
+  fprintf(outFile, "Invalidates Avoided (Approx): %d\n",numInvalidatesAvoidedFromApprox);
   fprintf(outFile, "\n");
 }
 

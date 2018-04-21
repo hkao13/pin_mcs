@@ -14,7 +14,7 @@ Options:
 -p pin tool
 "
 # defaults
-benchmarks=(fluidanimate swaptions)
+benchmarks=(fluidanimate)
 #benchmarks=(splash2x.ocean_cp)
 threads=2
 inputs=(test)
@@ -23,7 +23,7 @@ output=$DATA_ROOT
 file="output.txt"
 parsecmgmt=$PARSEC_ROOT/bin/parsecmgmt
 pin=$PIN_ROOT/pin.sh
-pin_tool=""
+pin_tool="$PIN_ROOT/source/tools/pin_mcs/obj-intel64/mcs.so"
 
 while getopts "b:hi:r:t:o:p:f:" OPTION;
 do
@@ -165,7 +165,7 @@ do
       lscpu > $output_dir/lscpu.txt
 
 
-      pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 -concise 1 --"
+      pin_command="$pin -injection child -mt -t $pin_tool -numcaches $threads -instrAll 1 -concise 1 -protos $PIN_ROOT/source/tools/pin_mcs/obj-intel64/MSI_SMPCache.so --"
 
       if [ "$pin_tool" == "none" ]
       then
@@ -180,10 +180,10 @@ do
 
       # $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
       #  -s "$time_command $pin_command"
-       $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
-        -s "$pin_command" > $output_dir/$file
-      #$parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
-      #  -s "$pin_command"
+      # $parsecmgmt -a run -p $benchmark -i $input -n $threads -c gcc-pthreads \
+      #  -s "$pin_command" > $output_dir/$file
+      $parsecmgmt -a run -p $benchmark -i $input -n $threads  \
+        -s "$pin_command"
 
       #gzip $output_dir/$file
 

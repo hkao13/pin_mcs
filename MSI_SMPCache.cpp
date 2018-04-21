@@ -4,6 +4,7 @@
 
 #define ENABLE_CD_W 0
 #define ENABLE_CD_IA 1
+#define ENABLE_SS 1
 
 //bool enable_prints=0;
 int main_memory_size_used=0;
@@ -278,8 +279,8 @@ uint32_t MSI_SMPCache::readWord(uint32_t rdPC, uint64_t addr){
         else {
           numFalseSharing++;
         }
-		    numCorrectSpeculations++;
- 	    	if(enable_prints) printf("False Sharing++");
+        numCorrectSpeculations++;
+ 	if(enable_prints) printf("False Sharing++");
       }
       else if ( (rcd >= lowBound) && (rcd <= highBound) ) {
         //printf("Low Bound: %ld, Data: %d High Bound: %ld\n", lowBound, lcd, highBound);
@@ -402,6 +403,30 @@ void MSI_SMPCache::writeWord(uint32_t wrPC, uint64_t addr, uint32_t val=INT_NAN)
      *miss.  We need to upgrade to Modified to write, and all other
      *copies must be invalidated
     */
+    
+    // Silent Store implementation to avoid coherence traffic
+    if (ENABLE_SS) {
+      
+      uint32_t prevData = st->getData(cache->calcOffset(addr));
+      if (prevData == val) {
+	numInvalidatesAvoided++;
+	return;
+      }
+      
+      // using unit64 for bound to avoid rollover on uint32 values
+      uint64_t lowBound = (uint64_t)( (1 - APPROX_THRESHOLD) * prevData );
+      uint64_t highBound = (uint64_t)( (1 + APPROX_THRESHOLD) * prevData );
+      
+      if ( (val >= lowBound) && (val <= highBound) ) {
+        numInvalidatesAvoidedFromApprox++;
+	return;
+      }
+      
+      
+    }
+    
+    
+    
     numWriteMisses++;
 
     /*Write-on-shared Coherence Misses*/

@@ -50,6 +50,10 @@ public:
   int numReplacements;
   int numWritebacksReceived; // for lower level caches to keep track of writeback received from upstream.
   
+// Silent Stores Part
+  int numInvalidatesAvoided;
+  int numInvalidatesAvoidedFromApprox;
+  
   SMPCache(int cpuid, std::vector<SMPCache * > * same, SMPCache *next, std::vector<SMPCache * > * prev);
   virtual ~SMPCache(){}
   
