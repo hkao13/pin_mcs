@@ -2,167 +2,167 @@ TIMING:
 16	16384	1.00e-06	5
 Time Step 0
 Processor 0
-	Total Time = 50322552
+	Total Time = 50704813
 Processor 1
-	Total Time = 50017763
+	Total Time = 50498232
 Processor 2
-	Total Time = 49947051
+	Total Time = 50416340
 Processor 3
-	Total Time = 50049040
+	Total Time = 50396140
 Processor 4
-	Total Time = 49999878
+	Total Time = 50461511
 Processor 5
-	Total Time = 50002555
+	Total Time = 50491300
 Processor 6
-	Total Time = 49969110
+	Total Time = 50539649
 Processor 7
-	Total Time = 50141949
+	Total Time = 50743589
 Processor 8
-	Total Time = 50002560
+	Total Time = 50432517
 Processor 9
-	Total Time = 50004460
+	Total Time = 50396544
 Processor 10
-	Total Time = 49929761
+	Total Time = 50466583
 Processor 11
-	Total Time = 49967456
+	Total Time = 50552136
 Processor 12
-	Total Time = 49949626
+	Total Time = 50410948
 Processor 13
-	Total Time = 49933515
+	Total Time = 50423259
 Processor 14
-	Total Time = 50938147
+	Total Time = 50728509
 Processor 15
-	Total Time = 50308094
+	Total Time = 50693859
 Time Step 1
 Processor 0
-	Total Time = 51116861
+	Total Time = 50483870
 Processor 1
-	Total Time = 51408085
+	Total Time = 50665465
 Processor 2
-	Total Time = 51600159
+	Total Time = 50616975
 Processor 3
-	Total Time = 51535676
+	Total Time = 50527011
 Processor 4
-	Total Time = 51361289
+	Total Time = 50491029
 Processor 5
-	Total Time = 51685521
+	Total Time = 50705520
 Processor 6
-	Total Time = 51499143
+	Total Time = 50527912
 Processor 7
-	Total Time = 51092941
+	Total Time = 50483323
 Processor 8
-	Total Time = 51505028
+	Total Time = 50698686
 Processor 9
-	Total Time = 51576209
+	Total Time = 50769231
 Processor 10
-	Total Time = 51632301
+	Total Time = 50467655
 Processor 11
-	Total Time = 51656708
+	Total Time = 50649189
 Processor 12
-	Total Time = 51603729
+	Total Time = 50605812
 Processor 13
-	Total Time = 51631807
+	Total Time = 50253287
 Processor 14
-	Total Time = 50756608
+	Total Time = 50394739
 Processor 15
-	Total Time = 51210375
+	Total Time = 50425202
 Time Step 2
 Processor 0
-	Total Time = 53008356
+	Total Time = 52885166
 Processor 1
-	Total Time = 52828029
+	Total Time = 53039165
 Processor 2
-	Total Time = 52946547
+	Total Time = 53041082
 Processor 3
-	Total Time = 52795791
+	Total Time = 53190593
 Processor 4
-	Total Time = 53164646
+	Total Time = 53139859
 Processor 5
-	Total Time = 52752786
+	Total Time = 52933661
 Processor 6
-	Total Time = 52989040
+	Total Time = 52864322
 Processor 7
-	Total Time = 52888380
+	Total Time = 52853738
 Processor 8
-	Total Time = 52673007
+	Total Time = 52723603
 Processor 9
-	Total Time = 52750267
+	Total Time = 53017037
 Processor 10
-	Total Time = 52928899
+	Total Time = 53081384
 Processor 11
-	Total Time = 52639646
+	Total Time = 52956944
 Processor 12
-	Total Time = 52813209
+	Total Time = 52989322
 Processor 13
-	Total Time = 52727578
+	Total Time = 53240575
 Processor 14
-	Total Time = 52756895
+	Total Time = 52840812
 Processor 15
-	Total Time = 52913917
+	Total Time = 52513091
 Time Step 3
 Processor 0
-	Total Time = 49040716
+	Total Time = 51201982
 Processor 1
-	Total Time = 48724339
+	Total Time = 51116291
 Processor 2
-	Total Time = 48813733
+	Total Time = 51007491
 Processor 3
-	Total Time = 48671587
+	Total Time = 51017157
 Processor 4
-	Total Time = 48587572
+	Total Time = 50743250
 Processor 5
-	Total Time = 48873290
+	Total Time = 51040084
 Processor 6
-	Total Time = 48889510
+	Total Time = 51193946
 Processor 7
-	Total Time = 48991974
+	Total Time = 51117737
 Processor 8
-	Total Time = 48943669
+	Total Time = 51443644
 Processor 9
-	Total Time = 49072702
+	Total Time = 51007130
 Processor 10
-	Total Time = 48765143
+	Total Time = 51216893
 Processor 11
-	Total Time = 49091249
+	Total Time = 51042013
 Processor 12
-	Total Time = 49125962
+	Total Time = 51082078
 Processor 13
-	Total Time = 49032932
+	Total Time = 50964274
 Processor 14
-	Total Time = 48978004
+	Total Time = 51320584
 Processor 15
-	Total Time = 48908044
+	Total Time = 51285202
 Time Step 4
 Processor 0
-	Total Time = 49433555
+	Total Time = 52785654
 Processor 1
-	Total Time = 49704345
+	Total Time = 52354532
 Processor 2
-	Total Time = 49518171
+	Total Time = 52953275
 Processor 3
-	Total Time = 49887678
+	Total Time = 52935227
 Processor 4
-	Total Time = 49916986
+	Total Time = 52985305
 Processor 5
-	Total Time = 49342401
+	Total Time = 52850580
 Processor 6
-	Total Time = 49622857
+	Total Time = 52860716
 Processor 7
-	Total Time = 49852253
+	Total Time = 52757870
 Processor 8
-	Total Time = 49685170
+	Total Time = 52671695
 Processor 9
-	Total Time = 49598036
+	Total Time = 52824425
 Processor 10
-	Total Time = 49798678
+	Total Time = 52744305
 Processor 11
-	Total Time = 49631917
+	Total Time = 52829037
 Processor 12
-	Total Time = 49381771
+	Total Time = 52820162
 Processor 13
-	Total Time = 49697523
+	Total Time = 53012685
 Processor 14
-	Total Time = 49584950
+	Total Time = 52761092
 Processor 15
-	Total Time = 49375193
+	Total Time = 52961257
 END

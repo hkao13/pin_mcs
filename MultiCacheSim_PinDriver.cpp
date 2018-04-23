@@ -41,10 +41,10 @@ KNOB<bool> KnobInstrumentAll(KNOB_MODE_WRITEONCE, "pintool",
           "instrAll", "false", "Instrument everything - for parsec");
 
 KNOB<unsigned int> KnobCacheSize(KNOB_MODE_WRITEONCE, "pintool",
-			   "csize", "65536", "Cache Size");//default cache is 64KB
+			   "csize", "32768", "Cache Size");//default cache is 64KB
 
 KNOB<unsigned int> KnobBlockSize(KNOB_MODE_WRITEONCE, "pintool",
-			   "bsize", "64", "Block Size");//default block is 64B
+			   "bsize", "32", "Block Size");//default block is 64B
 
 KNOB<unsigned int> KnobAssoc(KNOB_MODE_WRITEONCE, "pintool",
 			   "assoc", "2", "Associativity");//default associativity is 2-way

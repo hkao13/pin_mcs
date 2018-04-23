@@ -12,6 +12,6 @@ export PATH=$PATH:$PIN_ROOT
 export DATA_ROOT="./output"
 export PATH=$PATH:$DATA_ROOT
 
-export PARSECPLAT="amd64-linux.gcc-pthreads"
+#export PARSECPLAT="amd64-linux.gcc-pthreads"
 
-export PARSECDIR="./"
+#export PARSECDIR="./"

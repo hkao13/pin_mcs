@@ -16,7 +16,7 @@ Options:
 # defaults
 
 
-benchmarks=(parsec)
+benchmarks=(canneal)
 threads=2
 inputs=(test)
 runs=1
